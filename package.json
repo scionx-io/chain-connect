@@ -1,0 +1,23 @@
+{
+  "name": "wallets",
+  "version": "1.0.0",
+  "description": "Multi-chain wallet connect demo with Vite",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.4",
+    "@tronweb3/tronwallet-adapters": "^1.2.14",
+    "ethers": "^6.15.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.9"
+  },
+  "main": "app.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
