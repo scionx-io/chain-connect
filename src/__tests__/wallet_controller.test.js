@@ -62,6 +62,10 @@ describe('WalletController', () => {
       walletName: createMockElement(),
       walletChain: createMockElement(),
       disconnectBtn: createMockElement(),
+      errorModal: document.createElement('dialog'),
+      errorMessage: createMockElement(),
+      errorCloseBtn: createMockElement(),
+      errorConfirmBtn: createMockElement(),
     };
 
     // Create controller instance
@@ -78,6 +82,10 @@ describe('WalletController', () => {
       walletNameTarget: mockElements.walletName,
       walletChainTarget: mockElements.walletChain,
       disconnectBtnTarget: mockElements.disconnectBtn,
+      errorModalTarget: mockElements.errorModal,
+      errorMessageTarget: mockElements.errorMessage,
+      errorCloseBtnTarget: mockElements.errorCloseBtn,
+      errorConfirmBtnTarget: mockElements.errorConfirmBtn,
     });
 
     // Call connect method to initialize
