@@ -64,6 +64,7 @@
   transform: translate(-50%, -50%);
   width: calc(100vw - var(--grid-4));
   max-width: 100%;
+  min-height: 200px;
   max-height: calc(100vh - var(--grid-8));
   padding: var(--grid-4) var(--grid-2);
   border: 1px solid var(--black);
@@ -96,8 +97,12 @@
 
 .error-message-content {
   margin-bottom: var(--grid-4);
+  margin-top: var(--grid-2);
   line-height: var(--leading-relaxed);
   color: var(--gray-70);
+  min-height: 60px;
+  display: flex;
+  align-items: center;
 }
 
 .error-modal-actions {
@@ -114,8 +119,9 @@
   }
 
   #errorModal {
-    width: 20rem;
-    padding: var(--grid-4) var(--grid-3);
+    width: 28rem;
+    min-height: 220px;
+    padding: var(--grid-5) var(--grid-4);
   }
 
   .modal-header h2,
@@ -128,6 +134,12 @@
 @media (min-width: 64rem) {
   #walletModal {
     width: 32rem;
+    padding: var(--grid-6) var(--grid-5);
+  }
+
+  #errorModal {
+    width: 32rem;
+    min-height: 240px;
     padding: var(--grid-6) var(--grid-5);
   }
 

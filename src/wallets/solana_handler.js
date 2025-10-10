@@ -22,48 +22,100 @@ class SolanaHandler {
     this.provider = null;
     this.boundAccountChanged = this.handleAccountChanged.bind(this);
     this.boundChainChanged = this.handleChainChanged.bind(this);
+    this.boundDisconnect = this.handleDisconnect.bind(this);
+  }
+
+  setupEventListeners() {
+    if (typeof this.provider.on === 'function') {
+      this.provider.on('accountChanged', this.boundAccountChanged);
+      this.provider.on('connect', this.boundChainChanged);
+      this.provider.on('disconnect', this.boundDisconnect);
+      
+      // Some Solana providers may emit networkChanged, but it's not standard
+      if (this.provider.on('networkChanged')) {
+        this.provider.on('networkChanged', this.boundChainChanged);
+      }
+    }
   }
 
   async connect(providerDetails, isReconnect = false) {
     this.provider = providerDetails.provider;
+    
     try {
-      const resp = isReconnect 
-        ? await this.provider.connect({ onlyIfTrusted: true })
-        : await this.provider.connect();
-
-      if (!resp.publicKey) {
-        if (isReconnect) {
-          console.log('No accounts found during reconnect');
-          return null;
+      // Check if the provider is already connected (like MIPD providers might be)
+      if (this.provider.isConnected || this.provider.isReady || this.provider.publicKey) {
+        // If already connected, just get the address directly
+        if (this.provider.publicKey) {
+          const address = this.provider.publicKey.toBase58();
+          // Set up event listeners
+          this.setupEventListeners();
+          const chainId = await this.getChainId();
+          
+          return {
+            provider: this.provider,
+            address,
+            chainId,
+            name: providerDetails.info.name,
+            rdns: providerDetails.info.rdns,
+            family: 'solana',
+            chains: [`solana:${chainId}`],
+          };
         }
-        throw new Error('No accounts found.');
       }
-
-      const address = resp.publicKey.toString();
-
-      this.provider.on('accountChanged', this.boundAccountChanged);
       
-      // Attempt to listen for network/cluster changes and disconnect events if the provider supports it
-      if (typeof this.provider.on === 'function') {
-        this.provider.on('connect', this.boundChainChanged); // When connected to wallet
-        this.provider.on('disconnect', this.handleDisconnect.bind(this)); // When disconnected
-        // Some Solana providers may emit networkChanged, but it's not standard
-        if (this.provider.on('networkChanged')) {
-          this.provider.on('networkChanged', this.boundChainChanged);
+      // If not connected, try using the connect method
+      if (typeof this.provider.connect === 'function') {
+        const resp = isReconnect 
+          ? await this.provider.connect({ onlyIfTrusted: true })
+          : await this.provider.connect();
+
+        if (!resp.publicKey) {
+          if (isReconnect) {
+            console.log('No accounts found during reconnect');
+            return null;
+          }
+          throw new Error('No accounts found.');
+        }
+
+        const address = resp.publicKey.toString();
+        
+        // Set up event listeners
+        this.setupEventListeners();
+        
+        const chainId = await this.getChainId();
+
+        return {
+          provider: this.provider,
+          address,
+          chainId,
+          name: providerDetails.info.name,
+          rdns: providerDetails.info.rdns,
+          family: 'solana',
+          chains: [`solana:${chainId}`],
+        };
+      } else {
+        // If connect method doesn't exist, try alternative approach for MIPD providers
+        if (this.provider.publicKey) {
+          const address = this.provider.publicKey.toBase58();
+          
+          // Set up event listeners
+          this.setupEventListeners();
+          
+          const chainId = await this.getChainId();
+          
+          return {
+            provider: this.provider,
+            address,
+            chainId,
+            name: providerDetails.info.name,
+            rdns: providerDetails.info.rdns,
+            family: 'solana',
+            chains: [`solana:${chainId}`],
+          };
+        } else {
+          throw new Error('Provider does not have connect method and is not already connected');
         }
       }
-
-      const chainId = await this.getChainId();
-
-      return {
-        provider: this.provider,
-        address,
-        chainId,
-        name: providerDetails.info.name,
-        rdns: providerDetails.info.rdns,
-        family: 'solana',
-        chains: [`solana:${chainId}`],
-      };
     } catch (error) {
       console.error('Solana connection error:', error);
       throw error;
@@ -71,17 +123,19 @@ class SolanaHandler {
   }
 
   disconnect() {
-    if (this.provider) {
+    if (this.provider && typeof this.provider.removeListener === 'function') {
       this.provider.removeListener('accountChanged', this.boundAccountChanged);
-      // Remove other event listeners if they were added
       this.provider.removeListener('connect', this.boundChainChanged);
-      this.provider.removeListener('disconnect', this.boundChainChanged);
-      if (this.provider.removeListener) {
-        this.provider.removeListener('networkChanged', this.boundChainChanged);
-      }
-      this.provider.disconnect();
-      this.provider = null;
+      this.provider.removeListener('disconnect', this.boundDisconnect);
+      this.provider.removeListener('networkChanged', this.boundChainChanged);
     }
+    
+    // Use disconnect method if available
+    if (this.provider && typeof this.provider.disconnect === 'function') {
+      this.provider.disconnect();
+    }
+    
+    this.provider = null;
     console.log('Disconnected from Solana wallet');
   }
 

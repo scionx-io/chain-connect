@@ -57,18 +57,18 @@ export const updateButtonState = (controller, isConnected, isLoading = false) =>
 export const updateWalletInfo = (controller, mipdStore, name, address, rdns = null, chainId = null, walletType = 'evm') => {
   let walletName = name;
   if (rdns) {
-    const wallet = mipdStore.get().find(w => w.info.rdns === rdns);
+    const wallet = mipdStore.getProviders().find(w => w.info.rdns === rdns);
     if (wallet) walletName = wallet.info.name;
   }
-  controller.walletNameSpanTarget.textContent = walletName;
-  controller.walletAddressSpanTarget.textContent = formatAddress(address);
-  
+  controller.walletNameTarget.textContent = walletName;
+  controller.walletAddressTarget.textContent = formatAddress(address);
+
   // Update chain information if available
   if (chainId) {
     const chainName = getChainName(chainId, walletType);
-    controller.walletChainSpanTarget.textContent = chainName;
+    controller.walletChainTarget.textContent = chainName;
   } else {
-    controller.walletChainSpanTarget.textContent = 'Unknown';
+    controller.walletChainTarget.textContent = 'Unknown';
   }
   
   controller.walletInfoTarget.classList.add('show');
