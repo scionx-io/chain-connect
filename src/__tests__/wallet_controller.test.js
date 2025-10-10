@@ -65,7 +65,6 @@ describe('WalletController', () => {
       errorModal: document.createElement('dialog'),
       errorMessage: createMockElement(),
       errorCloseBtn: createMockElement(),
-      errorConfirmBtn: createMockElement(),
     };
 
     // Create controller instance
@@ -85,7 +84,6 @@ describe('WalletController', () => {
       errorModalTarget: mockElements.errorModal,
       errorMessageTarget: mockElements.errorMessage,
       errorCloseBtnTarget: mockElements.errorCloseBtn,
-      errorConfirmBtnTarget: mockElements.errorConfirmBtn,
     });
 
     // Call connect method to initialize
@@ -150,13 +148,12 @@ describe('WalletController', () => {
       controller.errorModalTarget = { close: vi.fn(), show: vi.fn(), showModal: vi.fn() };
       controller.errorMessageTarget = { textContent: '' };
       controller.errorCloseBtnTarget = { };
-      controller.errorConfirmBtnTarget = { };
 
       // Mock connection to throw an error
       mockWalletManager.connect.mockRejectedValue(new Error('Connection failed'));
 
-      // Mock the promise resolution to simulate user clicking 'OK'
-      controller.showErrorAndWait = vi.fn().mockResolvedValue('ok');
+      // Mock the promise resolution to simulate user acknowledging error
+      controller.showErrorAndWait = vi.fn().mockResolvedValue();
 
       await controller.selectWallet(event);
 
@@ -177,15 +174,14 @@ describe('WalletController', () => {
       controller.errorModalTarget = { close: vi.fn(), show: vi.fn(), showModal: vi.fn() };
       controller.errorMessageTarget = { textContent: '' };
       controller.errorCloseBtnTarget = { };
-      controller.errorConfirmBtnTarget = { };
 
       // Mock connection to throw a user rejection error
       const rejectionError = new Error('User rejected');
       rejectionError.code = 4001;
       mockWalletManager.connect.mockRejectedValue(rejectionError);
 
-      // Mock the promise resolution to simulate user clicking 'OK'
-      controller.showErrorAndWait = vi.fn().mockResolvedValue('ok');
+      // Mock the promise resolution to simulate user acknowledging error
+      controller.showErrorAndWait = vi.fn().mockResolvedValue();
 
       await controller.selectWallet(event);
 
@@ -238,7 +234,6 @@ describe('WalletController', () => {
       
       // The actual logic is tested in updateWalletInfo mock
       expect(true).toBe(true); // Placeholder until we test the utility function properly
-    });
 
     it('should handle disconnected event', () => {
       controller.handleDisconnected();
