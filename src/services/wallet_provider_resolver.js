@@ -15,20 +15,6 @@ class WalletProviderResolver {
       'tron': ['tron:0x2b6653dc'],
       'tokenpocket': ['tron:0x2b6653dc'],
     };
-    this.globalProviders = {
-      'io.metamask': {
-        provider: window.ethereum,
-        info: { name: 'MetaMask', rdns: 'io.metamask', chains: ['eip155:1'], icon: WALLET_ICONS.metamask }
-      },
-      'phantom': {
-        provider: window.solana,
-        info: { name: 'Phantom', rdns: 'phantom', chains: ['solana:101'], icon: WALLET_ICONS.phantom }
-      },
-      'tronlink': {
-        provider: window.tronWeb || window.tronLink,
-        info: { name: 'TronLink', rdns: 'tronlink', chains: ['tron:0x2b6653dc'], icon: WALLET_ICONS.tronlink }
-      }
-    };
   }
 
   findProvider(rdns) {
@@ -63,8 +49,24 @@ class WalletProviderResolver {
   }
 
   getGlobalProvider(rdns) {
-    const provider = this.globalProviders[rdns];
-    if (provider) {
+    // Dynamically check window properties at runtime
+    const globalProviders = {
+      'io.metamask': {
+        provider: window.ethereum,
+        info: { name: 'MetaMask', rdns: 'io.metamask', chains: ['eip155:1'], icon: WALLET_ICONS.metamask }
+      },
+      'phantom': {
+        provider: window.solana,
+        info: { name: 'Phantom', rdns: 'phantom', chains: ['solana:101'], icon: WALLET_ICONS.phantom }
+      },
+      'tronlink': {
+        provider: window.tronWeb || window.tronLink,
+        info: { name: 'TronLink', rdns: 'tronlink', chains: ['tron:0x2b6653dc'], icon: WALLET_ICONS.tronlink }
+      }
+    };
+
+    const provider = globalProviders[rdns];
+    if (provider && provider.provider) {
       console.log(`Found global provider for RDNS ${rdns}:`, provider.info.name);
       return provider;
     }

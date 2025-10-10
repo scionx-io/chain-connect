@@ -16,10 +16,15 @@ vi.mock('../utils.js', () => ({
   clearWalletState: vi.fn(),
 }));
 
-vi.mock('../services/wallet_provider_resolver.js', () => ({
-  WalletProviderResolver: vi.fn().mockImplementation(() => ({
-    findProvider: vi.fn()
-  }))
+// Don't mock WalletProviderResolver - use the real implementation
+
+// Mock config.js for WALLET_ICONS
+vi.mock('../config.js', () => ({
+  WALLET_ICONS: {
+    metamask: 'data:image/svg+xml,<svg></svg>',
+    phantom: 'data:image/svg+xml,<svg></svg>',
+    tronlink: 'data:image/svg+xml,<svg></svg>',
+  }
 }));
 
 describe('WalletManager', () => {

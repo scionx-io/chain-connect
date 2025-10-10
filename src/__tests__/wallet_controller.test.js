@@ -234,6 +234,7 @@ describe('WalletController', () => {
       
       // The actual logic is tested in updateWalletInfo mock
       expect(true).toBe(true); // Placeholder until we test the utility function properly
+    });
 
     it('should handle disconnected event', () => {
       controller.handleDisconnected();

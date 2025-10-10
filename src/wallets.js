@@ -162,7 +162,7 @@ export function renderWallets(mipdStore, controller) {
           // Add a small indicator that this wallet supports multiple chains
           const multiChainIndicator = document.createElement('span');
           multiChainIndicator.className = 'multi-chain-indicator';
-          multiChainIndicator.textContent = '•••';
+          multiChainIndicator.textContent = 'Multi-chain';
           multiChainIndicator.title = `Supports: ${wallet.families.map(f => 
             f === 'evm' ? 'EVM' : f === 'solana' ? 'Solana' : f === 'tron' ? 'Tron' : f
           ).join(', ')}`;
