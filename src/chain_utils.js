@@ -22,8 +22,10 @@ export const CHAIN_NAMES = {
   // Tron
   '728126428': 'Tron Mainnet',
   '0x2b6653dc': 'Tron Mainnet',
-  '1': 'Tron Nile Testnet',  // Note: Tron also uses 1 for testnet, different from ETH
-  '0x1': 'Tron Nile Testnet',
+  '3448148188': 'Tron Nile Testnet',
+  '0xcd8690dc': 'Tron Nile Testnet',
+  '2494158238': 'Tron Shasta Testnet',  // Calculated from 0x94a9059e
+  '0x94a9059e': 'Tron Shasta Testnet',
   
   // Polygon
   '137': 'Polygon Mainnet',
