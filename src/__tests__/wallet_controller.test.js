@@ -146,12 +146,22 @@ describe('WalletController', () => {
       // Fix modal mock to have a close method
       controller.modalTarget = { close: vi.fn(), show: vi.fn(), showModal: vi.fn() };
 
+      // Mock the error modal elements for the showErrorAndWait method
+      controller.errorModalTarget = { close: vi.fn(), show: vi.fn(), showModal: vi.fn() };
+      controller.errorMessageTarget = { textContent: '' };
+      controller.errorCloseBtnTarget = { };
+      controller.errorConfirmBtnTarget = { };
+
       // Mock connection to throw an error
       mockWalletManager.connect.mockRejectedValue(new Error('Connection failed'));
+
+      // Mock the promise resolution to simulate user clicking 'OK'
+      controller.showErrorAndWait = vi.fn().mockResolvedValue('ok');
 
       await controller.selectWallet(event);
 
       expect(mockWalletManager.connect).toHaveBeenCalledWith('io.metamask');
+      expect(controller.showErrorAndWait).toHaveBeenCalled();
     });
 
     it('should handle user rejection error', async () => {
@@ -163,14 +173,24 @@ describe('WalletController', () => {
       // Fix modal mock to have a close method
       controller.modalTarget = { close: vi.fn(), show: vi.fn(), showModal: vi.fn() };
 
+      // Mock the error modal elements for the showErrorAndWait method
+      controller.errorModalTarget = { close: vi.fn(), show: vi.fn(), showModal: vi.fn() };
+      controller.errorMessageTarget = { textContent: '' };
+      controller.errorCloseBtnTarget = { };
+      controller.errorConfirmBtnTarget = { };
+
       // Mock connection to throw a user rejection error
       const rejectionError = new Error('User rejected');
       rejectionError.code = 4001;
       mockWalletManager.connect.mockRejectedValue(rejectionError);
 
+      // Mock the promise resolution to simulate user clicking 'OK'
+      controller.showErrorAndWait = vi.fn().mockResolvedValue('ok');
+
       await controller.selectWallet(event);
 
       expect(mockWalletManager.connect).toHaveBeenCalledWith('io.metamask');
+      expect(controller.showErrorAndWait).toHaveBeenCalled();
     });
   });
 

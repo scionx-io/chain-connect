@@ -152,7 +152,21 @@ export default class extends Controller {
         errorMessage = 'Network error occurred. Please check your internet connection.';
       }
       
-      this.showError(errorMessage);
+      // Wait for user response before continuing
+      const userResponse = await this.showErrorAndWait(errorMessage);
+      
+      // Based on user response, we can handle differently
+      // For now, we just continue the same flow for both responses
+      // In the future, we could have different behaviors:
+      // - 'ok' might retry the connection
+      // - 'cancel' might abort and return to main screen
+      if (userResponse === 'cancel') {
+        // If user cancelled, we could potentially return to the main screen
+        // For now, just update the button state
+        updateButtonState(this, false);
+        return;
+      }
+      
       updateButtonState(this, false);
     } finally {
       // Remove loading indicator from the selected wallet button
@@ -253,11 +267,23 @@ export default class extends Controller {
     if (this.hasErrorModalTarget) {
       this.errorModalTarget.showModal();
     }
+    
+    // Resolve the promise with 'ok' to continue with the flow
+    if (this.errorModalPromiseResolver) {
+      this.errorModalPromiseResolver('ok');
+      this.errorModalPromiseResolver = null;
+    }
   }
   
   closeErrorModal() {
     if (this.hasErrorModalTarget) {
       this.errorModalTarget.close();
+    }
+    
+    // Resolve the promise with 'cancel' to abort the flow
+    if (this.errorModalPromiseResolver) {
+      this.errorModalPromiseResolver('cancel');
+      this.errorModalPromiseResolver = null;
     }
   }
   
@@ -265,5 +291,28 @@ export default class extends Controller {
     if (this.hasErrorModalTarget) {
       this.errorModalTarget.close();
     }
+    
+    // Resolve the promise with 'ok' to continue with the flow
+    if (this.errorModalPromiseResolver) {
+      this.errorModalPromiseResolver('ok');
+      this.errorModalPromiseResolver = null;
+    }
+  }
+  
+  // Show error modal and return a promise that resolves when user interacts
+  showErrorAndWait(message) {
+    return new Promise((resolve) => {
+      // Store the resolve function to be called when user responds
+      this.errorModalPromiseResolver = resolve;
+      
+      // Display error in modal
+      if (this.hasErrorMessageTarget) {
+        this.errorMessageTarget.textContent = message;
+      }
+      
+      if (this.hasErrorModalTarget) {
+        this.errorModalTarget.showModal();
+      }
+    });
   }
 }
