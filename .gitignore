@@ -3,3 +3,7 @@ node_modules/
 dist/
 .env
 *.log
+coverage/
+GEMINI.md
+CLAUDE.md
+QWEN.md
