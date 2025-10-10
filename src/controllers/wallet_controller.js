@@ -14,7 +14,11 @@ export default class extends Controller {
     "walletAddress",
     "walletName",
     "walletChain",
-    "disconnectBtn"
+    "disconnectBtn",
+    "errorModal",
+    "errorMessage",
+    "errorCloseBtn",
+    "errorConfirmBtn"
   ]
 
   static values = {
@@ -241,18 +245,25 @@ export default class extends Controller {
   }
   
   showError(message) {
-    // Create a more user-friendly error display
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'error-message';
-    errorDiv.textContent = message;
+    // Display error in modal
+    if (this.hasErrorMessageTarget) {
+      this.errorMessageTarget.textContent = message;
+    }
     
-    document.body.appendChild(errorDiv);
-    
-    // Remove the error message after 5 seconds
-    setTimeout(() => {
-      if (errorDiv.parentNode) {
-        errorDiv.parentNode.removeChild(errorDiv);
-      }
-    }, 5000);
+    if (this.hasErrorModalTarget) {
+      this.errorModalTarget.showModal();
+    }
+  }
+  
+  closeErrorModal() {
+    if (this.hasErrorModalTarget) {
+      this.errorModalTarget.close();
+    }
+  }
+  
+  confirmErrorModal() {
+    if (this.hasErrorModalTarget) {
+      this.errorModalTarget.close();
+    }
   }
 }

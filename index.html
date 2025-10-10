@@ -19,6 +19,17 @@
       </div>
       <div id="walletButtons" class="wallets" data-wallet-target="walletButtons"></div>
     </dialog>
+    
+    <dialog id="errorModal" data-wallet-target="errorModal">
+      <div class="error-modal-header">
+        <h2>Error</h2>
+      </div>
+      <p class="error-message-content" data-wallet-target="errorMessage"></p>
+      <div class="error-modal-actions">
+        <button class="error-modal-btn" data-action="wallet#closeErrorModal" data-wallet-target="errorCloseBtn">Cancel</button>
+        <button class="error-modal-btn primary" data-action="wallet#confirmErrorModal" data-wallet-target="errorConfirmBtn">OK</button>
+      </div>
+    </dialog>
 
     <div id="walletInfo" class="connection-info" data-wallet-target="walletInfo">
       <div class="connection-details">
