@@ -140,10 +140,4 @@
   }
 }
 
-/* Desktop - 1024px+ */
-@media (min-width: 64rem) {
-  .wallet-button:hover {
-    border-color: var(--black);
-    background: var(--gray-05);
-  }
-}
+
