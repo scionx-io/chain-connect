@@ -110,22 +110,27 @@
 @media (min-width: 40rem) {
   #walletModal {
     width: 28rem;
-    padding: var(--grid-6) var(--grid-4);
+    padding: var(--grid-5) var(--grid-4);
   }
 
   #errorModal {
-    width: 28rem;
-    padding: var(--grid-6) var(--grid-4);
+    width: 20rem;
+    padding: var(--grid-4) var(--grid-3);
   }
 
   .modal-header h2,
   .error-modal-header h2 {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
   }
 }
 
 /* Desktop - 1024px+ */
 @media (min-width: 64rem) {
+  #walletModal {
+    width: 32rem;
+    padding: var(--grid-6) var(--grid-5);
+  }
+
   .close-modal-btn:hover {
     border-color: var(--black);
   }

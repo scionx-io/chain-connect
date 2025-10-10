@@ -156,23 +156,6 @@ export function renderWallets(mipdStore, controller) {
       // Add data attribute for chain features if available
       if (wallet.families && Array.isArray(wallet.families) && wallet.families.length > 0) {
         button.setAttribute('data-chain-features', wallet.families.join(','));
-        
-        // Add visual indicator for multi-chain wallets
-        if (wallet.families.length > 1) {
-          // Add a small indicator that this wallet supports multiple chains
-          const multiChainIndicator = document.createElement('span');
-          multiChainIndicator.className = 'multi-chain-indicator';
-          multiChainIndicator.textContent = 'Multi-chain';
-          multiChainIndicator.title = `Supports: ${wallet.families.map(f => 
-            f === 'evm' ? 'EVM' : f === 'solana' ? 'Solana' : f === 'tron' ? 'Tron' : f
-          ).join(', ')}`;
-          
-          // Insert the indicator next to the wallet name
-          const spanElement = button.querySelector('span');
-          if (spanElement) {
-            spanElement.appendChild(multiChainIndicator);
-          }
-        }
       }
       
       walletGrid.appendChild(button);
@@ -233,23 +216,6 @@ export function renderWallets(mipdStore, controller) {
             // Add data attribute for chain features if available
             if (wallet.families && Array.isArray(wallet.families) && wallet.families.length > 0) {
               button.setAttribute('data-chain-features', wallet.families.join(','));
-              
-              // Add visual indicator for multi-chain wallets
-              if (wallet.families.length > 1) {
-                // Add a small indicator that this wallet supports multiple chains
-                const multiChainIndicator = document.createElement('span');
-                multiChainIndicator.className = 'multi-chain-indicator';
-                multiChainIndicator.textContent = '•••';
-                multiChainIndicator.title = `Supports: ${wallet.families.map(f => 
-                  f === 'evm' ? 'EVM' : f === 'solana' ? 'Solana' : f === 'tron' ? 'Tron' : f
-                ).join(', ')}`;
-                
-                // Insert the indicator next to the wallet name
-                const spanElement = button.querySelector('span');
-                if (spanElement) {
-                  spanElement.appendChild(multiChainIndicator);
-                }
-              }
             }
             
             walletGroup.appendChild(button);
@@ -324,23 +290,6 @@ function createWalletSection(container, title, wallets, controller) {
     // Add data attribute for chain features if available
     if (wallet.families && Array.isArray(wallet.families) && wallet.families.length > 0) {
       button.setAttribute('data-chain-features', wallet.families.join(','));
-      
-      // Add visual indicator for multi-chain wallets
-      if (wallet.families.length > 1) {
-        // Add a small indicator that this wallet supports multiple chains
-        const multiChainIndicator = document.createElement('span');
-        multiChainIndicator.className = 'multi-chain-indicator';
-        multiChainIndicator.textContent = '•••';
-        multiChainIndicator.title = `Supports: ${wallet.families.map(f => 
-          f === 'evm' ? 'EVM' : f === 'solana' ? 'Solana' : f === 'tron' ? 'Tron' : f
-        ).join(', ')}`;
-        
-        // Insert the indicator next to the wallet name
-        const spanElement = button.querySelector('span');
-        if (spanElement) {
-          spanElement.appendChild(multiChainIndicator);
-        }
-      }
     }
     
     walletGroup.appendChild(button);
