@@ -112,18 +112,4 @@
 }
 
 
-/* Desktop - 1024px+ */
-@media (min-width: 64rem) {
-  .connect-wallet-btn:hover,
-  .disconnect-btn:hover {
-    border-color: var(--black);
-  }
 
-  .connect-wallet-btn:hover {
-    background: var(--gray-90);
-  }
-
-  .disconnect-btn:hover {
-    background: var(--gray-05);
-  }
-}
