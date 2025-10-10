@@ -193,7 +193,7 @@ export default class extends Controller {
 
   handleConnected(event) {
     const { connection } = event.detail;
-    updateWalletInfo(this, this.mipdStore, connection.name, connection.address, connection.rdns, connection.chainId, connection.walletType);
+    updateWalletInfo(this, this.mipdStore, connection.name, connection.address, connection.rdns, connection.chainId, connection.family);
   }
 
   handleDisconnected() {
@@ -234,7 +234,7 @@ export default class extends Controller {
     }
 
     // Update the UI with new connection information
-    updateWalletInfo(this, this.mipdStore, connection.name, connection.address, connection.rdns, connection.chainId, connection.walletType);
+    updateWalletInfo(this, this.mipdStore, connection.name, connection.address, connection.rdns, connection.chainId, connection.family);
 
     // Remove loading indicator after a short delay to ensure UI updates
     setTimeout(() => {
