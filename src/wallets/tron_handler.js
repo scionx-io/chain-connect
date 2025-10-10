@@ -71,7 +71,7 @@ class TronHandler {
     }
   }
 
-  disconnect() {
+  async disconnect() {
     if (this.accountChangedListener) {
       window.removeEventListener('message', this.accountChangedListener);
       this.accountChangedListener = null;
@@ -81,6 +81,16 @@ class TronHandler {
     if (this.tronWeb && this.tronWeb.removeListener && typeof this.tronWeb.removeListener === 'function') {
       this.tronWeb.removeListener('connect', this.boundChainChanged);
       this.tronWeb.removeListener('networkChanged', this.boundChainChanged);
+    }
+    
+    // Try to disconnect from Tron wallet if the method is available
+    if (this.tronWeb && this.tronWeb.disconnect && typeof this.tronWeb.disconnect === 'function') {
+      try {
+        await this.tronWeb.disconnect();
+        console.log('Disconnected from Tron wallet');
+      } catch (error) {
+        console.log('Tron wallet disconnect method failed or not supported', error);
+      }
     }
     
     console.log('TronLink handler cleaned up.');

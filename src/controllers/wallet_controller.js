@@ -75,6 +75,7 @@ export default class extends Controller {
     }, 500); // 500ms should be enough for wallet detection to complete
   }
 
+  // Stimulus lifecycle method - called when controller is removed from DOM
   disconnect() {
     this.walletManager.removeEventListener('connected', this.handleConnected);
     this.walletManager.removeEventListener('disconnected', this.handleDisconnected);
@@ -82,6 +83,13 @@ export default class extends Controller {
     this.walletManager.removeEventListener('chainChanged', this.handleChainChanged);
     this.walletManager.removeEventListener('accountChanged', this.handleAccountChanged);
 
+    if (this.walletManager.activeConnection) {
+      this.walletManager.disconnect(this.walletManager.activeConnection.rdns);
+    }
+  }
+
+  // User action - called when user clicks disconnect button
+  disconnectWallet() {
     if (this.walletManager.activeConnection) {
       this.walletManager.disconnect(this.walletManager.activeConnection.rdns);
     }
@@ -210,6 +218,13 @@ export default class extends Controller {
   // Unified handler for wallet state changes
   handleWalletStateChange(event, changeType) {
     const { connection } = event.detail;
+    
+    // Check if address is null which indicates disconnection
+    if (!connection.address) {
+      // If address is null, treat as disconnection
+      resetWalletUI(this);
+      return;
+    }
 
     // Set the appropriate loading state based on change type
     if (changeType === 'chain') {

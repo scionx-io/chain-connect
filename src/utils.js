@@ -37,8 +37,10 @@ export const clearWalletState = () => {
 };
 
 // UI Helpers
-export const formatAddress = (address) =>
-  `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+export const formatAddress = (address) => {
+  if (!address) return '0x...0000'; // Return a placeholder when address is null/undefined
+  return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+};
 
 export const updateButtonState = (controller, isConnected, isLoading = false) => {
   const btn = controller.connectWalletBtnTarget;

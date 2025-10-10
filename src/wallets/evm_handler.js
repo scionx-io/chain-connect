@@ -70,11 +70,28 @@ class EvmHandler {
     }
   }
 
-  disconnect() {
+  async disconnect() {
     if (this.originalProvider) {
-      // Remove event listeners from the injected provider
-      this.originalProvider.removeListener('accountsChanged', this.boundAccountsChanged);
-      this.originalProvider.removeListener('chainChanged', this.boundChainChanged);
+      try {
+        // Try to revoke permissions using wallet_revokePermissions if available
+        // This method is supported by MetaMask, Rabby and other modern EVM wallets
+        if (this.originalProvider.request && typeof this.originalProvider.request === 'function') {
+          await this.originalProvider.request({
+            method: 'wallet_revokePermissions',
+            params: [{
+              eth_accounts: {}
+            }]
+          });
+          console.log('Permissions revoked from EVM wallet');
+        }
+      } catch (error) {
+        console.log('wallet_revokePermissions not supported by this wallet, falling back to standard disconnection', error);
+        // If wallet_revokePermissions is not supported, continue with standard cleanup
+      } finally {
+        // Remove event listeners from the injected provider regardless of permission revocation success
+        this.originalProvider.removeListener('accountsChanged', this.boundAccountsChanged);
+        this.originalProvider.removeListener('chainChanged', this.boundChainChanged);
+      }
     }
     this.provider = null;
     this.originalProvider = null;
