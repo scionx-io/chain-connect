@@ -27,13 +27,30 @@ class SolanaHandler {
 
   setupEventListeners() {
     if (typeof this.provider.on === 'function') {
-      this.provider.on('accountChanged', this.boundAccountChanged);
-      this.provider.on('connect', this.boundChainChanged);
-      this.provider.on('disconnect', this.boundDisconnect);
+      try {
+        this.provider.on('accountChanged', this.boundAccountChanged);
+      } catch (e) {
+        console.debug('accountChanged event not supported by this provider or listener invalid:', e.message);
+      }
+      
+      try {
+        this.provider.on('connect', this.boundChainChanged);
+      } catch (e) {
+        console.debug('connect event not supported by this provider or listener invalid:', e.message);
+      }
+      
+      try {
+        this.provider.on('disconnect', this.boundDisconnect);
+      } catch (e) {
+        console.debug('disconnect event not supported by this provider or listener invalid:', e.message);
+      }
       
       // Some Solana providers may emit networkChanged, but it's not standard
-      if (this.provider.on('networkChanged')) {
+      try {
         this.provider.on('networkChanged', this.boundChainChanged);
+      } catch (e) {
+        // networkChanged event might not be supported by all providers, that's ok
+        console.debug('networkChanged event not supported by this provider or listener invalid:', e.message);
       }
     }
   }
@@ -94,6 +111,99 @@ class SolanaHandler {
           chains: [`solana:${chainId}`],
         };
       } else {
+        // Special handling for Phantom and other Solana providers that might need initialization
+        // Check if it's a Phantom wallet that might need to be activated differently
+        if (this.provider.isPhantom || providerDetails.info.rdns.includes('phantom')) {
+          // Phantom wallets can sometimes be accessed differently
+          // Wait a bit for the provider to fully initialize if needed
+          if (typeof window !== 'undefined' && window.phantom && window.phantom.solana) {
+            // Phantom might be available through its own namespace
+            this.provider = window.phantom.solana;
+          }
+          
+          // Check again if the provider now has a connect method after potential initialization
+          if (typeof this.provider.connect === 'function') {
+            const resp = isReconnect 
+              ? await this.provider.connect({ onlyIfTrusted: true })
+              : await this.provider.connect();
+
+            if (!resp.publicKey) {
+              if (isReconnect) {
+                console.log('No accounts found during reconnect');
+                return null;
+              }
+              throw new Error('No accounts found.');
+            }
+
+            const address = resp.publicKey.toString();
+            
+            // Set up event listeners
+            this.setupEventListeners();
+            
+            const chainId = await this.getChainId();
+
+            return {
+              provider: this.provider,
+              address,
+              chainId,
+              name: providerDetails.info.name,
+              rdns: providerDetails.info.rdns,
+              family: 'solana',
+              chains: [`solana:${chainId}`],
+            };
+          } else if (this.provider.publicKey) {
+            // If there's already a public key, use it directly
+            const address = this.provider.publicKey.toBase58();
+            
+            // Set up event listeners
+            this.setupEventListeners();
+            
+            const chainId = await this.getChainId();
+            
+            return {
+              provider: this.provider,
+              address,
+              chainId,
+              name: providerDetails.info.name,
+              rdns: providerDetails.info.rdns,
+              family: 'solana',
+              chains: [`solana:${chainId}`],
+            };
+          }
+        }
+        
+        // For providers without a connect method but with request function (older standards)
+        if (typeof this.provider.request === 'function') {
+          try {
+            // Try connecting via request method
+            const resp = await this.provider.request({
+              method: 'connect',
+              params: isReconnect ? { onlyIfTrusted: true } : {}
+            });
+            
+            if (resp && resp.publicKey) {
+              const address = resp.publicKey.toBase58();
+              
+              // Set up event listeners
+              this.setupEventListeners();
+              
+              const chainId = await this.getChainId();
+              
+              return {
+                provider: this.provider,
+                address,
+                chainId,
+                name: providerDetails.info.name,
+                rdns: providerDetails.info.rdns,
+                family: 'solana',
+                chains: [`solana:${chainId}`],
+              };
+            }
+          } catch (requestError) {
+            console.warn('Request-based connection failed, attempting fallback methods:', requestError);
+          }
+        }
+        
         // If connect method doesn't exist, try alternative approach for MIPD providers
         if (this.provider.publicKey) {
           const address = this.provider.publicKey.toBase58();
@@ -113,6 +223,42 @@ class SolanaHandler {
             chains: [`solana:${chainId}`],
           };
         } else {
+          // If all methods fail, try checking if it's a global provider that might need initialization
+          if (providerDetails.info.rdns.includes('phantom') && typeof window !== 'undefined') {
+            // Sometimes Phantom is available as window.solana but needs to be accessed differently
+            if (window.solana && window.solana.isPhantom) {
+              // Try connecting to the global Phantom provider
+              const globalPhantom = window.solana;
+              if (typeof globalPhantom.connect === 'function') {
+                const resp = isReconnect 
+                  ? await globalPhantom.connect({ onlyIfTrusted: true })
+                  : await globalPhantom.connect();
+
+                if (resp.publicKey) {
+                  const address = resp.publicKey.toString();
+                  
+                  // Update our provider reference
+                  this.provider = globalPhantom;
+                  
+                  // Set up event listeners
+                  this.setupEventListeners();
+                  
+                  const chainId = await this.getChainId();
+
+                  return {
+                    provider: this.provider,
+                    address,
+                    chainId,
+                    name: providerDetails.info.name,
+                    rdns: providerDetails.info.rdns,
+                    family: 'solana',
+                    chains: [`solana:${chainId}`],
+                  };
+                }
+              }
+            }
+          }
+          
           throw new Error('Provider does not have connect method and is not already connected');
         }
       }
@@ -124,15 +270,38 @@ class SolanaHandler {
 
   disconnect() {
     if (this.provider && typeof this.provider.removeListener === 'function') {
-      this.provider.removeListener('accountChanged', this.boundAccountChanged);
-      this.provider.removeListener('connect', this.boundChainChanged);
-      this.provider.removeListener('disconnect', this.boundDisconnect);
-      this.provider.removeListener('networkChanged', this.boundChainChanged);
+      try {
+        this.provider.removeListener('accountChanged', this.boundAccountChanged);
+      } catch (e) {
+        console.debug('Error removing accountChanged listener:', e.message);
+      }
+      
+      try {
+        this.provider.removeListener('connect', this.boundChainChanged);
+      } catch (e) {
+        console.debug('Error removing connect listener:', e.message);
+      }
+      
+      try {
+        this.provider.removeListener('disconnect', this.boundDisconnect);
+      } catch (e) {
+        console.debug('Error removing disconnect listener:', e.message);
+      }
+      
+      try {
+        this.provider.removeListener('networkChanged', this.boundChainChanged);
+      } catch (e) {
+        console.debug('Error removing networkChanged listener:', e.message);
+      }
     }
     
     // Use disconnect method if available
     if (this.provider && typeof this.provider.disconnect === 'function') {
-      this.provider.disconnect();
+      try {
+        this.provider.disconnect();
+      } catch (e) {
+        console.debug('Error calling disconnect method:', e.message);
+      }
     }
     
     this.provider = null;
