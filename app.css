@@ -458,13 +458,12 @@ body {
 
 .error-modal-actions {
   display: flex;
-  gap: var(--grid-2);
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .error-modal-btn {
   min-height: 48px;
-  padding: var(--grid-2);
+  padding: var(--grid-2) var(--grid-4);
   border: 1px solid var(--gray-30);
   background: var(--white);
   color: var(--black);
@@ -476,6 +475,7 @@ body {
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
+  width: 100%;
 }
 
 .error-modal-btn:active {
