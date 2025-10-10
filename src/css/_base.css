@@ -52,9 +52,4 @@ body {
   }
 }
 
-/* Desktop - 1024px+ */
-@media (min-width: 64rem) {
-  .container:hover {
-    transform: translateY(-2px);
-  }
-}
+
