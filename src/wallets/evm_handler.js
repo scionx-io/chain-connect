@@ -107,8 +107,14 @@ class EvmHandler {
   }
 
   async handleChainChanged(chainId) {
-    const network = await this.provider.getNetwork();
-    this.onStateChanged({ chainId: network.chainId.toString() });
+    try {
+      const network = await this.provider.getNetwork();
+      this.onStateChanged({ chainId: network.chainId.toString() });
+    } catch (error) {
+      console.error('Error getting network during chain change:', error);
+      // Fallback to using the chainId from the event parameter
+      this.onStateChanged({ chainId: chainId.toString() });
+    }
   }
 }
 
