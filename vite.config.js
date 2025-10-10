@@ -4,4 +4,5 @@ export default defineConfig({
   define: {
     'global': {},
   },
+  assetsInclude: ['**/*.svg'],
 });

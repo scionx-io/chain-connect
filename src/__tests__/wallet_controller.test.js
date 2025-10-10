@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import WalletController from '../src/controllers/wallet_controller.js';
+import WalletController from '../controllers/wallet_controller.js';
 
 // Mock DOM elements
 const createMockElement = (className = '') => {
@@ -9,40 +9,38 @@ const createMockElement = (className = '') => {
 };
 
 // Mock the utility functions
-vi.mock('../src/utils.js', () => ({
+vi.mock('../utils.js', () => ({
   updateButtonState: vi.fn(),
   resetWalletUI: vi.fn(),
   updateWalletInfo: vi.fn(),
 }));
 
-vi.mock('../src/wallets.js', () => ({
+vi.mock('../wallets.js', () => ({
   renderWallets: vi.fn(),
 }));
 
-// Mock the WalletConnectionService to control its behavior in tests
-const mockWalletService = {
-  addConnectedListener: vi.fn(),
-  addDisconnectedListener: vi.fn(),
-  addStateChangedListener: vi.fn(),
-  addChainChangedListener: vi.fn(),
-  addAccountChangedListener: vi.fn(),
-  removeConnectedListener: vi.fn(),
-  removeDisconnectedListener: vi.fn(),
-  removeStateChangedListener: vi.fn(),
-  removeChainChangedListener: vi.fn(),
-  removeAccountChangedListener: vi.fn(),
-  connect: vi.fn(),
-  disconnect: vi.fn(),
-  getActiveConnection: vi.fn(() => null),
-  getMipdStore: vi.fn(() => ({
-    subscribe: vi.fn(),
-    getProviders: vi.fn().mockReturnValue([]),
-  })),
-  subscribeToProviders: vi.fn(),
+// Mock mipd createStore
+const mockMipdStore = {
+  subscribe: vi.fn(),
+  getProviders: vi.fn().mockReturnValue([]),
 };
 
-vi.mock('../src/services/wallet_connection_service.js', () => ({
-  WalletConnectionService: vi.fn(() => mockWalletService),
+vi.mock('mipd', () => ({
+  createStore: vi.fn(() => mockMipdStore),
+}));
+
+// Mock WalletManager to control its behavior in tests
+const mockWalletManager = {
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  connect: vi.fn(),
+  disconnect: vi.fn(),
+  init: vi.fn(),
+  activeConnection: null,
+};
+
+vi.mock('../wallet_manager.js', () => ({
+  WalletManager: vi.fn(() => mockWalletManager),
 }));
 
 describe('WalletController', () => {
@@ -87,24 +85,24 @@ describe('WalletController', () => {
   });
 
   describe('Initialization', () => {
-    it('should initialize with MIPD store and wallet connection service', () => {
-      expect(mockWalletService.addConnectedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addDisconnectedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addStateChangedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addChainChangedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addAccountChangedListener).toHaveBeenCalledWith(expect.any(Function));
+    it('should initialize with MIPD store and wallet manager', () => {
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('connected', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('disconnected', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('stateChanged', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('chainChanged', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('accountChanged', expect.any(Function));
     });
 
     it('should set up event listeners', () => {
-      expect(mockWalletService.addConnectedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addDisconnectedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addStateChangedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addChainChangedListener).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockWalletService.addAccountChangedListener).toHaveBeenCalledWith(expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('connected', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('disconnected', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('stateChanged', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('chainChanged', expect.any(Function));
+      expect(mockWalletManager.addEventListener).toHaveBeenCalledWith('accountChanged', expect.any(Function));
     });
 
-    it('should call getMipdStore to get store', () => {
-      expect(mockWalletService.getMipdStore).toHaveBeenCalled();
+    it('should initialize wallet manager', () => {
+      expect(mockWalletManager.init).toHaveBeenCalled();
     });
   });
 
@@ -112,9 +110,9 @@ describe('WalletController', () => {
     it('should do nothing if button is not found', () => {
       const event = { target: document.createElement('span') };
       controller.selectWallet(event);
-      
+
       // Should not proceed if no .wallet-button is found
-      expect(mockWalletService.connect).not.toHaveBeenCalled();
+      expect(mockWalletManager.connect).not.toHaveBeenCalled();
     });
 
     it('should connect to wallet when button is clicked', async () => {
@@ -128,7 +126,7 @@ describe('WalletController', () => {
 
       await controller.selectWallet(event);
 
-      expect(mockWalletService.connect).toHaveBeenCalledWith('io.metamask');
+      expect(mockWalletManager.connect).toHaveBeenCalledWith('io.metamask');
     });
 
     it('should handle connection errors gracefully', async () => {
@@ -141,11 +139,11 @@ describe('WalletController', () => {
       controller.modalTarget = { close: vi.fn(), show: vi.fn(), showModal: vi.fn() };
 
       // Mock connection to throw an error
-      mockWalletService.connect.mockRejectedValue(new Error('Connection failed'));
+      mockWalletManager.connect.mockRejectedValue(new Error('Connection failed'));
 
       await controller.selectWallet(event);
 
-      expect(mockWalletService.connect).toHaveBeenCalledWith('io.metamask');
+      expect(mockWalletManager.connect).toHaveBeenCalledWith('io.metamask');
     });
 
     it('should handle user rejection error', async () => {
@@ -160,11 +158,11 @@ describe('WalletController', () => {
       // Mock connection to throw a user rejection error
       const rejectionError = new Error('User rejected');
       rejectionError.code = 4001;
-      mockWalletService.connect.mockRejectedValue(rejectionError);
+      mockWalletManager.connect.mockRejectedValue(rejectionError);
 
       await controller.selectWallet(event);
 
-      expect(mockWalletService.connect).toHaveBeenCalledWith('io.metamask');
+      expect(mockWalletManager.connect).toHaveBeenCalledWith('io.metamask');
     });
   });
 
@@ -189,28 +187,18 @@ describe('WalletController', () => {
   });
 
   describe('disconnect', () => {
-    it('should disconnect from wallet service', () => {
+    it('should disconnect from wallet manager', () => {
       const mockRdns = 'io.metamask';
-      mockWalletService.getActiveConnection.mockReturnValue({ rdns: mockRdns });
+      mockWalletManager.activeConnection = { rdns: mockRdns };
 
       controller.disconnect();
 
-      expect(mockWalletService.removeConnectedListener).toHaveBeenCalledWith(
-        expect.any(Function)
-      );
-      expect(mockWalletService.removeDisconnectedListener).toHaveBeenCalledWith(
-        expect.any(Function)
-      );
-      expect(mockWalletService.removeStateChangedListener).toHaveBeenCalledWith(
-        expect.any(Function)
-      );
-      expect(mockWalletService.removeChainChangedListener).toHaveBeenCalledWith(
-        expect.any(Function)
-      );
-      expect(mockWalletService.removeAccountChangedListener).toHaveBeenCalledWith(
-        expect.any(Function)
-      );
-      expect(mockWalletService.disconnect).toHaveBeenCalledWith(mockRdns);
+      expect(mockWalletManager.removeEventListener).toHaveBeenCalledWith('connected', expect.any(Function));
+      expect(mockWalletManager.removeEventListener).toHaveBeenCalledWith('disconnected', expect.any(Function));
+      expect(mockWalletManager.removeEventListener).toHaveBeenCalledWith('stateChanged', expect.any(Function));
+      expect(mockWalletManager.removeEventListener).toHaveBeenCalledWith('chainChanged', expect.any(Function));
+      expect(mockWalletManager.removeEventListener).toHaveBeenCalledWith('accountChanged', expect.any(Function));
+      expect(mockWalletManager.disconnect).toHaveBeenCalledWith(mockRdns);
     });
   });
 

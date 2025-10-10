@@ -16,6 +16,12 @@ vi.mock('../utils.js', () => ({
   clearWalletState: vi.fn(),
 }));
 
+vi.mock('../services/wallet_provider_resolver.js', () => ({
+  WalletProviderResolver: vi.fn().mockImplementation(() => ({
+    findProvider: vi.fn()
+  }))
+}));
+
 describe('WalletManager', () => {
   let walletManager;
   let mockMipdStore;

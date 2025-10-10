@@ -6,52 +6,27 @@
   <title>Wallet Connection</title>
   <link rel="stylesheet" href="app.css">
 </head>
-<body>
+<body data-controller="wallet">
   <div class="container">
-    <div class="header">
-      <h1>Connect Wallet</h1>
-    </div>
-
-    <button id="connectWalletBtn" class="connect-wallet-btn">
+    <button id="connectWalletBtn" class="connect-wallet-btn" data-action="wallet#openModal" data-wallet-target="connectWalletBtn">
       Connect Wallet
     </button>
 
-    <dialog id="walletModal">
+    <dialog id="walletModal" data-action="click->wallet#closeModalOnOutsideClick" data-wallet-target="modal">
       <div class="modal-header">
         <h2>Choose Wallet</h2>
-        <button id="closeModalBtn" class="close-modal-btn">&times;</button>
+        <button id="closeModalBtn" class="close-modal-btn" data-action="wallet#closeModal" data-wallet-target="closeModalBtn">&times;</button>
       </div>
-      <div class="wallets">
-        <button class="wallet-button" data-wallet="metamask">
-          <div class="wallet-icon">E</div>
-          <div>
-            <div class="wallet-name">MetaMask</div>
-            <div class="wallet-description">Ethereum</div>
-          </div>
-        </button>
-        <button class="wallet-button" data-wallet="phantom">
-          <div class="wallet-icon">S</div>
-          <div>
-            <div class="wallet-name">Phantom</div>
-            <div class="wallet-description">Solana</div>
-          </div>
-        </button>
-        <button class="wallet-button" data-wallet="tronlink">
-          <div class="wallet-icon">T</div>
-          <div>
-            <div class="wallet-name">TronLink</div>
-            <div class="wallet-description">Tron</div>
-          </div>
-        </button>
-      </div>
+      <div id="walletButtons" class="wallets" data-wallet-target="walletButtons"></div>
     </dialog>
 
-    <div id="walletInfo" class="connection-info">
+    <div id="walletInfo" class="connection-info" data-wallet-target="walletInfo">
       <div class="connection-details">
-        <p><strong>Wallet:</strong> <span id="walletName"></span></p>
-        <p><strong>Address:</strong> <span id="walletAddress"></span></p>
+        <p><strong>Wallet:</strong> <span id="walletName" data-wallet-target="walletName"></span></p>
+        <p><strong>Address:</strong> <span id="walletAddress" data-wallet-target="walletAddress"></span></p>
+        <p><strong>Chain:</strong> <span id="walletChain" data-wallet-target="walletChain"></span></p>
       </div>
-      <button id="disconnectBtn" class="disconnect-btn">Disconnect</button>
+      <button id="disconnectBtn" class="disconnect-btn" data-action="wallet#disconnect" data-wallet-target="disconnectBtn">Disconnect</button>
     </div>
   </div>
 

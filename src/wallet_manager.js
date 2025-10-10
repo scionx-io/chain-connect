@@ -1,7 +1,7 @@
 import walletRegistry from './wallet_registry.js';
 import './wallets/index.js';
 import { loadWalletState, saveWalletState, clearWalletState } from './utils.js';
-import { WALLET_ICONS } from './config.js';
+import { WalletProviderResolver } from './services/wallet_provider_resolver.js';
 
 class WalletManager extends EventTarget {
   constructor(mipdStore) {
@@ -11,6 +11,7 @@ class WalletManager extends EventTarget {
     this.activeConnection = null;
     this.handlers = new Map();
     this.isConnecting = false;
+    this.providerResolver = new WalletProviderResolver(mipdStore);
   }
 
   async init() {
@@ -155,45 +156,7 @@ class WalletManager extends EventTarget {
   }
 
   findProvider(rdns) {
-    const mipdProvider = this.mipdStore.getProviders().find(p => p.info.rdns === rdns);
-    if (mipdProvider) {
-      // If MIPD provider doesn't have chains, try to infer from rdns
-      if (!mipdProvider.info.chains) {
-        let inferredChains = [];
-        // Infer chain based on rdns for common wallets
-        if (rdns.includes('metamask') || rdns.includes('coinbase') || rdns.includes('rabby') || 
-            rdns.includes('trust') || rdns.includes('mathwallet')) {
-          inferredChains = ['eip155:1'];  // Ethereum mainnet
-        } else if (rdns.includes('phantom') || rdns.includes('solflare') || rdns.includes('sollet')) {
-          inferredChains = ['solana:101'];  // Solana mainnet
-        } else if (rdns.includes('tron') || rdns.includes('tokenpocket')) {
-          inferredChains = ['tron:0x2b6653dc'];  // Tron mainnet
-        }
-        mipdProvider.info.chains = inferredChains;
-      }
-      return mipdProvider;
-    }
-
-    if (rdns === 'io.metamask' && window.ethereum) {
-      return {
-        provider: window.ethereum,
-        info: { name: 'MetaMask', rdns: 'io.metamask', chains: ['eip155:1'], icon: WALLET_ICONS.metamask }
-      };
-    }
-    if (rdns === 'phantom' && window.solana) {
-      return {
-        provider: window.solana,
-        info: { name: 'Phantom', rdns: 'phantom', chains: ['solana:101'], icon: WALLET_ICONS.phantom }
-      };
-    }
-    if (rdns === 'tronlink' && (window.tronWeb || window.tronLink)) {
-      return {
-        provider: window.tronWeb || window.tronLink,
-        info: { name: 'TronLink', rdns: 'tronlink', chains: ['tron:0x2b6653dc'], icon: WALLET_ICONS.tronlink }
-      };
-    }
-
-    return null;
+    return this.providerResolver.findProvider(rdns);
   }
 }
 

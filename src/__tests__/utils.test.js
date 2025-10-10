@@ -1,6 +1,6 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { saveWalletState, loadWalletState, clearWalletState } from '../src/utils';
+import { saveWalletState, loadWalletState, clearWalletState } from '../utils.js';
 
 describe('Wallet State Utilities', () => {
   let storage = {};
