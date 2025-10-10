@@ -27,11 +27,13 @@ class WalletProviderResolver {
   }
 
   findMIPDProvider(rdns) {
+    console.log(rdns)
     const mipdProvider = this.mipdStore.getProviders().find(p => p.info.rdns === rdns);
     if (mipdProvider) {
       console.log(`Found MIPD provider for RDNS ${rdns}:`, mipdProvider.info.name, 'with chains:', mipdProvider.info.chains);
-      if (!mipdProvider.info.chains) {
+      if (!mipdProvider.info.chains || (Array.isArray(mipdProvider.info.chains) && mipdProvider.info.chains.length === 0)) {
         mipdProvider.info.chains = this.inferChainsFromRDNS(rdns);
+        console.log(`Inferred chains for ${rdns}:`, mipdProvider.info.chains);
       }
       return mipdProvider;
     }
@@ -49,18 +51,22 @@ class WalletProviderResolver {
   }
 
   getGlobalProvider(rdns) {
-    // Dynamically check window properties at runtime
+    // Dynamically check window properties at runtime, ensuring window exists
     const globalProviders = {
       'io.metamask': {
-        provider: window.ethereum,
+        provider: typeof window !== 'undefined' ? window.ethereum : null,
         info: { name: 'MetaMask', rdns: 'io.metamask', chains: ['eip155:1'], icon: WALLET_ICONS.metamask }
       },
+      'io.rabby': {
+        provider: typeof window !== 'undefined' ? window.ethereum : null, // Rabby injects to window.ethereum like other EVM wallets
+        info: { name: 'Rabby Wallet', rdns: 'io.rabby', chains: ['eip155:1'], icon: WALLET_ICONS.rabby || null }
+      },
       'phantom': {
-        provider: window.solana,
+        provider: typeof window !== 'undefined' ? window.solana : null,
         info: { name: 'Phantom', rdns: 'phantom', chains: ['solana:101'], icon: WALLET_ICONS.phantom }
       },
       'tronlink': {
-        provider: window.tronWeb || window.tronLink,
+        provider: typeof window !== 'undefined' ? (window.tronWeb || window.tronLink) : null,
         info: { name: 'TronLink', rdns: 'tronlink', chains: ['tron:0x2b6653dc'], icon: WALLET_ICONS.tronlink }
       }
     };
