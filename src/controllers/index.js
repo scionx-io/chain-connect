@@ -1,8 +1,13 @@
 
-import { Application } from "@hotwired/stimulus"
+// Import the application instance
+import { application } from "./application"
+
+// Import all controllers
 import WalletController from "./wallet_controller.js"
 import ChainConnectController from "./chain_connect_controller.js"
 
-window.Stimulus = Application.start()
-Stimulus.register("wallet", WalletController)
-Stimulus.register("chain-connect", ChainConnectController)
+// Register controllers with the application
+application.register("wallet", WalletController)
+application.register("chain-connect", ChainConnectController)
+
+export { application }
