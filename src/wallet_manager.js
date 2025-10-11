@@ -137,6 +137,33 @@ class WalletManager extends EventTarget {
     return globalWallets;
   }
 
+  _sortByPriority(wallets) {
+    const priorityWallets = ['Phantom', 'MetaMask', 'Coinbase Wallet'];
+
+    return wallets.sort((a, b) => {
+      const aPriority = priorityWallets.indexOf(a.info.name);
+      const bPriority = priorityWallets.indexOf(b.info.name);
+
+      // If both are in priority list, sort by position in priority list
+      if (aPriority !== -1 && bPriority !== -1) {
+        return aPriority - bPriority;
+      }
+
+      // If only a is in priority list, a comes first
+      if (aPriority !== -1) {
+        return -1;
+      }
+
+      // If only b is in priority list, b comes first
+      if (bPriority !== -1) {
+        return 1;
+      }
+
+      // If neither is in priority list, maintain original order
+      return 0;
+    });
+  }
+
   async init() {
     const savedState = loadWalletState();
     if (savedState && savedState.rdns) {
