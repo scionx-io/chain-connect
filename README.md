@@ -167,6 +167,30 @@ The library includes built-in CSS styles following Swiss design principles:
 - Helvetica Neue typography
 - Monochromatic color palette with accent colors for wallet brands
 
+## Example Implementation
+
+A complete example implementation demonstrating how to use this package is available in the `example/` directory:
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd chain-connect
+
+# Build the package
+yarn build && yarn pack
+
+# Navigate to the example directory
+cd example
+
+# Install dependencies
+npm install  # or yarn install
+
+# Run the development server
+npm run dev  # or yarn dev
+```
+
+The example shows how to integrate the wallet connector in a standalone project with all the necessary HTML structure, JavaScript setup, and styling.
+
 ## Browser Compatibility
 
 Modern browsers with Web3 wallet support (Chrome, Firefox, Edge, Safari)

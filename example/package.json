@@ -1,0 +1,31 @@
+{
+  "name": "scionx-chain-connect-example",
+  "version": "1.0.0",
+  "description": "Example implementation of @scionx/chain-connect",
+  "main": "index.html",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@scionx/chain-connect": "file:../scionx-chain-connect-1.0.0.tgz",
+    "@hotwired/stimulus": "^3.2.2"
+  },
+  "devDependencies": {
+    "vite": "^7.1.9"
+  },
+  "keywords": [
+    "ethereum",
+    "solana",
+    "tron",
+    "wallet",
+    "web3",
+    "blockchain",
+    "multi-chain",
+    "crypto",
+    "dapp"
+  ],
+  "author": "",
+  "license": "ISC"
+}

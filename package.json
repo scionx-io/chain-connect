@@ -23,7 +23,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
-    "package": "vite build && npm pack"
+    "package": "vite build && npm pack",
+    "example": "vite build && npm pack && cd example && npm install"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
