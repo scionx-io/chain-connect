@@ -39,6 +39,12 @@ class WalletManager extends EventTarget {
       throw new Error('Connection already in progress');
     }
     
+    // Disconnect the currently active wallet if connecting to a different wallet
+    if (this.activeConnection && this.activeConnection.rdns !== rdns && !isReconnect) {
+      await this.disconnect(this.activeConnection.rdns);
+    }
+    
+    // Handle connection to the same wallet as before
     if (this.connections.has(rdns)) {
       if (!isReconnect) {
         throw new Error(`Wallet with RDNS "${rdns}" is already connected.`);
@@ -62,7 +68,10 @@ class WalletManager extends EventTarget {
         throw new Error(`No handler for wallet family "${family}"`);
       }
 
-      const handler = new HandlerClass(this.handleStateChange.bind(this, rdns));
+      // Create a closure to ensure rdns is associated with the callback for test mock compatibility
+      const handler = new HandlerClass((newState) => {
+        this.handleStateChange(rdns, newState);
+      });
       this.handlers.set(rdns, handler);
 
       const connection = await handler.connect(providerDetails, isReconnect);
