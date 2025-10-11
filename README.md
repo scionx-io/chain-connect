@@ -167,6 +167,41 @@ The library includes built-in CSS styles following Swiss design principles:
 - Helvetica Neue typography
 - Monochromatic color palette with accent colors for wallet brands
 
+## Project Structure
+
+This library follows a modular architecture with clear separation of concerns:
+
+```
+src/
+├── core/                    # Core wallet business logic
+│   ├── wallet_manager.js    # Main wallet management class
+│   ├── wallet_discovery.js  # Wallet detection and discovery
+│   ├── wallet_registry.js   # Handler registry for different wallet families
+│   ├── connection_manager.js # Connection lifecycle management
+│   └── wallets/             # Wallet family handlers
+│       ├── evm_handler.js   # EVM-based wallet (MetaMask, etc.) handler
+│       ├── solana_handler.js # Solana wallet (Phantom, etc.) handler
+│       ├── tron_handler.js   # Tron wallet (TronLink, etc.) handler
+│       └── index.js          # Handler registration
+├── controllers/             # Stimulus controllers (UI layer)
+│   └── wallet_controller.js # Main UI controller for wallet interactions
+├── services/                # External service integrations
+│   └── (currently empty)    # Reserved for future services
+├── utils/                   # Utility functions
+│   ├── chain_utils.js       # Chain utility functions
+│   └── utils.js             # General utility functions
+├── config.js                # Configuration constants and wallet icons
+├── index.js                 # Main entry point
+└── wallets.js               # Wallet rendering utilities
+```
+
+### Architecture Overview
+
+- **Core Logic (`core/`)**: Contains all wallet business logic including connection management, wallet discovery, and chain-specific handlers
+- **Controllers (`controllers/`)**: Stimulus controllers managing UI interactions
+- **Services (`services/`)**: Service layer for external integrations (future use)
+- **Utils (`utils/`)**: Reusable utility functions
+
 ## Example Implementation
 
 A complete example implementation demonstrating how to use this package is available in the `example/` directory:

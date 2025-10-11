@@ -1,21 +1,25 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { WalletManager } from '../wallet_manager.js';
+import { WalletManager } from '../core/wallet_manager.js';
 import { createMockEvmProvider, createMockSolanaProvider, createMockTronProvider } from './mock_wallets.js';
 
 vi.mock('../utils.js', () => ({
   loadWalletState: vi.fn().mockReturnValue(null),
   saveWalletState: vi.fn(),
   clearWalletState: vi.fn(),
+  updateButtonState: vi.fn(),
+  updateWalletInfo: vi.fn(),
+  resetWalletUI: vi.fn(),
+  formatAddress: vi.fn(),
 }));
 
-vi.mock('../wallet_registry.js', () => ({
+vi.mock('../core/wallet_registry.js', () => ({
   default: {
     get: vi.fn(),
     register: vi.fn()
   }
 }));
 
-import walletRegistry from '../wallet_registry.js';
+import walletRegistry from '../core/wallet_registry.js';
 
 describe('Error Scenarios', () => {
   let walletManager;
@@ -44,7 +48,7 @@ describe('Error Scenarios', () => {
         disconnect: vi.fn()
       });
       
-      vi.mocked(walletRegistry.get).mockReturnValue(mockHandler);
+      walletRegistry.get.mockReturnValue(mockHandler);
 
       await expect(walletManager.connect('io.metamask'))
         .rejects
@@ -63,7 +67,7 @@ describe('Error Scenarios', () => {
         disconnect: vi.fn()
       });
       
-      vi.mocked(walletRegistry.get).mockReturnValue(mockHandler);
+      walletRegistry.get.mockReturnValue(mockHandler);
 
       await expect(walletManager.connect('phantom'))
         .rejects
@@ -82,7 +86,7 @@ describe('Error Scenarios', () => {
         disconnect: vi.fn()
       });
       
-      vi.mocked(walletRegistry.get).mockReturnValue(mockHandler);
+      walletRegistry.get.mockReturnValue(mockHandler);
 
       await expect(walletManager.connect('tronlink'))
         .rejects
@@ -103,7 +107,7 @@ describe('Error Scenarios', () => {
         disconnect: vi.fn()
       });
       
-      vi.mocked(walletRegistry.get).mockReturnValue(mockHandler);
+      walletRegistry.get.mockReturnValue(mockHandler);
 
       await expect(walletManager.connect('io.metamask'))
         .rejects
@@ -122,7 +126,7 @@ describe('Error Scenarios', () => {
         disconnect: vi.fn()
       });
       
-      vi.mocked(walletRegistry.get).mockReturnValue(mockHandler);
+      walletRegistry.get.mockReturnValue(mockHandler);
 
       await expect(walletManager.connect('io.metamask'))
         .rejects
@@ -144,7 +148,7 @@ describe('Error Scenarios', () => {
         provider: mockProvider
       }]);
 
-      vi.mocked(walletRegistry.get).mockReturnValue(null);
+      walletRegistry.get.mockReturnValue(null);
 
       await expect(walletManager.connect('unknown.wallet'))
         .rejects
@@ -165,7 +169,7 @@ describe('Error Scenarios', () => {
         disconnect: vi.fn()
       });
       
-      vi.mocked(walletRegistry.get).mockReturnValue(mockHandler);
+      walletRegistry.get.mockReturnValue(mockHandler);
 
       await expect(walletManager.connect('io.metamask'))
         .rejects
@@ -193,7 +197,7 @@ describe('Error Scenarios', () => {
         disconnect: vi.fn()
       });
       
-      vi.mocked(walletRegistry.get).mockReturnValue(mockHandler);
+      walletRegistry.get.mockReturnValue(mockHandler);
 
       // Connect
       const first = await walletManager.connect('io.metamask');

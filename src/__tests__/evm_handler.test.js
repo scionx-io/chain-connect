@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import EvmHandler from '../wallets/evm_handler.js';
+import EvmHandler from '../core/wallets/evm_handler.js';
 import { createMockEvmProvider } from './mock_wallets.js';
 
 // Mock ethers

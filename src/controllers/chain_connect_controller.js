@@ -1,6 +1,6 @@
 import { Controller } from "@hotwired/stimulus"
 import { createStore } from 'mipd';
-import { WalletManager } from '../wallet_manager.js';
+import { WalletManager } from '../core/wallet_manager.js';
 import { updateButtonState, resetWalletUI, updateWalletInfo } from '../utils.js';
 import { renderWallets } from '../wallets.js';
 

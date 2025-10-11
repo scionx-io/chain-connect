@@ -39,7 +39,7 @@ const mockWalletManager = {
   activeConnection: null,
 };
 
-vi.mock('../wallet_manager.js', () => ({
+vi.mock('../core/wallet_manager.js', () => ({
   WalletManager: vi.fn(() => mockWalletManager),
 }));
 

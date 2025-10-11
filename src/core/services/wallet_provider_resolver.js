@@ -1,4 +1,4 @@
-import { WALLET_ICONS } from '../config.js';
+import { WALLET_ICONS } from '../../config.js';
 
 class WalletProviderResolver {
   constructor(mipdStore) {

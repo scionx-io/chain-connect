@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { WalletProviderResolver } from '../services/wallet_provider_resolver.js';
+import { WalletProviderResolver } from '../core/services/wallet_provider_resolver.js';
 import { createStore } from 'mipd';
 
 describe('WalletProviderResolver', () => {

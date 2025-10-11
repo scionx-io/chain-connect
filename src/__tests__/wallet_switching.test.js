@@ -1,301 +1,196 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { WalletManager } from '../wallet_manager.js';
-import { createStore } from 'mipd';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { WalletManager } from '../core/wallet_manager.js';
+
+// Mock config.js to avoid SVG import issues
+vi.mock('../config.js', () => ({
+  WALLET_ICONS: {
+    metamask: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjM0U3QkVFIi8+Cjwvc3ZnPgo=',
+    phantom: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjNjM0NUQ2Ii8+Cjwvc3ZnPgo=',
+    tronlink: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjE2IiBoZWlnaHQ9IjE2IiBmaWxsPSIjRUQ0NjM2Ii8+Cjwvc3ZnPgo=',
+  }
+}));
 
 // Mock the wallet registry
-vi.mock('../wallet_registry.js', () => {
-  const mockHandler = {
-    connect: vi.fn(),
-    disconnect: vi.fn(),
-  };
-  return {
-    default: {
-      get: vi.fn(() => mockHandler.constructor),
-      register: vi.fn(),
-    }
-  };
-});
+vi.mock('../core/wallet_registry.js', () => ({
+  default: {
+    get: vi.fn(),
+    register: vi.fn()
+  }
+}));
 
-// Mock the provider resolver
-vi.mock('../services/wallet_provider_resolver.js', async () => {
-  const actual = await vi.importActual('../services/wallet_provider_resolver.js');
+// Mock dependencies
+vi.mock('../utils.js', async () => {
+  const actualUtils = await vi.importActual('../utils.js');
+  
   return {
-    ...actual,
-    WalletProviderResolver: vi.fn().mockImplementation(() => {
-      return {
-        findProvider: vi.fn((rdns) => {
-          if (rdns === 'io.metamask') {
-            return {
-              provider: { 
-                request: vi.fn(),
-                on: vi.fn(),
-                removeListener: vi.fn(),
-              },
-              info: { 
-                rdns: 'io.metamask',
-                name: 'MetaMask',
-                chains: ['eip155:1']
-              }
-            };
-          } else if (rdns === 'io.rabby') {
-            return {
-              provider: { 
-                request: vi.fn(),
-                on: vi.fn(),
-                removeListener: vi.fn(),
-              },
-              info: { 
-                rdns: 'io.rabby',
-                name: 'Rabby Wallet',
-                chains: ['eip155:1']
-              }
-            };
-          }
-          return null;
-        })
-      };
-    })
-  };
-});
-
-// Mock utils
-vi.mock('../utils.js', () => {
-  return {
-    loadWalletState: vi.fn(() => null),
+    ...actualUtils,
+    loadWalletState: vi.fn().mockReturnValue(null),
     saveWalletState: vi.fn(),
     clearWalletState: vi.fn(),
   };
 });
 
+// Mock the WalletDiscovery module to prevent it from importing config.js with SVG files
+vi.mock('../core/wallet_discovery.js', async () => {
+  const actual = await vi.importActual('../core/wallet_discovery.js');
+  
+  return {
+    WalletDiscovery: vi.fn().mockImplementation(() => ({
+      getDetectedWallets: vi.fn()
+    }))
+  };
+});
+
+vi.mock('../core/connection_manager.js', () => ({
+  ConnectionManager: vi.fn().mockImplementation(() => ({
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    getActiveConnection: vi.fn(),
+    getConnection: vi.fn(),
+    hasConnection: vi.fn(),
+    findProvider: vi.fn(),
+    getWalletFamily: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    init: vi.fn()
+  }))
+}));
+
+
+
 describe('Wallet Switching', () => {
   let walletManager;
-  let mipdStore;
+  let mockMipdStore;
+  let mockConnectionManager;
 
   beforeEach(() => {
-    mipdStore = createStore();
-    walletManager = new WalletManager(mipdStore);
-    
-    // Reset all mocks before each test
     vi.clearAllMocks();
+    
+    // Create mock MIPD store
+    mockMipdStore = {
+      getProviders: vi.fn().mockReturnValue([])
+    };
+
+    walletManager = new WalletManager(mockMipdStore);
+    
+    // Get references to the mock managers
+    mockConnectionManager = walletManager.connectionManager;
+    
+    // Reset mocks to default behavior
+    mockConnectionManager.hasConnection.mockReturnValue(false);
+    mockConnectionManager.getActiveConnection.mockReturnValue(null);
   });
 
   it('should disconnect active wallet before connecting to a new one', async () => {
-    // Create a Map to store handlers by rdns
-    const handlersByRdns = new Map();
-
-    // Mock the handlers for both wallets
-    const mockMetamaskHandler = {
-      connect: vi.fn().mockResolvedValue({
-        name: 'MetaMask',
-        address: '0x1234567890123456789012345678901234567890',
-        chainId: '1',
-        family: 'evm',
-        rdns: 'io.metamask'
-      }),
-      disconnect: vi.fn().mockResolvedValue(undefined)
+    const mockMetamaskConnection = {
+      name: 'MetaMask',
+      address: '0x1234567890123456789012345678901234567890',
+      chainId: '1',
+      family: 'evm',
+      rdns: 'io.metamask'
     };
 
-    const mockRabbyHandler = {
-      connect: vi.fn().mockResolvedValue({
-        name: 'Rabby Wallet',
-        address: '0x0987654321098765432109876543210987654321',
-        chainId: '1',
-        family: 'evm',
-        rdns: 'io.rabby'
-      }),
-      disconnect: vi.fn().mockResolvedValue(undefined)
+    const mockRabbyConnection = {
+      name: 'Rabby Wallet',
+      address: '0x0987654321098765432109876543210987654321',
+      chainId: '1',
+      family: 'evm',
+      rdns: 'io.rabby'
     };
-
-    handlersByRdns.set('io.metamask', mockMetamaskHandler);
-    handlersByRdns.set('io.rabby', mockRabbyHandler);
-
-    // Mock the wallet registry to return different handlers
-    const { default: walletRegistry } = await import('../wallet_registry.js');
-    walletRegistry.get = vi.fn((family) => {
-      if (family === 'evm') {
-        // Return a constructor that looks up the handler based on provider details
-        return class {
-          constructor(onStateChange) {
-            // Store the callback for later use
-            this._onStateChange = onStateChange;
-            this._handlers = handlersByRdns;
-          }
-
-          async connect(providerDetails, isReconnect) {
-            const handler = this._handlers.get(providerDetails.info.rdns);
-            if (handler) {
-              // Copy methods from the mock handler to this instance
-              Object.assign(this, handler);
-              return handler.connect(providerDetails, isReconnect);
-            }
-          }
-
-          async disconnect() {
-            // Disconnect is called on the handler instance, which should have the methods copied
-            if (this.disconnect && this.disconnect !== disconnect) {
-              return this.disconnect();
-            }
-          }
-        };
-      }
-    });
 
     // Connect to MetaMask first
+    mockConnectionManager.hasConnection.mockReturnValue(false);
+    mockConnectionManager.connect.mockResolvedValue(mockMetamaskConnection);
+    mockConnectionManager.getActiveConnection.mockReturnValue(mockMetamaskConnection);
+
     await walletManager.connect('io.metamask');
 
-    // Verify MetaMask was connected
-    expect(mockMetamaskHandler.connect).toHaveBeenCalledWith(
-      expect.objectContaining({
-        info: expect.objectContaining({
-          rdns: 'io.metamask'
-        })
-      }),
-      false
-    );
+    // Now connect to Rabby - should disconnect MetaMask first
+    mockConnectionManager.getActiveConnection.mockReturnValue(mockMetamaskConnection); // MetaMask still active
+    mockConnectionManager.connect.mockResolvedValue(mockRabbyConnection);
 
-    // Verify no disconnection happened yet
-    expect(mockMetamaskHandler.disconnect).not.toHaveBeenCalled();
-
-    // Now connect to Rabby - this should disconnect MetaMask first
     await walletManager.connect('io.rabby');
 
-    // Verify MetaMask was disconnected before connecting to Rabby
-    expect(mockMetamaskHandler.disconnect).toHaveBeenCalledTimes(1);
+    // Verify MetaMask was disconnected
+    expect(mockConnectionManager.disconnect).toHaveBeenCalledWith('io.metamask');
 
     // Verify Rabby was connected
-    expect(mockRabbyHandler.connect).toHaveBeenCalledWith(
-      expect.objectContaining({
-        info: expect.objectContaining({
-          rdns: 'io.rabby'
-        })
-      }),
-      false
+    expect(mockConnectionManager.connect).toHaveBeenCalledWith(
+      'io.rabby',
+      false,
+      expect.any(Function)
     );
-
-    // Verify the active connection is now Rabby
-    expect(walletManager.activeConnection.name).toBe('Rabby Wallet');
-    expect(walletManager.activeConnection.address).toBe('0x0987654321098765432109876543210987654321');
   });
 
   it('should handle connecting to the same wallet twice', async () => {
-    const mockHandler = {
-      connect: vi.fn().mockResolvedValue({
-        name: 'MetaMask',
-        address: '0x1234567890123456789012345678901234567890',
-        chainId: '1',
-        family: 'evm',
-        rdns: 'io.metamask'
-      }),
-      disconnect: vi.fn().mockResolvedValue(undefined)
+    const mockConnection = {
+      name: 'MetaMask',
+      address: '0x1234567890123456789012345678901234567890',
+      chainId: '1',
+      family: 'evm',
+      rdns: 'io.metamask'
     };
 
-    // Mock the wallet registry
-    const { default: walletRegistry } = await import('../wallet_registry.js');
-    walletRegistry.get = vi.fn(() => {
-      return class {
-        constructor() {
-          Object.assign(this, mockHandler);
-        }
+    // First connection succeeds
+    mockConnectionManager.hasConnection.mockReturnValue(false);
+    mockConnectionManager.connect.mockResolvedValue(mockConnection);
 
-        async connect(providerDetails, isReconnect) {
-          return mockHandler.connect(providerDetails, isReconnect);
-        }
-
-        async disconnect() {
-          return mockHandler.disconnect();
-        }
-      };
-    });
-
-    // Connect to MetaMask first
     await walletManager.connect('io.metamask');
 
-    // Verify connection was successful
-    expect(mockHandler.connect).toHaveBeenCalledTimes(1);
+    expect(mockConnectionManager.connect).toHaveBeenCalledTimes(1);
 
-    // Try to connect to MetaMask again - this should fail with an error
-    // The WalletManager detects the duplicate connection and throws before calling handler.connect()
-    await expect(walletManager.connect('io.metamask')).rejects.toThrow('Wallet with RDNS "io.metamask" is already connected.');
+    // Try to connect again - now hasConnection returns true
+    mockConnectionManager.hasConnection.mockReturnValue(true);
 
-    // Verify connect was only called once (second attempt is rejected before calling connect)
-    // and disconnect was not called
-    expect(mockHandler.connect).toHaveBeenCalledTimes(1);
-    expect(mockHandler.disconnect).not.toHaveBeenCalled();
+    await expect(walletManager.connect('io.metamask')).rejects.toThrow('already connected');
+
+    // Verify connect was only called once
+    expect(mockConnectionManager.connect).toHaveBeenCalledTimes(1);
   });
 
   it('should handle switching from one wallet to another and back', async () => {
-    // Create a Map to store handlers by rdns
-    const handlersByRdns = new Map();
-
-    const mockMetamaskHandler = {
-      connect: vi.fn().mockResolvedValue({
-        name: 'MetaMask',
-        address: '0x1234567890123456789012345678901234567890',
-        chainId: '1',
-        family: 'evm',
-        rdns: 'io.metamask'
-      }),
-      disconnect: vi.fn().mockResolvedValue(undefined)
+    const mockMetamaskConnection = {
+      name: 'MetaMask',
+      address: '0x1234567890123456789012345678901234567890',
+      chainId: '1',
+      family: 'evm',
+      rdns: 'io.metamask'
     };
 
-    const mockRabbyHandler = {
-      connect: vi.fn().mockResolvedValue({
-        name: 'Rabby Wallet',
-        address: '0x0987654321098765432109876543210987654321',
-        chainId: '1',
-        family: 'evm',
-        rdns: 'io.rabby'
-      }),
-      disconnect: vi.fn().mockResolvedValue(undefined)
+    const mockRabbyConnection = {
+      name: 'Rabby Wallet',
+      address: '0x0987654321098765432109876543210987654321',
+      chainId: '1',
+      family: 'evm',
+      rdns: 'io.rabby'
     };
-
-    handlersByRdns.set('io.metamask', mockMetamaskHandler);
-    handlersByRdns.set('io.rabby', mockRabbyHandler);
-
-    // Mock the wallet registry
-    const { default: walletRegistry } = await import('../wallet_registry.js');
-    walletRegistry.get = vi.fn((family) => {
-      if (family === 'evm') {
-        // Return a constructor that looks up the handler based on provider details
-        return class {
-          constructor(onStateChange) {
-            this._onStateChange = onStateChange;
-            this._handlers = handlersByRdns;
-          }
-
-          async connect(providerDetails, isReconnect) {
-            const handler = this._handlers.get(providerDetails.info.rdns);
-            if (handler) {
-              Object.assign(this, handler);
-              return handler.connect(providerDetails, isReconnect);
-            }
-          }
-
-          async disconnect() {
-            if (this.disconnect && this.disconnect !== disconnect) {
-              return this.disconnect();
-            }
-          }
-        };
-      }
-    });
 
     // Connect to MetaMask
+    mockConnectionManager.hasConnection.mockReturnValue(false);
+    mockConnectionManager.connect.mockResolvedValue(mockMetamaskConnection);
+    mockConnectionManager.getActiveConnection.mockReturnValue(mockMetamaskConnection);
+
     await walletManager.connect('io.metamask');
-    expect(walletManager.activeConnection.name).toBe('MetaMask');
+    expect(walletManager.getActiveConnection().name).toBe('MetaMask');
 
     // Switch to Rabby
-    await walletManager.connect('io.rabby');
-    expect(walletManager.activeConnection.name).toBe('Rabby Wallet');
+    mockConnectionManager.getActiveConnection.mockReturnValue(mockMetamaskConnection); // MetaMask still active
+    mockConnectionManager.connect.mockResolvedValue(mockRabbyConnection);
 
-    // Verify MetaMask was disconnected
-    expect(mockMetamaskHandler.disconnect).toHaveBeenCalledTimes(1);
+    await walletManager.connect('io.rabby');
+
+    mockConnectionManager.getActiveConnection.mockReturnValue(mockRabbyConnection);
+    expect(walletManager.getActiveConnection().name).toBe('Rabby Wallet');
+    expect(mockConnectionManager.disconnect).toHaveBeenCalledWith('io.metamask');
 
     // Switch back to MetaMask
-    await walletManager.connect('io.metamask');
-    expect(walletManager.activeConnection.name).toBe('MetaMask');
+    mockConnectionManager.getActiveConnection.mockReturnValue(mockRabbyConnection); // Rabby still active
+    mockConnectionManager.connect.mockResolvedValue(mockMetamaskConnection);
 
-    // Verify Rabby was disconnected
-    expect(mockRabbyHandler.disconnect).toHaveBeenCalledTimes(1);
+    await walletManager.connect('io.metamask');
+
+    mockConnectionManager.getActiveConnection.mockReturnValue(mockMetamaskConnection);
+    expect(walletManager.getActiveConnection().name).toBe('MetaMask');
+    expect(mockConnectionManager.disconnect).toHaveBeenCalledWith('io.rabby');
   });
 });

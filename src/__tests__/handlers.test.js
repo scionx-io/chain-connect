@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, vi, expect, afterEach } from 'vitest';
-import EvmHandler from '../wallets/evm_handler.js';
-import SolanaHandler from '../wallets/solana_handler.js';
-import TronHandler from '../wallets/tron_handler.js';
+import EvmHandler from '../core/wallets/evm_handler.js';
+import SolanaHandler from '../core/wallets/solana_handler.js';
+import TronHandler from '../core/wallets/tron_handler.js';
 
 // Mock ethers to avoid complex provider issues in tests
 vi.mock('ethers', async () => {

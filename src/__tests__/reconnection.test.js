@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { WalletManager } from '../wallet_manager.js';
-import EvmHandler from '../wallets/evm_handler.js';
+import { WalletManager } from '../core/wallet_manager.js';
+import EvmHandler from '../core/wallets/evm_handler.js';
 import { createMockEvmProvider } from './mock_wallets.js';
 
 vi.mock('../utils.js');
-vi.mock('../wallet_registry.js');
+vi.mock('../core/wallet_registry.js');
 
 import * as utils from '../utils.js';
-import walletRegistry from '../wallet_registry.js';
+import walletRegistry from '../core/wallet_registry.js';
 
 describe('Reconnection Logic', () => {
   let walletManager;

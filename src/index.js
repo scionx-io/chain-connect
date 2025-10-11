@@ -1,6 +1,6 @@
 // Main entry point for the wallet connector library
-import { WalletManager } from './wallet_manager.js';
-import { WalletProviderResolver } from './services/wallet_provider_resolver.js';
+import { WalletManager } from './core/wallet_manager.js';
+import { WalletProviderResolver } from './core/services/wallet_provider_resolver.js';
 import { updateButtonState, resetWalletUI, updateWalletInfo } from './utils.js';
 import { renderWallets } from './wallets.js';
 import { WALLET_ICONS } from './config.js';
@@ -21,9 +21,9 @@ export {
 };
 
 // Export wallet handlers
-export { default as EvmHandler } from './wallets/evm_handler.js';
-export { default as SolanaHandler } from './wallets/solana_handler.js';
-export { default as TronHandler } from './wallets/tron_handler.js';
+export { default as EvmHandler } from './core/wallets/evm_handler.js';
+export { default as SolanaHandler } from './core/wallets/solana_handler.js';
+export { default as TronHandler } from './core/wallets/tron_handler.js';
 
 // Export controllers for those who want to use it with Stimulus
 export { default as WalletController } from './controllers/wallet_controller.js';

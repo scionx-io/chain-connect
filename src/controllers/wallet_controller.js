@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 import { createStore } from 'mipd';
 import { updateButtonState, resetWalletUI, updateWalletInfo } from '../utils.js';
 import { renderWallets } from '../wallets.js';
-import { WalletManager } from '../wallet_manager.js';
+import { WalletManager } from '../core/wallet_manager.js';
 
 export default class extends Controller {
   static targets = [
@@ -52,13 +52,13 @@ export default class extends Controller {
     // Set loading state during initial wallet detection
     this.walletDetectionValue = true;
 
-    renderWallets(this.walletManager.getDetectedWallets(), this);
+    renderWallets(this.mipdStore, this);
 
     // Use a flag to ensure loading state is turned off after initialization
     let walletDetectionCompleted = false;
 
     this.mipdStore.subscribe(() => {
-      renderWallets(this.walletManager.getDetectedWallets(), this);
+      renderWallets(this.mipdStore, this);
       // Turn off loading state after wallet detection completes
       if (!walletDetectionCompleted) {
         walletDetectionCompleted = true;
