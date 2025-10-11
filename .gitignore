@@ -7,3 +7,4 @@ coverage/
 GEMINI.md
 CLAUDE.md
 QWEN.md
+*.tgz

@@ -1,14 +1,29 @@
 {
-  "name": "wallets",
+  "name": "@scionx/chain-connect",
   "version": "1.0.0",
-  "description": "Multi-chain wallet connect demo with Vite",
+  "description": "Multi-chain wallet connector supporting Ethereum, Solana, and Tron with minimalist Swiss design",
   "type": "module",
+  "main": "./dist/chain-connect.cjs",
+  "module": "./dist/chain-connect.js",
+  "browser": "./dist/chain-connect.umd.js",
+  "exports": {
+    ".": {
+      "import": "./dist/chain-connect.js",
+      "require": "./dist/chain-connect.cjs",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "package": "vite build && npm pack"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
@@ -24,8 +39,26 @@
     "vite": "^7.1.9",
     "vitest": "^3.2.4"
   },
-  "main": "app.js",
-  "keywords": [],
+  "keywords": [
+    "ethereum",
+    "solana",
+    "tron",
+    "wallet",
+    "web3",
+    "blockchain",
+    "multi-chain",
+    "crypto",
+    "dapp",
+    "connector"
+  ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scionx/chain-connect.git"
+  },
+  "bugs": {
+    "url": "https://github.com/scionx/chain-connect/issues"
+  },
+  "homepage": "https://github.com/scionx/chain-connect#readme"
 }
