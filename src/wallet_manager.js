@@ -20,6 +20,36 @@ class WalletManager extends EventTarget {
     }
   }
 
+  _getFamiliesFromChains(chains) {
+    const families = [];
+
+    if (!chains) {
+      this._debug('No chain info provided for wallet family detection');
+      return families;
+    }
+
+    this._debug('Detecting wallet families from chains:', chains);
+
+    if (chains.some(chain => chain.startsWith('eip155:'))) {
+      this._debug('  -> Identified as EVM wallet');
+      families.push('evm');
+    }
+    if (chains.some(chain => chain.startsWith('solana:'))) {
+      this._debug('  -> Identified as Solana wallet');
+      families.push('solana');
+    }
+    if (chains.some(chain => chain.startsWith('tron:'))) {
+      this._debug('  -> Identified as Tron wallet');
+      families.push('tron');
+    }
+
+    if (families.length === 0) {
+      this._debug('  -> Could not identify wallet family from chains');
+    }
+
+    return families;
+  }
+
   async init() {
     const savedState = loadWalletState();
     if (savedState && savedState.rdns) {
