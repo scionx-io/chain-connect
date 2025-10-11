@@ -164,6 +164,105 @@ class WalletManager extends EventTarget {
     });
   }
 
+  getDetectedWallets() {
+    // Group all wallets by blockchain family
+    const allGroupedWallets = {
+      evm: [],
+      solana: [],
+      tron: [],
+      multiChain: []
+    };
+
+    // Get MIPD wallets
+    const mipdWallets = this.mipdStore.getProviders();
+    this._debug('Total MIPD wallets detected:', mipdWallets.length);
+
+    // Categorize MIPD wallets
+    mipdWallets.forEach(wallet => {
+      const families = this._categorizeWallet(wallet);
+
+      if (families.length === 0) return; // Skip unsupported wallets
+
+      const walletWithFamilies = { ...wallet, families };
+
+      if (families.length > 1) {
+        // Multi-chain wallet
+        allGroupedWallets.multiChain.push(walletWithFamilies);
+        this._debug(`  -> Categorized as Multi-chain (${families.join(', ')}) based on chain info`);
+      } else {
+        allGroupedWallets[families[0]].push(walletWithFamilies);
+        this._debug(`  -> Categorized as ${families[0]} based on chain info`);
+      }
+    });
+
+    // Add global providers (non-MIPD wallets)
+    const globalWallets = this._getGlobalProviders();
+    globalWallets.forEach(wallet => {
+      // Check if wallet already exists in grouped wallets (avoid duplicates)
+      const existsInMultiChain = allGroupedWallets.multiChain.some(w => w.info.name === wallet.info.name);
+      const existsInSingleChain = [...allGroupedWallets.evm, ...allGroupedWallets.solana, ...allGroupedWallets.tron]
+        .some(w => w.info.name === wallet.info.name);
+
+      if (!existsInMultiChain && !existsInSingleChain) {
+        if (wallet.families.length > 1) {
+          allGroupedWallets.multiChain.push(wallet);
+        } else {
+          allGroupedWallets[wallet.families[0]].push(wallet);
+        }
+      }
+    });
+
+    this._debug('All grouped wallets:', {
+      evm: allGroupedWallets.evm.map(w => w.info.name),
+      solana: allGroupedWallets.solana.map(w => w.info.name),
+      tron: allGroupedWallets.tron.map(w => w.info.name),
+      multiChain: allGroupedWallets.multiChain.map(w => `${w.info.name} (${w.families.join(', ')})`)
+    });
+
+    // Flatten all wallets into a single array
+    const allWallets = [
+      ...allGroupedWallets.multiChain,
+      ...allGroupedWallets.evm,
+      ...allGroupedWallets.solana,
+      ...allGroupedWallets.tron
+    ];
+
+    // Sort by priority
+    this._sortByPriority(allWallets);
+
+    this._debug('Sorted all wallets:', allWallets.map(w => w.info.name));
+
+    // Split into top 4 and remaining
+    const topWallets = allWallets.slice(0, 4);
+    const remainingWallets = allWallets.slice(4);
+
+    // Group remaining wallets by family
+    const groupedWallets = {
+      multiChain: [],
+      evm: [],
+      solana: [],
+      tron: []
+    };
+
+    remainingWallets.forEach(wallet => {
+      if (wallet.families.includes('evm') && wallet.families.includes('solana')) {
+        groupedWallets.multiChain.push(wallet);
+      } else if (wallet.families.includes('evm')) {
+        groupedWallets.evm.push(wallet);
+      } else if (wallet.families.includes('solana')) {
+        groupedWallets.solana.push(wallet);
+      } else if (wallet.families.includes('tron')) {
+        groupedWallets.tron.push(wallet);
+      }
+    });
+
+    return {
+      topWallets,
+      groupedWallets,
+      totalCount: allWallets.length
+    };
+  }
+
   async init() {
     const savedState = loadWalletState();
     if (savedState && savedState.rdns) {
