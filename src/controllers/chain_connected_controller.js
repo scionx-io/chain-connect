@@ -76,31 +76,131 @@ export default class extends Controller {
     }, 500); // 500ms should be enough for wallet detection to complete
   }
 
-  // AppKit-compatible methods
-  getAccount() {
-    return {
-      address: this.walletManager.activeConnection?.address,
-      isConnected: !!this.walletManager.activeConnection,
-      status: this.walletManager.activeConnection ? 'connected' : 'disconnected'
-    }
+  // Properties for outlets to use
+  get address() {
+    return this.walletManager.activeConnection?.address
   }
 
-  getChainId() {
+  get chainId() {
     return this.walletManager.activeConnection?.chainId
   }
 
-  getWalletProvider() {
+  get provider() {
     return this.walletManager.activeConnection?.provider
+  }
+
+  get isConnected() {
+    return !!this.walletManager.activeConnection
+  }
+
+  // Method to open the modal
+  open() {
+    this.openModal()
+  }
+
+  // Method to subscribe to wallet state changes
+  subscribe(callback) {
+    // Add the callback to a list of subscribers
+    if (!this.subscribers) {
+      this.subscribers = [];
+    }
+    
+    this.subscribers.push(callback);
+    
+    // Return an unsubscribe function
+    return () => {
+      const index = this.subscribers.indexOf(callback);
+      if (index > -1) {
+        this.subscribers.splice(index, 1);
+      }
+    };
+  }
+
+  // Helper method to notify all subscribers of a state change
+  notifySubscribers(connection) {
+    if (this.subscribers && this.subscribers.length > 0) {
+      this.subscribers.forEach(callback => {
+        callback({
+          address: connection?.address,
+          chainId: connection?.chainId,
+          provider: connection?.provider,
+          isConnected: !!connection
+        });
+      });
+    }
+  }
+
+  // Override the handleConnected method to notify subscribers
+  handleConnected(event) {
+    const { connection } = event.detail;
+    updateWalletInfo(this, this.mipdStore, connection.name, connection.address, connection.rdns, connection.chainId, connection.family);
+    
+    // Notify subscribers of the state change
+    this.notifySubscribers(connection);
+  }
+
+  // Override the handleDisconnected method to notify subscribers
+  handleDisconnected() {
+    resetWalletUI(this);
+    
+    // Notify subscribers of the disconnection
+    this.notifySubscribers(null);
+  }
+  
+  // Handle state changes (account/chain changes)
+  handleStateChanged(event) {
+    this.handleWalletStateChange(event, 'account');
+  }
+  
+  // Handle chain changes specifically
+  handleChainChanged(event) {
+    this.handleWalletStateChange(event, 'chain');
+  }
+  
+  // Handle account changes specifically
+  handleAccountChanged(event) {
+    this.handleWalletStateChange(event, 'account');
+  }
+  
+  // Unified handler for wallet state changes
+  handleWalletStateChange(event, changeType) {
+    const { connection } = event.detail;
+    
+    // Check if address is null which indicates disconnection
+    if (!connection.address) {
+      // If address is null, treat as disconnection
+      resetWalletUI(this);
+      // Notify subscribers of the disconnection
+      this.notifySubscribers(null);
+      return;
+    }
+
+    // Set the appropriate loading state based on change type
+    if (changeType === 'chain') {
+      this.chainSwitchingValue = true;
+    } else { // account changes
+      this.accountChangeValue = true;
+    }
+
+    // Update the UI with new connection information
+    updateWalletInfo(this, this.mipdStore, connection.name, connection.address, connection.rdns, connection.chainId, connection.family);
+
+    // Notify subscribers of the state change
+    this.notifySubscribers(connection);
+
+    // Remove loading indicator after a short delay to ensure UI updates
+    setTimeout(() => {
+      if (changeType === 'chain') {
+        this.chainSwitchingValue = false;
+      } else { // account changes
+        this.accountChangeValue = false;
+      }
+    }, 300);
   }
 
   async ready() {
     // Already have init(), just alias it or make it return a promise
     return this.walletManager.init()
-  }
-
-  // AppKit-compatible method to open modal
-  open() {
-    this.openModal() // calls existing method
   }
 
   // User action - called when user clicks disconnect button
