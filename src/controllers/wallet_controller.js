@@ -52,13 +52,13 @@ export default class extends Controller {
     // Set loading state during initial wallet detection
     this.walletDetectionValue = true;
 
-    renderWallets(this.mipdStore, this);
+    renderWallets(this.walletManager.getDetectedWallets(), this);
 
     // Use a flag to ensure loading state is turned off after initialization
     let walletDetectionCompleted = false;
 
     this.mipdStore.subscribe(() => {
-      renderWallets(this.mipdStore, this);
+      renderWallets(this.walletManager.getDetectedWallets(), this);
       // Turn off loading state after wallet detection completes
       if (!walletDetectionCompleted) {
         walletDetectionCompleted = true;
