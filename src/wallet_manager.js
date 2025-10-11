@@ -14,6 +14,12 @@ class WalletManager extends EventTarget {
     this.providerResolver = new WalletProviderResolver(mipdStore);
   }
 
+  _debug(...args) {
+    if (window.WALLET_DEBUG) {
+      console.log('[WalletManager]', ...args);
+    }
+  }
+
   async init() {
     const savedState = loadWalletState();
     if (savedState && savedState.rdns) {
