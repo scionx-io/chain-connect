@@ -25,8 +25,9 @@ export { default as EvmHandler } from './wallets/evm_handler.js';
 export { default as SolanaHandler } from './wallets/solana_handler.js';
 export { default as TronHandler } from './wallets/tron_handler.js';
 
-// Export controller for those who want to use it with Stimulus
+// Export controllers for those who want to use it with Stimulus
 export { default as WalletController } from './controllers/wallet_controller.js';
+export { default as ChainConnectController } from './controllers/chain_connected_controller.js';
 
 // Main initialization function for the wallet connector
 export function initializeWalletConnector(mipdStore, targetElement) {
