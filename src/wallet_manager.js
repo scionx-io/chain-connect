@@ -50,6 +50,38 @@ class WalletManager extends EventTarget {
     return families;
   }
 
+  _getFamiliesFromRdns(rdns) {
+    const families = [];
+
+    // EVM wallets
+    if (rdns.includes('metamask') || rdns.includes('coinbase') ||
+        rdns.includes('rabby') || rdns.includes('trust') ||
+        rdns.includes('mathwallet')) {
+      families.push('evm');
+      this._debug(`  -> Categorized as EVM based on RDNS: ${rdns}`);
+    }
+    // Multi-chain wallets
+    else if (rdns.includes('phantom')) {
+      families.push('evm', 'solana');
+      this._debug(`  -> Categorized as Multi-chain (EVM and Solana) based on RDNS: ${rdns}`);
+    }
+    // Solana wallets
+    else if (rdns.includes('solflare') || rdns.includes('sollet')) {
+      families.push('solana');
+      this._debug(`  -> Categorized as Solana based on RDNS: ${rdns}`);
+    }
+    // Tron wallets
+    else if (rdns.includes('tron') || rdns.includes('tokenpocket')) {
+      families.push('tron');
+      this._debug(`  -> Categorized as Tron based on RDNS: ${rdns}`);
+    }
+    else {
+      this._debug(`  -> Skipping wallet with RDNS ${rdns} - not recognized as EVM, Solana, or Tron wallet`);
+    }
+
+    return families;
+  }
+
   async init() {
     const savedState = loadWalletState();
     if (savedState && savedState.rdns) {
