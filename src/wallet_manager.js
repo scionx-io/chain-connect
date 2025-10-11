@@ -82,6 +82,28 @@ class WalletManager extends EventTarget {
     return families;
   }
 
+  _categorizeWallet(wallet) {
+    this._debug(`Processing wallet: ${wallet.info.name} (RDNS: ${wallet.info.rdns}), chains:`, wallet.info.chains);
+
+    // Primary: Use MIPD chain info (most reliable)
+    const families = this._getFamiliesFromChains(wallet.info.chains);
+
+    // Only return families if we found supported chains (EVM, Solana, Tron)
+    const supportedFamilies = families.filter(family => ['evm', 'solana', 'tron'].includes(family));
+
+    if (supportedFamilies.length > 0) {
+      return supportedFamilies;
+    }
+
+    // Fallback: RDNS matching for known wallets
+    if (wallet.info.rdns) {
+      return this._getFamiliesFromRdns(wallet.info.rdns);
+    }
+
+    this._debug(`  -> Skipping wallet ${wallet.info.name} - doesn't support EVM, Solana, or Tron chains`);
+    return [];
+  }
+
   async init() {
     const savedState = loadWalletState();
     if (savedState && savedState.rdns) {
