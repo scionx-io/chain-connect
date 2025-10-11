@@ -118,7 +118,7 @@
       </div>
     </dialog>
     
-    <dialog id="errorModal" data-wallet-target="errorModal">
+    <dialog data-wallet-target="errorModal" data-wallet-target="errorModal">
       <div class="error-modal-header">
         <h2>Error</h2>
       </div>
@@ -139,15 +139,15 @@
     </div>
     
     <!-- Demo section showing how to access the controller properties -->
-    <div class="demo-info">
+    <div class="demo-info" data-controller="demo-status">
       <h2>Controller Properties Demo</h2>
-      <p><strong>Is Connected:</strong> <span id="isConnected">Not connected</span></p>
-      <p><strong>Wallet Address:</strong> <span id="demoAddress">Not connected</span></p>
-      <p><strong>Chain ID:</strong> <span id="demoChainId">Not connected</span></p>
-      <p><strong>Provider:</strong> <span id="demoProvider">Not available</span></p>
+      <p><strong>Is Connected:</strong> <span data-demo-status-target="isConnected">Not connected</span></p>
+      <p><strong>Wallet Address:</strong> <span data-demo-status-target="demoAddress">Not connected</span></p>
+      <p><strong>Chain ID:</strong> <span data-demo-status-target="demoChainId">Not connected</span></p>
+      <p><strong>Provider:</strong> <span data-demo-status-target="demoProvider">Not available</span></p>
       
       <h3>Subscribed Events:</h3>
-      <div id="eventLog" class="event-log"></div>
+      <div data-demo-status-target="eventLog" class="event-log"></div>
     </div>
   </div>
 
