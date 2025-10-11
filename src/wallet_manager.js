@@ -2,6 +2,7 @@ import walletRegistry from './wallet_registry.js';
 import './wallets/index.js';
 import { loadWalletState, saveWalletState, clearWalletState } from './utils.js';
 import { WalletProviderResolver } from './services/wallet_provider_resolver.js';
+import { WALLET_ICONS } from './config.js';
 
 class WalletManager extends EventTarget {
   constructor(mipdStore) {
@@ -102,6 +103,38 @@ class WalletManager extends EventTarget {
 
     this._debug(`  -> Skipping wallet ${wallet.info.name} - doesn't support EVM, Solana, or Tron chains`);
     return [];
+  }
+
+  _getGlobalProviders() {
+    const globalWallets = [];
+
+    // Check for Phantom (window.solana)
+    if (window.solana) {
+      this._debug('Phantom/Solana wallet detected in browser');
+      globalWallets.push({
+        info: {
+          name: 'Phantom',
+          icon: WALLET_ICONS.phantom,
+          rdns: 'phantom'
+        },
+        families: ['evm', 'solana']
+      });
+    }
+
+    // Check for TronLink (window.tronWeb or window.tronLink)
+    if (window.tronWeb || window.tronLink) {
+      this._debug('TronLink/Tron wallet detected in browser');
+      globalWallets.push({
+        info: {
+          name: 'TronLink',
+          icon: WALLET_ICONS.tronlink,
+          rdns: 'tronlink'
+        },
+        families: ['tron']
+      });
+    }
+
+    return globalWallets;
   }
 
   async init() {
