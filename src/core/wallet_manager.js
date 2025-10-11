@@ -1,15 +1,25 @@
 import walletRegistry from './wallet_registry.js';
 import './wallets/index.js';
-import { loadWalletState, saveWalletState, clearWalletState } from '../utils.js';
+import { loadWalletState, saveWalletState, clearWalletState } from '../utils/utils.js';
 import { WalletDiscovery } from './wallet_discovery.js';
-import { ConnectionManager } from './connection_manager.js';
+import { WalletProviderResolver } from './services/wallet_provider_resolver.js';
 
 class WalletManager extends EventTarget {
   constructor(mipdStore) {
     super();
     this.mipdStore = mipdStore;
     this.discovery = new WalletDiscovery(mipdStore);
-    this.connectionManager = new ConnectionManager(mipdStore);
+    this.providerResolver = new WalletProviderResolver(mipdStore);
+    this.connections = new Map();
+    this.activeConnection = null;
+    this.handlers = new Map();
+    this.isConnecting = false;
+  }
+
+  _debug(...args) {
+    if (window.WALLET_DEBUG) {
+      console.log('[WalletManager]', ...args);
+    }
   }
 
   getDetectedWallets() {
@@ -28,49 +38,99 @@ class WalletManager extends EventTarget {
     }
   }
 
+  getWalletFamily(chains) {
+    if (!chains) return null;
+    if (chains.some(chain => chain.startsWith('eip155:'))) return 'evm';
+    if (chains.some(chain => chain.startsWith('solana:'))) return 'solana';
+    if (chains.some(chain => chain.startsWith('tron:'))) return 'tron';
+    return null;
+  }
+
   async connect(rdns, isReconnect = false) {
-    // Disconnect the currently active wallet if connecting to a different wallet
-    const activeConnection = this.connectionManager.getActiveConnection();
-    if (activeConnection && activeConnection.rdns !== rdns && !isReconnect) {
-      await this.connectionManager.disconnect(activeConnection.rdns);
+    if (this.isConnecting) {
+      throw new Error('Connection already in progress');
     }
 
-    // Handle connection to the same wallet as before
-    if (this.connectionManager.hasConnection(rdns)) {
-      if (!isReconnect) {
-        throw new Error(`Wallet with RDNS "${rdns}" is already connected.`);
+    this.isConnecting = true;
+
+    try {
+      // Disconnect the currently active wallet if connecting to a different wallet
+      const activeConnection = this.getActiveConnection();
+      if (activeConnection && activeConnection.rdns !== rdns && !isReconnect) {
+        await this.disconnect(activeConnection.rdns);
       }
-      // Clean up existing connection before reconnecting
-      await this.connectionManager.disconnect(rdns);
+
+      // Handle connection to the same wallet as before
+      if (this.hasConnection(rdns)) {
+        if (!isReconnect) {
+          throw new Error(`Wallet with RDNS "${rdns}" is already connected.`);
+        }
+        // Clean up existing connection before reconnecting
+        await this.disconnect(rdns);
+      }
+
+      const providerDetails = this.findProvider(rdns);
+      if (!providerDetails) {
+        throw new Error(`Wallet with RDNS "${rdns}" not found or not available.`);
+      }
+
+      const family = this.getWalletFamily(providerDetails.info.chains);
+      const HandlerClass = walletRegistry.get(family);
+
+      if (!HandlerClass) {
+        throw new Error(`No handler for wallet family "${family}"`);
+      }
+
+      // Create a closure to ensure rdns is associated with the callback for test mock compatibility
+      const handler = new HandlerClass((newState) => {
+        this.handleStateChange(rdns, newState);
+      });
+      this.handlers.set(rdns, handler);
+
+      const connection = await handler.connect(providerDetails, isReconnect);
+      if (connection) {
+        connection.rdns = rdns;
+        this.connections.set(rdns, connection);
+        this.activeConnection = connection;
+
+        // Save state after successful connection
+        saveWalletState(
+          connection.family,
+          connection.address,
+          connection.chainId,
+          rdns
+        );
+
+        this.emit('connected', { connection });
+      } else {
+        this.handlers.delete(rdns);
+      }
+
+      return connection;
+    } finally {
+      this.isConnecting = false;
     }
+  }
 
-    // Listen to connection manager events and forward them
-    this.forwardConnectionManagerEvents();
+  findProvider(rdns) {
+    return this.providerResolver.findProvider(rdns);
+  }
 
-    const connection = await this.connectionManager.connect(
-      rdns,
-      isReconnect,
-      (stateChange) => this.handleStateChange(rdns, stateChange.connection)
-    );
+  getActiveConnection() {
+    return this.activeConnection;
+  }
 
-    if (connection) {
-      // Save state after successful connection
-      saveWalletState(
-        connection.family,
-        connection.address,
-        connection.chainId,
-        rdns
-      );
+  getConnection(rdns) {
+    return this.connections.get(rdns);
+  }
 
-      this.emit('connected', { connection });
-    }
-
-    return connection;
+  hasConnection(rdns) {
+    return this.connections.has(rdns);
   }
 
   async disconnect(rdns) {
     if (!rdns) {
-      const activeConnection = this.connectionManager.getActiveConnection();
+      const activeConnection = this.getActiveConnection();
       rdns = activeConnection?.rdns;
       if (!rdns) {
         // If no rdns is specified and no active connection exists, do nothing
@@ -78,56 +138,44 @@ class WalletManager extends EventTarget {
       }
     }
 
-    await this.connectionManager.disconnect(rdns);
+    const connection = this.connections.get(rdns);
+    if (!connection) {
+      return;
+    }
+
+    const handler = this.handlers.get(rdns);
+    if (handler && handler.disconnect) {
+      await handler.disconnect();
+    }
+
+    this.connections.delete(rdns);
+    this.handlers.delete(rdns);
+
+    if (this.activeConnection?.rdns === rdns) {
+      this.activeConnection = null;
+    }
+
     clearWalletState();
+    this.emit('disconnected', { rdns });
   }
 
-  handleStateChange(rdns, connection) {
-    // Simply update the connection object with new state
-    const currentState = this.connectionManager.getConnection(rdns);
-    if (!currentState) return;
+  handleStateChange(rdns, newState) {
+    const connection = this.connections.get(rdns);
+    if (!connection) return;
 
-    // Update the connection object
-    Object.assign(currentState, connection);
+    Object.assign(connection, newState);
+
+    // Emit specific events for chain and account changes
+    if (newState.chainId !== undefined) {
+      this.emit('chainChanged', { rdns, connection });
+    }
+    if (newState.address !== undefined) {
+      this.emit('accountChanged', { rdns, connection });
+    }
   }
 
   emit(type, detail) {
     this.dispatchEvent(new CustomEvent(type, { detail }));
-  }
-
-  getActiveConnection() {
-    return this.connectionManager.getActiveConnection();
-  }
-  
-  forwardConnectionManagerEvents() {
-    // Remove any existing listeners to prevent duplicates
-    this.removeConnectionManagerListeners();
-    
-    // Add event listeners that forward events from connection manager to wallet manager
-    this.connectionManager.addEventListener('connected', (event) => {
-      this.emit('connected', event.detail);
-    });
-    
-    this.connectionManager.addEventListener('disconnected', (event) => {
-      this.emit('disconnected', event.detail);
-    });
-    
-    this.connectionManager.addEventListener('stateChanged', (event) => {
-      this.emit('stateChanged', event.detail);
-    });
-    
-    this.connectionManager.addEventListener('chainChanged', (event) => {
-      this.emit('chainChanged', event.detail);
-    });
-    
-    this.connectionManager.addEventListener('accountChanged', (event) => {
-      this.emit('accountChanged', event.detail);
-    });
-  }
-  
-  removeConnectionManagerListeners() {
-    // In a real implementation, we would store the listeners to remove them
-    // For now, we're assuming that re-adding them is sufficient
   }
 }
 

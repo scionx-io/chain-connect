@@ -31,36 +31,14 @@ class SolanaHandler {
     this.provider = providerDetails.provider;
     
     try {
-      let publicKey = null;
+      const options = isReconnect ? { onlyIfTrusted: true } : {};
+      const resp = await this.provider.connect(options);
 
-      // Already connected
-      if (this.provider.publicKey) {
-        publicKey = this.provider.publicKey;
-      } 
-      // Standard connect
-      else if (typeof this.provider.connect === 'function') {
-        const options = isReconnect ? { onlyIfTrusted: true } : {};
-        const resp = await this.provider.connect(options);
-
-        if (!resp?.publicKey) {
-          return isReconnect ? null : null;
-        }
-
-        publicKey = resp.publicKey;
-      } 
-      // Fallback for older providers
-      else if (typeof this.provider.request === 'function') {
-        const params = isReconnect ? { onlyIfTrusted: true } : {};
-        const resp = await this.provider.request({ method: 'connect', params });
-        
-        publicKey = resp?.publicKey;
+      if (!resp?.publicKey) {
+        return null;
       }
 
-      if (!publicKey) {
-        throw new Error('Unable to connect to wallet');
-      }
-
-      const address = publicKey.toBase58();
+      const address = resp.publicKey.toBase58();
       this.setupEventListeners();
       const chainId = await this.getChainId();
 
@@ -126,7 +104,6 @@ class SolanaHandler {
       if (lower.includes('testnet')) return '4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z';
     }
 
-    // Default to mainnet
     return '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp';
   }
 }

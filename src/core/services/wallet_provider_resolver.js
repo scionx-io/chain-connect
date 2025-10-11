@@ -1,4 +1,4 @@
-import { WALLET_ICONS } from '../../config.js';
+import { WALLET_ICONS } from '../../utils/config.js';
 
 class WalletProviderResolver {
   constructor(mipdStore) {
@@ -17,6 +17,12 @@ class WalletProviderResolver {
     };
   }
 
+  _debug(...args) {
+    if (window.WALLET_DEBUG) {
+      console.log('[WalletProviderResolver]', ...args);
+    }
+  }
+
   findProvider(rdns) {
     // 1. Check MIPD store
     const mipdProvider = this.findMIPDProvider(rdns);
@@ -27,13 +33,13 @@ class WalletProviderResolver {
   }
 
   findMIPDProvider(rdns) {
-    console.log(rdns)
+    this._debug('Looking for MIPD provider:', rdns);
     const mipdProvider = this.mipdStore.getProviders().find(p => p.info.rdns === rdns);
     if (mipdProvider) {
-      console.log(`Found MIPD provider for RDNS ${rdns}:`, mipdProvider.info.name, 'with chains:', mipdProvider.info.chains);
+      this._debug(`Found MIPD provider for RDNS ${rdns}:`, mipdProvider.info.name, 'with chains:', mipdProvider.info.chains);
       if (!mipdProvider.info.chains || (Array.isArray(mipdProvider.info.chains) && mipdProvider.info.chains.length === 0)) {
         mipdProvider.info.chains = this.inferChainsFromRDNS(rdns);
-        console.log(`Inferred chains for ${rdns}:`, mipdProvider.info.chains);
+        this._debug(`Inferred chains for ${rdns}:`, mipdProvider.info.chains);
       }
       return mipdProvider;
     }
@@ -43,7 +49,7 @@ class WalletProviderResolver {
   inferChainsFromRDNS(rdns) {
     for (const [key, chains] of Object.entries(this.chainMappings)) {
       if (rdns.includes(key)) {
-        console.log(`Inferred chains for ${rdns}:`, chains);
+        this._debug(`Inferred chains for ${rdns}:`, chains);
         return chains;
       }
     }
@@ -73,10 +79,10 @@ class WalletProviderResolver {
 
     const provider = globalProviders[rdns];
     if (provider && provider.provider) {
-      console.log(`Found global provider for RDNS ${rdns}:`, provider.info.name);
+      this._debug(`Found global provider for RDNS ${rdns}:`, provider.info.name);
       return provider;
     }
-    console.log(`No provider found for RDNS ${rdns}`);
+    this._debug(`No provider found for RDNS ${rdns}`);
     return null;
   }
 }
