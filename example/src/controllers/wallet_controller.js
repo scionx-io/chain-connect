@@ -3,11 +3,7 @@ import { createStore } from 'mipd';
 import { WalletManager } from '../core/wallet_manager.js';
 
 export default class extends Controller {
-
-
   static outlets = ["modal"]
-
-
 
   // ============================================================================
   // Lifecycle
@@ -26,6 +22,21 @@ export default class extends Controller {
 
     // Initialize wallet detection
     this.initializeWalletDetection();
+
+    // Dispatch initial connection state
+    if (this.walletManager.getActiveConnection()) {
+      const connection = this.walletManager.getActiveConnection();
+      this.dispatch('connected', {
+        detail: {
+          address: connection.address,
+          chainId: connection.chainId,
+          name: connection.name,
+          rdns: connection.rdns,
+          family: connection.family,
+          provider: connection.provider
+        }
+      });
+    }
   }
 
   disconnect() {
@@ -83,6 +94,8 @@ export default class extends Controller {
     }
 
     this.closeModal();
+
+    // Dispatch connecting event so app can show loading
     this.dispatch('connecting', { detail: { rdns } });
 
     try {
@@ -91,6 +104,7 @@ export default class extends Controller {
       });
 
       await Promise.race([this.walletManager.connect(rdns), timeoutPromise]);
+      // Success handled by handleConnected event
     } catch (error) {
       console.error('Wallet connection error:', error);
       this.dispatch('error', {
@@ -125,16 +139,22 @@ export default class extends Controller {
   // ============================================================================
 
   initializeWalletDetection() {
-    // Dispatch initial wallet list
+    // Dispatch initial wallets
     this.dispatch('walletsDetected', {
-      detail: { wallets: this.walletManager.getDetectedWallets() }
+      detail: { wallets: this.getAvailableWallets() }
     });
 
+    // Re-dispatch when new wallets inject
     this.mipdStore.subscribe(() => {
       this.dispatch('walletsDetected', {
-        detail: { wallets: this.walletManager.getDetectedWallets() }
+        detail: { wallets: this.getAvailableWallets() }
       });
     });
+  }
+
+  getAvailableWallets() {
+    // Return array of available wallets from WalletManager
+    return this.walletManager.getAvailableWallets();
   }
 
   // ============================================================================

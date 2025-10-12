@@ -16,19 +16,10 @@ h1 {
   margin-bottom: 30px;
 }
 
-.wallet-modal {
-  border-radius: 8px;
-  border: 1px solid #ddd;
-}
+/* The wallet connector UI styles are now handled by the imported CSS */
+/* Only keeping styles for static demo elements */
 
-.wallet-info {
-  margin-top: 20px;
-  padding: 15px;
-  background-color: #e9ecef;
-  border-radius: 4px;
-}
-
-.connect-btn {
+button[data-action="wallet#openModal"] {
   background-color: #007bff;
   color: white;
   border: none;
@@ -39,22 +30,8 @@ h1 {
   margin: 5px;
 }
 
-.connect-btn:hover {
+button[data-action="wallet#openModal"]:hover {
   background-color: #0056b3;
-}
-
-.disconnect-btn {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  font-size: 14px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.disconnect-btn:hover {
-  background-color: #c82333;
 }
 
 .demo-info {

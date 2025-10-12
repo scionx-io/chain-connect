@@ -59,8 +59,9 @@ export const CHAIN_NAMES = {
   '901': 'Solana Devnet',
 
   // Tron
-  '1000': 'Tron Mainnet',
-  '1001': 'Tron Nile Testnet',
+  '728126428': 'Tron Mainnet',
+  '2494104990': 'Tron Shasta Testnet',
+  '3448148188': 'Tron Nile Testnet',
 
   // TON
   '1100': 'TON Mainnet',

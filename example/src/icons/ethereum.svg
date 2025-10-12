@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <defs>
+    <linearGradient id="ethereumGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#343434" />
+      <stop offset="100%" stop-color="#343434" />
+    </linearGradient>
+  </defs>
+  <polygon points="20,5 20,15 30,20" fill="#343434"/>
+  <polygon points="20,5 10,20 20,15" fill="#8C8C8C"/>
+  <polygon points="20,25 20,35 30,20" fill="#343434"/>
+  <polygon points="20,25 10,20 20,35" fill="#8C8C8C"/>
+  <polygon points="20,15 10,20 20,25" fill="#3C3C3B"/>
+  <polygon points="20,15 30,20 20,25" fill="#141414"/>
+</svg>

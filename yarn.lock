@@ -2120,6 +2120,13 @@
     "@walletconnect/window-getters" "^1.0.1"
     tslib "1.14.1"
 
+"@webreflection/alien-signals@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@webreflection/alien-signals/-/alien-signals-0.3.2.tgz#d2771f5ba316075ba1ba5bdb18fb07712679769b"
+  integrity sha512-DmNjD8Kq5iM+Toirp3llS/izAiI3Dwav5nHRvKdR/YJBTgun3y4xK76rs9CFYD2bZwZJN/rP+HjEqKTteGK+Yw==
+  dependencies:
+    alien-signals "^2.0.6"
+
 abitype@0.8.7:
   version "0.8.7"
   resolved "https://registry.yarnpkg.com/abitype/-/abitype-0.8.7.tgz#e4b3f051febd08111f486c0cc6a98fa72d033622"
@@ -2156,6 +2163,11 @@ agentkeepalive@^4.5.0:
   integrity sha512-kja8j7PjmncONqaTsB8fQ+wE2mSU2DJ9D4XKoJ5PFWIdRMa6SLSN1ff4mOr4jCbfRSsxR4keIiySJU0N9T5hIQ==
   dependencies:
     humanize-ms "^1.2.1"
+
+alien-signals@^2.0.6:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/alien-signals/-/alien-signals-2.0.8.tgz#f1592509482c6cf0a5710f09bfcad3ca60f347db"
+  integrity sha512-844G1VLkk0Pe2SJjY0J8vp8ADI73IM4KliNu2OGlYzWpO28NexEUvjHTcFjFX3VXoiUtwTbHxLNI9ImkcoBqzA==
 
 ansi-regex@^5.0.1:
   version "5.0.1"
@@ -4213,6 +4225,13 @@ ufo@^1.5.4, ufo@^1.6.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/ufo/-/ufo-1.6.1.tgz#ac2db1d54614d1b22c1d603e3aef44a85d8f146b"
   integrity sha512-9a4/uxlTWJ4+a5i0ooc1rU7C7YOw3wT+UGqdeNNHWnOF9qcMBgLRS+4IYUqbczewFx4mLEig6gawh7X6mFlEkA==
+
+uhtml@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/uhtml/-/uhtml-5.0.9.tgz#0a4e8af97a7103248ad747fa09500b4ce59132a9"
+  integrity sha512-qPyu3vGilaLe6zrjOCD/xezWEHLwdevxmbY3hzyhT25KBDF4F7YYW3YZcL3kylD/6dMoVISHjn8ggV3+9FY+5g==
+  dependencies:
+    "@webreflection/alien-signals" "^0.3.2"
 
 uint8arrays@3.1.1, uint8arrays@^3.0.0, uint8arrays@^3.1.0:
   version "3.1.1"

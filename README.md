@@ -28,39 +28,31 @@ yarn add @scionx/chain-connect
 
 ## Usage
 
+### CSS Styles
+
+The wallet connector uses built-in CSS styles following Swiss design principles. You need to import the CSS file in your application:
+
+```javascript
+// Option 1: Named export (recommended)
+import '@scionx/chain-connect/style';
+
+// Option 2: Direct file path
+import '@scionx/chain-connect/dist/chain-connect.css';
+```
+
+Alternatively, you can link the CSS in your HTML:
+```html
+<link rel="stylesheet" href="node_modules/@scionx/chain-connect/dist/chain-connect.css">
+```
+
 ### HTML Structure
 
-First, set up the HTML structure for the wallet connector:
+Set up a minimal HTML structure for the wallet connector:
 
 ```html
 <div data-controller="wallet">
-  <button data-action="click->wallet#openModal" 
-          data-wallet-target="connectWalletBtn">
-    Connect Wallet
-  </button>
-  
-  <dialog data-wallet-target="modal" class="wallet-modal">
-    <div class="wallet-modal-content">
-      <div class="wallet-modal-header">
-        <h2>Connect your wallet</h2>
-        <button data-action="click->wallet#closeModal" 
-                data-wallet-target="closeModalBtn">&times;</button>
-      </div>
-      <div data-wallet-target="walletButtons" class="wallet-buttons">
-        <!-- Wallet buttons will be dynamically rendered here -->
-      </div>
-    </div>
-  </dialog>
-  
-  <div data-wallet-target="walletInfo" class="wallet-info" style="display:none;">
-    <div class="wallet-details">
-      <span data-wallet-target="walletName"></span>
-      <span data-wallet-target="walletAddress"></span>
-      <span data-wallet-target="walletChain"></span>
-    </div>
-    <button data-action="click->wallet#disconnectWallet" 
-            data-wallet-target="disconnectBtn">Disconnect</button>
-  </div>
+  <button data-action="wallet#openModal">Connect Wallet</button>
+  <!-- The controller creates all other UI elements dynamically -->
 </div>
 ```
 
@@ -69,26 +61,33 @@ First, set up the HTML structure for the wallet connector:
 If you're using Stimulus (Hotwire), use the provided controller:
 
 ```javascript
-// controllers/wallet_controller.js
-import { Controller } from '@hotwired/stimulus';
+// Import CSS in your main application file
+import '@scionx/chain-connect/style';
+
+import { Application } from '@hotwired/stimulus';
 import { WalletController } from '@scionx/chain-connect';
 
-// Extend the WalletController to customize functionality
-export default class extends WalletController {
-  // Extend or customize functionality as needed
-}
+const application = Application.start();
+application.register('wallet', WalletController);
 ```
+
+The controller will dynamically create all necessary UI elements (modal, wallet buttons, connection info, etc.) when needed. You only need to provide a trigger button in your HTML.
 
 ### Direct Usage
 
 For direct usage without Stimulus:
 
 ```javascript
+// Import CSS in your main application file
+import '@scionx/chain-connect/style';
+
 import { createWalletConnector } from '@scionx/chain-connect';
 
 // Create and initialize the wallet connector
 const walletConnector = await createWalletConnector();
 ```
+
+Note: The direct usage approach bypasses the Stimulus controller and requires manual UI implementation. For the full UI experience with modals and wallet selection, the Stimulus approach is recommended.
 
 ## API Reference
 

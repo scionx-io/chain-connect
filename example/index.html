@@ -6,66 +6,25 @@
   <title>@scionx/chain-connect Example</title>
   <link rel="stylesheet" href="./style.css">
 </head>
-<body data-controller="wallet">
-  <div class="container">
-    <h1>@scionx/chain-connect Example</h1>
-    <p>Simple example showing how to integrate the multi-chain wallet connector</p>
+<body>
+  <div data-controller="wallet demo-status"
+       data-action="wallet:connected->demo-status#handleConnected
+                    wallet:disconnected->demo-status#handleDisconnected
+                    wallet:chainChanged->demo-status#handleChainChanged
+                    wallet:accountChanged->demo-status#handleAccountChanged
+                    wallet:error->demo-status#handleError">
 
-    <!-- Original connect button using wallet controller -->
-    <button class="connect-btn" data-action="click->wallet#openModal" 
-            data-wallet-target="connectWalletBtn">
-      Connect Wallet (using wallet controller)
-    </button>
-    
-    <!-- New button using chain-connect controller -->
-    <button class="connect-btn" data-controller="chain-connect" data-action="chain-connect#open">
-      Connect Wallet (using chain-connect controller)
-    </button>
+    <div class="container">
+      <h1>@scionx/chain-connect Example</h1>
+      <p>Simple example showing how to integrate the multi-chain wallet connector</p>
 
-    <dialog data-wallet-target="modal" class="wallet-modal">
-      <div class="wallet-modal-content">
-        <div class="wallet-modal-header">
-          <h2>Connect your wallet</h2>
-          <button style="background: none; border: none; font-size: 24px; cursor: pointer;" 
-                  data-action="click->wallet#closeModal" 
-                  data-wallet-target="closeModalBtn">&times;</button>
-        </div>
-        <div data-wallet-target="walletButtons" class="wallet-buttons">
-          <!-- Wallet buttons will be dynamically rendered here -->
-        </div>
-      </div>
-    </dialog>
-    
-    <dialog data-wallet-target="errorModal" data-wallet-target="errorModal">
-      <div class="error-modal-header">
-        <h2>Error</h2>
-      </div>
-      <p class="error-message-content" data-wallet-target="errorMessage"></p>
-      <div class="error-modal-actions">
-        <button class="connect-btn" data-action="wallet#closeErrorModal" data-wallet-target="errorCloseBtn">OK</button>
-      </div>
-    </dialog>
+      <button data-action="click->wallet#connectWallet">Connect Wallet</button>
 
-    <div data-wallet-target="walletInfo" class="wallet-info" style="display:none;">
-      <div class="wallet-details">
-        <div><strong>Wallet:</strong> <span data-wallet-target="walletName"></span></div>
-        <div><strong>Address:</strong> <span data-wallet-target="walletAddress"></span></div>
-        <div><strong>Chain:</strong> <span data-wallet-target="walletChain"></span></div>
+      <!-- Demo controller renders everything -->
+      <div class="demo-info">
+        <h2>Wallet Status</h2>
+        <div data-demo-status-target="statusDisplay"></div>
       </div>
-      <button class="disconnect-btn" data-action="click->wallet#disconnectWallet" 
-              data-wallet-target="disconnectBtn">Disconnect</button>
-    </div>
-    
-    <!-- Demo section showing how to access the controller properties -->
-    <div class="demo-info" data-controller="demo-status">
-      <h2>Controller Properties Demo</h2>
-      <p><strong>Is Connected:</strong> <span data-demo-status-target="isConnected">Not connected</span></p>
-      <p><strong>Wallet Address:</strong> <span data-demo-status-target="demoAddress">Not connected</span></p>
-      <p><strong>Chain ID:</strong> <span data-demo-status-target="demoChainId">Not connected</span></p>
-      <p><strong>Provider:</strong> <span data-demo-status-target="demoProvider">Not available</span></p>
-      
-      <h3>Subscribed Events:</h3>
-      <div data-demo-status-target="eventLog" class="event-log"></div>
     </div>
   </div>
 
