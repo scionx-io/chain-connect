@@ -192,9 +192,4 @@ export default class ConnectorController extends Controller {
     // This functionality may need to be handled by wallet buttons themselves
     // or through communication with the modal controller
   }
-
-  isConnectedValueChanged(isConnected) {
-    // Add/remove class to controller element for CSS targeting
-    this.element.classList.toggle('wallet-connected', isConnected);
-  }
 }

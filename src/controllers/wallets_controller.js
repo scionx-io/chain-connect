@@ -4,6 +4,52 @@ import { Controller } from "@hotwired/stimulus";
 export default class WalletsController extends Controller {
   static outlets = ["connector"]
   
+  static values = {
+    isConnected: { type: Boolean, default: false }
+  }
+
+  connect() {
+    // Set up event listeners if we have a connector outlet
+    if (this.hasConnectorOutlet) {
+      this.setupConnectorEventListeners();
+    }
+  }
+
+  disconnect() {
+    // Clean up event listeners when disconnecting
+    this.cleanupConnectorEventListeners();
+  }
+
+  // ============================================================================
+  // Event Listener Management (Connector Controller Events)
+  // ============================================================================
+
+  setupConnectorEventListeners() {
+    this.boundHandleConnected = this.handleConnected.bind(this);
+    this.boundHandleDisconnected = this.handleDisconnected.bind(this);
+
+    // Add event listeners to the connector controller
+    this.connectorOutlet.addEventListener('connected', this.boundHandleConnected);
+    this.connectorOutlet.addEventListener('disconnected', this.boundHandleDisconnected);
+  }
+
+  cleanupConnectorEventListeners() {
+    if (this.connectorOutlet && this.boundHandleConnected && this.boundHandleDisconnected) {
+      this.connectorOutlet.removeEventListener('connected', this.boundHandleConnected);
+      this.connectorOutlet.removeEventListener('disconnected', this.boundHandleDisconnected);
+    }
+  }
+
+  handleConnected(event) {
+    // Update our local isConnected value to trigger the reactive callback
+    this.isConnectedValue = true;
+  }
+
+  handleDisconnected(event) {
+    // Update our local isConnected value to trigger the reactive callback
+    this.isConnectedValue = false;
+  }
+  
   // Method called by other controllers to connect to a specific wallet
   async connectWallet(rdns) {
     if (!rdns) {
@@ -66,5 +112,14 @@ export default class WalletsController extends Controller {
     }
 
     await this.connectWallet(rdns);
+  }
+
+  // ============================================================================
+  // Value Change Callbacks (Stimulus Reactive Updates)
+  // ============================================================================
+
+  isConnectedValueChanged(isConnected) {
+    // Add/remove class to controller element for CSS targeting
+    this.element.classList.toggle('wallet-connected', isConnected);
   }
 }
