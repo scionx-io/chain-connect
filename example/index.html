@@ -7,43 +7,21 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div data-controller="connector wallets demo-status"
-       data-demo-status-connector-outlet="connector"
-       data-connector-wallets-outlet="wallets"
-       data-wallets-connector-outlet="connector"
-       data-action="connector:connecting->demo-status#handleConnecting
-                    connector:connected->demo-status#handleConnected
-                    connector:disconnected->demo-status#handleDisconnected
-                    connector:chainChanged->demo-status#handleChainChanged
-                    connector:accountChanged->demo-status#handleAccountChanged
-                    connector:error->demo-status#handleError">
+  <div data-controller="wallet"
+       data-action="wallet:connected->demo#handleConnected
+                    wallet:disconnected->demo#handleDisconnected
+                    wallet:error->demo#handleError">
 
     <div class="container">
       <h1>@scionx/chain-connect Example</h1>
-      <p>Simple example showing how to integrate the multi-chain wallet connector</p>
+      <p>Simple wallet connector - just one controller!</p>
 
-      <button data-action="click->connector#open">Connect Wallet</button>
+      <button data-action="click->wallet#open">Connect Wallet</button>
+      <button data-action="click->wallet#disconnectWallet">Disconnect</button>
 
-      <!-- Demo section showing event-based updates -->
-      <div class="demo-info">
-        <h2>Event-Based Status</h2>
-        <div data-demo-status-target="statusDisplay"></div>
-      </div>
-
-      <!-- Demo section showing Stimulus values via outlet -->
-      <div class="demo-info">
-        <h2>Stimulus Values Demo</h2>
-        <div data-demo-status-target="valuesDisplay"></div>
-      </div>
-
-      <!-- Demo section showing wallet status -->
-      <div class="demo-info">
-        <h2>Wallet Status</h2>
-        <div id="wallet-status-display">
-          <p>Status: <span id="status-text">Disconnected</span></p>
-          <p>Address: <span id="address-text">-</span></p>
-          <p>Chain: <span id="chain-text">-</span></p>
-        </div>
+      <div data-controller="demo" data-demo-wallet-outlet="wallet">
+        <h2>Connection Status</h2>
+        <div data-demo-target="status"></div>
       </div>
     </div>
   </div>
