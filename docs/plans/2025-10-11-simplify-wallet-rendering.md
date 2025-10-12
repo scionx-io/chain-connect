@@ -748,8 +748,7 @@ Expected:
 - `wallets.js`: ~140-150 lines (was 328)
 - `wallet_manager.js`: ~280 lines (was 171)
 - `connector_controller.js`: ~309 lines (unchanged)
-- `wallets_controller.js`: ~160 lines (new controller for wallet list management)
-- `wallet_controller.js`: ~120 lines (controller for individual wallet actions)
+- `wallets_controller.js`: ~160 lines (controller for wallet list management and selection)
 
 ---
 

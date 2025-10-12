@@ -28,6 +28,9 @@ export default class WalletsController extends Controller {
 
     // Initialize wallet detection and list
     this.initializeWalletList();
+    
+    // Listen for wallet selection events from individual wallet buttons
+    this.element.addEventListener('wallets:walletSelected', this.onWalletSelected.bind(this));
   }
 
   disconnect() {
@@ -96,9 +99,7 @@ export default class WalletsController extends Controller {
     // Apply sorting
     wallets = this.sortWallets(wallets);
 
-    // Temporarily update the modalTemplate to work with the data-action approach
-    // We'll need to update the template to accept proper parameters
-    render(this.modalTarget, this.getModalTemplate(wallets));
+    render(this.modalTarget, modalTemplate(wallets));
 
     // Get the dialog element
     this.modal = this.modalTarget.querySelector('dialog');
@@ -130,7 +131,12 @@ export default class WalletsController extends Controller {
   // Wallet Selection
   // ============================================================================
 
-  async selectWallet(event, rdns) {
+  async selectWallet(event, rdns = null) {
+    // Extract rdns from data attribute if not provided directly
+    if (!rdns && event && event.target) {
+      rdns = event.target.closest('[data-wallet-rdns]')?.getAttribute('data-wallet-rdns');
+    }
+    
     if (!rdns) {
       this.dispatch('error', {
         detail: { message: 'Invalid wallet selection' }
@@ -218,6 +224,17 @@ export default class WalletsController extends Controller {
       this.searchTarget.value = "";
     }
     this.renderModal(); // Re-render with all wallets
+  }
+
+  // ============================================================================
+  // Event Handlers
+  // ============================================================================
+
+  onWalletSelected(event) {
+    // Extract rdns from the event detail
+    const { rdns } = event.detail;
+    // Call the selectWallet method with the rdns
+    this.selectWallet(null, rdns);
   }
 
   // ============================================================================

@@ -104,7 +104,7 @@ The main class that manages wallet connections:
 
 ### ConnectorController (Stimulus)
 
-A Stimulus controller that handles wallet connection management:
+A Stimulus controller that acts as a central hub connecting all other controllers:
 
 - `disconnectWallet()` - Disconnect the currently connected wallet
 - `handleConnected(event)` - Handles wallet connection events
@@ -112,10 +112,11 @@ A Stimulus controller that handles wallet connection management:
 - `handleChainChanged(event)` - Handles chain change events
 - `handleAccountChanged(event)` - Handles account change events
 - Manages the connection state and wallet manager instance
+- Provides outlets to communicate with other controllers
 
 ### WalletsController (Stimulus)
 
-A Stimulus controller for managing the list of wallets:
+A Stimulus controller for managing the list of wallets and the selection modal:
 
 - `openModal()` - Open the wallet selection modal
 - `closeModal()` - Close the wallet selection modal
@@ -126,19 +127,14 @@ A Stimulus controller for managing the list of wallets:
 - `resetFilters()` - Resets all applied filters
 - Manages wallet detection and list rendering
 
-### WalletController (Stimulus)
+### ModalController (Stimulus)
 
-A Stimulus controller for individual wallet actions and display:
+A Stimulus controller for general modal functionality:
 
-- `disconnectWallet()` - Disconnects the currently connected wallet
-- `copyAddress()` - Copies the wallet address to clipboard
-- `showDetails()` - Shows detailed information about the wallet
-- `hideDetails()` - Hides the detailed information
-- `updateWalletDisplay()` - Updates the display of wallet icon and name
-- `handleConnected(event)` - Handles wallet connection events
-- `handleDisconnected()` - Handles wallet disconnection events
-- `handleChainChanged(event)` - Handles chain change events
-- `handleAccountChanged(event)` - Handles account change events
+- `open()` - Open the modal
+- `close()` - Close the modal
+- Handles clicking outside the modal to close it
+- Manages modal open/close state
 
 ### Utility Functions
 
@@ -211,10 +207,9 @@ src/
 │       ├── tron_handler.js   # Tron wallet (TronLink, etc.) handler
 │       └── index.js          # Handler registration
 ├── controllers/             # Stimulus controllers (UI layer)
-│   ├── connector_controller.js # Core controller for wallet connection management
-│   ├── wallets_controller.js   # Controller for wallet list management and selection
-│   ├── wallet_controller.js    # Controller for individual wallet actions and status
-│   └── modal_controller.js     # Controller for modal interactions
+│   ├── connector_controller.js # Central hub controller for all wallet operations
+│   ├── wallets_controller.js   # Controller for wallet list management and selection modal
+│   └── modal_controller.js     # Controller for general modal interactions
 ├── services/                # External service integrations
 │   └── (currently empty)    # Reserved for future services
 ├── utils/                   # Utility functions

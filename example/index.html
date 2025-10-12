@@ -9,6 +9,7 @@
 <body>
   <div data-controller="connector wallets demo-status"
        data-demo-status-connector-outlet="connector"
+       data-connector-wallets-outlet="wallets"
        data-action="connector:connecting->demo-status#handleConnecting
                     connector:connected->demo-status#handleConnected
                     connector:disconnected->demo-status#handleDisconnected
@@ -34,19 +35,13 @@
         <div data-demo-status-target="valuesDisplay"></div>
       </div>
 
-      <!-- Demo section showing wallet with icon and name only -->
+      <!-- Demo section showing wallet status -->
       <div class="demo-info">
-        <h2>Wallet Information (using WalletController)</h2>
-        <div data-controller="wallet" 
-             data-action="connector:connected->wallet#handleConnected
-                         connector:disconnected->wallet#handleDisconnected
-                         connector:chainChanged->wallet#handleChainChanged
-                         connector:accountChanged->wallet#handleAccountChanged">
-          <div>
-            <img data-wallet-target="icon" width="40" height="40" alt="Wallet Icon" />
-            <span data-wallet-target="name">Not connected</span>
-          </div>
-          <button data-action="click->wallet#copyAddress" data-wallet-target="copyButton">Copy Address</button>
+        <h2>Wallet Status</h2>
+        <div id="wallet-status-display">
+          <p>Status: <span id="status-text">Disconnected</span></p>
+          <p>Address: <span id="address-text">-</span></p>
+          <p>Chain: <span id="chain-text">-</span></p>
         </div>
       </div>
     </div>
