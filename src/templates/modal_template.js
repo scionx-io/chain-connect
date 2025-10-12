@@ -1,36 +1,47 @@
 import { html } from 'uhtml';
 
-export function modalTemplate(wallets, onSelectWallet, onClose) {
+/**
+ * Modal template using Stimulus actions for event handling
+ * @param {Array} wallets - Array of detected wallet objects
+ * @returns {TemplateResult} uhtml template
+ */
+export function modalTemplate(wallets) {
   return html`
     <dialog id="walletModal">
       <div class="modal-header">
         <h2>Connect Wallet</h2>
-        <button class="close-modal-btn" onclick=\${onClose}>×</button>
+        <button
+          class="close-modal-btn"
+          data-action="click->wallet#closeModal">×</button>
       </div>
 
-      \${wallets.length === 0
-        ? html\`<p class="no-wallets-message">No wallets detected</p>\`
-        : html\`
+      ${wallets.length === 0
+        ? html`<p class="no-wallets-message">No wallets detected. Please install a wallet extension.</p>`
+        : html`
           <div class="wallet-group">
-            \${wallets.map(wallet => walletButtonTemplate(wallet, onSelectWallet))}
+            ${wallets.map(wallet => walletButtonTemplate(wallet))}
           </div>
-        \`
+        `
       }
     </dialog>
   `;
 }
 
-function walletButtonTemplate(wallet, onSelect) {
+/**
+ * Individual wallet button template
+ * Uses Stimulus action for wallet selection
+ */
+function walletButtonTemplate(wallet) {
   return html`
-    <button 
+    <button
       class="wallet-button"
-      data-wallet-rdns="\${wallet.rdns}"
-      onclick=\${(e) => onSelect(e, wallet.rdns)}>
-      \${wallet.icon
-        ? html\`<img src="\${wallet.icon}" alt="\${wallet.name}" width="40" height="40" />\`
+      data-wallet-rdns="${wallet.rdns}"
+      data-action="click->wallet#selectWallet">
+      ${wallet.icon
+        ? html`<img src="${wallet.icon}" alt="${wallet.name}" width="40" height="40" />`
         : ''
       }
-      <span>\${wallet.name}</span>
+      <span>${wallet.name}</span>
     </button>
   `;
 }

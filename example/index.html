@@ -8,7 +8,9 @@
 </head>
 <body>
   <div data-controller="wallet demo-status"
-       data-action="wallet:connected->demo-status#handleConnected
+       data-demo-status-wallet-outlet="wallet"
+       data-action="wallet:connecting->demo-status#handleConnecting
+                    wallet:connected->demo-status#handleConnected
                     wallet:disconnected->demo-status#handleDisconnected
                     wallet:chainChanged->demo-status#handleChainChanged
                     wallet:accountChanged->demo-status#handleAccountChanged
@@ -20,10 +22,16 @@
 
       <button data-action="click->wallet#connectWallet">Connect Wallet</button>
 
-      <!-- Demo controller renders everything -->
+      <!-- Demo section showing event-based updates -->
       <div class="demo-info">
-        <h2>Wallet Status</h2>
+        <h2>Event-Based Status</h2>
         <div data-demo-status-target="statusDisplay"></div>
+      </div>
+
+      <!-- Demo section showing Stimulus values via outlet -->
+      <div class="demo-info">
+        <h2>Stimulus Values Demo</h2>
+        <div data-demo-status-target="valuesDisplay"></div>
       </div>
     </div>
   </div>

@@ -30,9 +30,9 @@ constructor(mipdStore) {
 }
 ```
 
-**Step 2: Update WalletController to pass mipdStore**
+**Step 2: Update ConnectorController to pass mipdStore**
 
-In `src/controllers/wallet_controller.js:29-31`, the constructor call already exists. Verify it looks like:
+In `src/controllers/connector_controller.js:29-31`, the constructor call already exists. Verify it looks like:
 
 ```javascript
 connect() {
@@ -641,15 +641,15 @@ git commit -m "refactor: simplify wallets.js to pure rendering function"
 
 ---
 
-## Task 10: Update WalletController to Use New API
+## Task 10: Update ConnectorController to Use New API
 
 **Files:**
-- Modify: `src/controllers/wallet_controller.js:55` (line that calls renderWallets)
-- Modify: `src/controllers/wallet_controller.js:61` (line in subscribe callback)
+- Modify: `src/controllers/connector_controller.js:55` (line that calls renderWallets)
+- Modify: `src/controllers/connector_controller.js:61` (line in subscribe callback)
 
 **Step 1: Update initial render call**
 
-In `src/controllers/wallet_controller.js`, find line 55:
+In `src/controllers/connector_controller.js`, find line 55:
 
 ```javascript
 // Old:
@@ -661,7 +661,7 @@ renderWallets(this.walletManager.getDetectedWallets(), this);
 
 **Step 2: Update subscribe callback**
 
-In `src/controllers/wallet_controller.js`, find line 61 in the subscribe callback:
+In `src/controllers/connector_controller.js`, find line 61 in the subscribe callback:
 
 ```javascript
 this.mipdStore.subscribe(() => {
@@ -694,7 +694,7 @@ Expected: App loads, wallets render correctly
 **Step 5: Commit**
 
 ```bash
-git add src/controllers/wallet_controller.js
+git add src/controllers/connector_controller.js
 git commit -m "refactor: update controller to use WalletManager.getDetectedWallets()"
 ```
 
@@ -747,7 +747,7 @@ wc -l src/wallets.js src/wallet_manager.js src/controllers/wallet_controller.js
 Expected:
 - `wallets.js`: ~140-150 lines (was 328)
 - `wallet_manager.js`: ~280 lines (was 171)
-- `wallet_controller.js`: ~309 lines (unchanged)
+- `connector_controller.js`: ~309 lines (unchanged)
 
 ---
 

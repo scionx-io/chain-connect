@@ -65,10 +65,10 @@ If you're using Stimulus (Hotwire), use the provided controller:
 import '@scionx/chain-connect/style';
 
 import { Application } from '@hotwired/stimulus';
-import { WalletController } from '@scionx/chain-connect';
+import { ConnectorController } from '@scionx/chain-connect';
 
 const application = Application.start();
-application.register('wallet', WalletController);
+application.register('wallet', ConnectorController);
 ```
 
 The controller will dynamically create all necessary UI elements (modal, wallet buttons, connection info, etc.) when needed. You only need to provide a trigger button in your HTML.
@@ -102,7 +102,7 @@ The main class that manages wallet connections:
 - `removeEventListener(type, listener)` - Remove event listeners
 - `findProvider(rdns)` - Find a wallet provider by its RDNS identifier
 
-### WalletController (Stimulus)
+### ConnectorController (Stimulus)
 
 A Stimulus controller with UI functionality:
 
@@ -183,7 +183,7 @@ src/
 │       ├── tron_handler.js   # Tron wallet (TronLink, etc.) handler
 │       └── index.js          # Handler registration
 ├── controllers/             # Stimulus controllers (UI layer)
-│   └── wallet_controller.js # Main UI controller for wallet interactions
+│   └── connector_controller.js # Main UI controller for wallet interactions
 ├── services/                # External service integrations
 │   └── (currently empty)    # Reserved for future services
 ├── utils/                   # Utility functions

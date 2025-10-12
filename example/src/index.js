@@ -24,7 +24,7 @@ export { default as SolanaHandler } from './core/wallets/solana_handler.js';
 export { default as TronHandler } from './core/wallets/tron_handler.js';
 
 // Export controllers for those who want to use it with Stimulus
-export { default as WalletController } from './controllers/wallet_controller.js';
+export { default as ConnectorController } from './controllers/connector_controller.js';
 export { default as ModalController } from './controllers/modal_controller.js';
 
 // Main initialization function for the wallet connector
