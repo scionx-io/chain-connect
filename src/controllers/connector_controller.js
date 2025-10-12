@@ -38,9 +38,6 @@ export default class ConnectorController extends Controller {
 
     // Initialize wallet detection
     this.initializeWalletDetection();
-    
-    // Listen for wallet selection events from WalletsController
-    this.element.addEventListener('connector:walletSelected', this.onWalletSelected.bind(this));
   }
 
   disconnect() {
@@ -91,43 +88,7 @@ export default class ConnectorController extends Controller {
     }
   }
 
-  // Handle wallet selection event dispatched from WalletsController
-  onWalletSelected(event) {
-    const { rdns } = event.detail;
-    
-    if (!rdns) {
-      this.dispatch('error', {
-        detail: { message: 'Invalid wallet selection' }
-      });
-      return;
-    }
 
-    // Set connecting state
-    this.connectingValue = true;
-    this.selectedRdnsValue = rdns;
-
-    this.closeModal();
-    this.dispatch('connecting', { detail: { rdns } });
-
-    try {
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Connection timeout')), 30000);
-      });
-
-      await Promise.race([this.walletManager.connect(rdns), timeoutPromise]);
-    } catch (error) {
-      console.error('Wallet connection error:', error);
-      this.dispatch('error', {
-        detail: {
-          message: error.message || 'Connection failed',
-          error
-        }
-      });
-    } finally {
-      this.connectingValue = false;
-      this.selectedRdnsValue = "";
-    }
-  }
 
   // ============================================================================
   // Modal Management
