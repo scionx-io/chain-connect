@@ -113,14 +113,27 @@ A Stimulus controller that handles wallet connection management:
 - `handleAccountChanged(event)` - Handles account change events
 - Manages the connection state and wallet manager instance
 
-### WalletController (Stimulus)
+### WalletsController (Stimulus)
 
-A Stimulus controller for wallet UI and status display:
+A Stimulus controller for managing the list of wallets:
 
-- `connectWallet()` - Opens the wallet selection modal
-- `selectWallet(event)` - Handles wallet selection from the list
 - `openModal()` - Open the wallet selection modal
 - `closeModal()` - Close the wallet selection modal
+- `selectWallet(event, rdns)` - Handles wallet selection from the list
+- `sortWallets(wallets)` - Sorts the list of wallets based on criteria
+- `updateSearch(event)` - Filters wallets based on search query
+- `changeSort(event)` - Changes the sorting criteria
+- `resetFilters()` - Resets all applied filters
+- Manages wallet detection and list rendering
+
+### WalletController (Stimulus)
+
+A Stimulus controller for individual wallet actions and status display:
+
+- `disconnectWallet()` - Disconnects the currently connected wallet
+- `copyAddress()` - Copies the wallet address to clipboard
+- `showDetails()` - Shows detailed information about the wallet
+- `hideDetails()` - Hides the detailed information
 - `updateStatusDisplay()` - Updates the display of wallet status, address, and chain
 - `handleConnected(event)` - Handles wallet connection events
 - `handleDisconnected()` - Handles wallet disconnection events
@@ -199,7 +212,8 @@ src/
 │       └── index.js          # Handler registration
 ├── controllers/             # Stimulus controllers (UI layer)
 │   ├── connector_controller.js # Core controller for wallet connection management
-│   ├── wallet_controller.js    # UI controller for wallet selection and status display
+│   ├── wallets_controller.js   # Controller for wallet list management and selection
+│   ├── wallet_controller.js    # Controller for individual wallet actions and status
 │   └── modal_controller.js     # Controller for modal interactions
 ├── services/                # External service integrations
 │   └── (currently empty)    # Reserved for future services

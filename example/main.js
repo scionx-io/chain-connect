@@ -1,9 +1,10 @@
 import { Application } from '@hotwired/stimulus';
-import { ConnectorController, WalletController } from '@scionx/chain-connect';
+import { ConnectorController, WalletController, WalletsController } from '@scionx/chain-connect';
 import '@scionx/chain-connect/style';
 import DemoStatusController from './controllers/demo_status_controller.js';
 
 const application = Application.start();
 application.register('connector', ConnectorController);
 application.register('wallet', WalletController);
+application.register('wallets', WalletsController);
 application.register('demo-status', DemoStatusController);

@@ -12,7 +12,7 @@ export function modalTemplate(wallets) {
         <h2>Connect Wallet</h2>
         <button
           class="close-modal-btn"
-          data-action="click->wallet#closeModal">×</button>
+          data-action="click->wallets#closeModal">×</button>
       </div>
 
       ${wallets.length === 0
@@ -36,7 +36,7 @@ function walletButtonTemplate(wallet) {
     <button
       class="wallet-button"
       data-wallet-rdns="${wallet.rdns}"
-      data-action="click->wallet#selectWallet">
+      data-action="click->wallets#selectWallet">
       ${wallet.icon
         ? html`<img src="${wallet.icon}" alt="${wallet.name}" width="40" height="40" />`
         : ''

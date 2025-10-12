@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div data-controller="connector demo-status"
+  <div data-controller="connector wallets demo-status"
        data-demo-status-connector-outlet="connector"
        data-action="connector:connecting->demo-status#handleConnecting
                     connector:connected->demo-status#handleConnected
@@ -20,7 +20,7 @@
       <h1>@scionx/chain-connect Example</h1>
       <p>Simple example showing how to integrate the multi-chain wallet connector</p>
 
-      <button data-action="click->connector#connectWallet">Connect Wallet</button>
+      <button data-action="click->wallets#openModal">Connect Wallet</button>
 
       <!-- Demo section showing event-based updates -->
       <div class="demo-info">
@@ -45,6 +45,7 @@
           <p>Status: <span data-wallet-target="status"></span></p>
           <p>Address: <span data-wallet-target="address"></span></p>
           <p>Chain: <span data-wallet-target="chain"></span></p>
+          <button data-action="click->wallet#copyAddress" data-wallet-target="copyButton">Copy Address</button>
         </div>
       </div>
     </div>
