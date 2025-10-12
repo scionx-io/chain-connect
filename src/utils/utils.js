@@ -1,3 +1,4 @@
+import { render, html } from 'uhtml';
 import { getChainName } from './chain_utils.js';
 
 // LocalStorage
@@ -59,68 +60,53 @@ export const updateButtonState = (controller, isConnected, isLoading = false) =>
   }
 };
 
-const createWalletInfoElement = (name, address, chainId, walletType, controller) => {
-  const walletInfoElement = document.createElement('div');
-  walletInfoElement.className = 'wallet-connector-info';
-
-  const walletDetails = document.createElement('div');
-  walletDetails.className = 'wallet-details';
-
+// Wallet info template
+function walletInfoTemplate(name, address, chainId, walletType) {
   const chainName = chainId ? getChainName(chainId, walletType) : 'Unknown';
-  walletDetails.innerHTML = `
-    <div><strong>Wallet:</strong> <span class="wallet-connector-name">${name}</span></div>
-    <div><strong>Address:</strong> <span class="wallet-connector-address">${formatAddress(address)}</span></div>
-    <div><strong>Chain:</strong> <span class="wallet-connector-chain">${chainName}</span></div>
+  return html`
+    <div class="wallet-connector-info">
+      <div class="wallet-details">
+        <div><strong>Wallet:</strong> <span class="wallet-connector-name">${name}</span></div>
+        <div><strong>Address:</strong> <span class="wallet-connector-address">${formatAddress(address)}</span></div>
+        <div><strong>Chain:</strong> <span class="wallet-connector-chain">${chainName}</span></div>
+      </div>
+      <button
+        class="disconnect-button"
+        data-action="click->wallet#disconnectWallet">
+        Disconnect
+      </button>
+    </div>
   `;
-
-  const disconnectBtn = document.createElement('button');
-  disconnectBtn.className = 'disconnect-button';
-  disconnectBtn.textContent = 'Disconnect';
-  disconnectBtn.setAttribute('data-action', 'click->wallet#disconnectWallet');
-
-  walletInfoElement.appendChild(walletDetails);
-  walletInfoElement.appendChild(disconnectBtn);
-
-  return walletInfoElement;
-};
-
-const updateExistingWalletInfo = (walletInfoElement, name, address, chainId, walletType) => {
-  const nameElement = walletInfoElement.querySelector('.wallet-connector-name');
-  const addressElement = walletInfoElement.querySelector('.wallet-connector-address');
-  const chainElement = walletInfoElement.querySelector('.wallet-connector-chain');
-
-  if (nameElement) nameElement.textContent = name;
-  if (addressElement) addressElement.textContent = formatAddress(address);
-  if (chainElement) {
-    const chainName = chainId ? getChainName(chainId, walletType) : 'Unknown';
-    chainElement.textContent = chainName;
-  }
-};
+}
 
 export const updateWalletInfo = (controller, mipdStore, name, address, rdns = null, chainId = null, walletType = 'evm') => {
-  let walletInfoElement = controller.element.querySelector('.wallet-connector-info');
+  const connectButton = controller.element.querySelector('[data-action*="wallet#openModal"]');
+  const container = connectButton ? connectButton.parentNode : controller.element;
 
-  if (!walletInfoElement) {
-    walletInfoElement = createWalletInfoElement(name, address, chainId, walletType, controller);
+  // Find or create container for wallet info
+  let walletInfoContainer = container.querySelector('.wallet-info-container');
+  if (!walletInfoContainer) {
+    walletInfoContainer = document.createElement('div');
+    walletInfoContainer.className = 'wallet-info-container';
 
-    const connectButton = controller.element.querySelector('[data-action*="wallet#openModal"]');
     if (connectButton) {
-      connectButton.parentNode.insertBefore(walletInfoElement, connectButton.nextSibling);
+      connectButton.parentNode.insertBefore(walletInfoContainer, connectButton.nextSibling);
     } else {
-      controller.element.appendChild(walletInfoElement);
+      container.appendChild(walletInfoContainer);
     }
-  } else {
-    updateExistingWalletInfo(walletInfoElement, name, address, chainId, walletType);
   }
+
+  // Render wallet info using uhtml
+  render(walletInfoContainer, walletInfoTemplate(name, address, chainId, walletType));
 
   updateButtonState(controller, true);
 };
 
 export const resetWalletUI = (controller) => {
-  // Remove or hide wallet info display
-  const walletInfoElement = controller.element.querySelector('.wallet-connector-info');
-  if (walletInfoElement) {
-    walletInfoElement.style.display = 'none';
+  // Remove wallet info container
+  const walletInfoContainer = controller.element.querySelector('.wallet-info-container');
+  if (walletInfoContainer) {
+    walletInfoContainer.remove();
   }
   updateButtonState(controller, false);
   clearWalletState();
