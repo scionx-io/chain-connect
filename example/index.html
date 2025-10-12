@@ -33,6 +33,20 @@
         <h2>Stimulus Values Demo</h2>
         <div data-demo-status-target="valuesDisplay"></div>
       </div>
+
+      <!-- Demo section showing wallet status with new controller -->
+      <div class="demo-info">
+        <h2>Wallet Status (using WalletController)</h2>
+        <div data-controller="wallet-status" 
+             data-action="wallet:connected->wallet-status#handleConnected
+                         wallet:disconnected->wallet-status#handleDisconnected
+                         wallet:chainChanged->wallet-status#handleChainChanged
+                         wallet:accountChanged->wallet-status#handleAccountChanged">
+          <p>Status: <span data-wallet-status-target="status"></span></p>
+          <p>Address: <span data-wallet-status-target="address"></span></p>
+          <p>Chain: <span data-wallet-status-target="chain"></span></p>
+        </div>
+      </div>
     </div>
   </div>
 

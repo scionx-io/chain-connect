@@ -112,6 +112,16 @@ A Stimulus controller with UI functionality:
 - `selectWallet(event)` - Handle wallet selection
 - `toggleAllWallets(event)` - Toggle visibility of additional wallet options
 
+### WalletController (Stimulus)
+
+A Stimulus controller for displaying wallet status and information:
+
+- `updateStatusDisplay()` - Updates the display of wallet status, address, and chain
+- `handleConnected(event)` - Handles wallet connection events
+- `handleDisconnected()` - Handles wallet disconnection events
+- `handleChainChanged(event)` - Handles chain change events
+- `handleAccountChanged(event)` - Handles account change events
+
 ### Utility Functions
 
 - `createWalletConnector()` - Creates and initializes a new wallet connector
@@ -183,7 +193,9 @@ src/
 │       ├── tron_handler.js   # Tron wallet (TronLink, etc.) handler
 │       └── index.js          # Handler registration
 ├── controllers/             # Stimulus controllers (UI layer)
-│   └── connector_controller.js # Main UI controller for wallet interactions
+│   ├── connector_controller.js # Main UI controller for wallet interactions
+│   ├── wallet_controller.js    # Utility controller for displaying wallet status
+│   └── modal_controller.js     # Controller for modal interactions
 ├── services/                # External service integrations
 │   └── (currently empty)    # Reserved for future services
 ├── utils/                   # Utility functions
