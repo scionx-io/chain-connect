@@ -12,7 +12,7 @@ export function modalTemplate(wallets) {
         <h2>Connect Wallet</h2>
         <button
           class="close-modal-btn"
-          data-action="click->connector#closeModal">×</button>
+          data-action="click->modal#close">×</button>
       </div>
 
       ${wallets.length === 0

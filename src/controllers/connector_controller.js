@@ -1,13 +1,13 @@
 import { Controller } from "@hotwired/stimulus"
 import { createStore } from 'mipd';
-import { render } from 'uhtml';
 import { WalletManager } from '../core/wallet_manager.js';
-import { modalTemplate } from '../templates/modal_template.js';
 
 // A controller that handles wallet connection management and modal operations
 export default class ConnectorController extends Controller {
   // Stimulus targets
-  static targets = ["modal"]
+  static targets = []
+  // Stimulus outlets
+  static outlets = ["modal"]
 
   // Stimulus values - reactive state management
   static values = {
@@ -78,7 +78,11 @@ export default class ConnectorController extends Controller {
   // ============================================================================
 
   open() {
-    this.openModal();
+    if (this.hasModalOutlet) {
+      const wallets = this.walletManager.getDetectedWallets();
+      this.modalOutlet.renderModal(wallets);
+      this.modalOutlet.open();
+    }
   }
 
   async disconnectWallet() {
@@ -88,62 +92,25 @@ export default class ConnectorController extends Controller {
     }
   }
 
-
-
   // ============================================================================
-  // Modal Management
+  // Wallet Detection
   // ============================================================================
 
-  renderModal() {
-    const wallets = this.walletManager.getDetectedWallets();
-    render(this.modalTarget, modalTemplate(wallets));
 
-    // Get the dialog element
-    this.modal = this.modalTarget.querySelector('dialog');
 
-    // Close on backdrop click
-    if (this.modal) {
-      this.modal.addEventListener('click', (e) => {
-        if (e.target === this.modal) {
-          this.closeModal();
-        }
-      });
-    }
-  }
-
-  openModal() {
-    this.renderModal();
-    if (this.modal) {
-      this.modal.showModal();
-    }
-  }
-
-  closeModal() {
-    if (this.modal) {
-      this.modal.close();
-    }
-  }
 
   // ============================================================================
   // Wallet Detection
   // ============================================================================
 
   initializeWalletDetection() {
-    // Render modal on first load
-    this.renderModal();
-
     // Dispatch event for apps that want to show wallet info elsewhere
     this.dispatch('walletsDetected', {
       detail: { wallets: this.walletManager.getDetectedWallets() }
     });
 
-    // Re-render and dispatch when new wallets inject
+    // Dispatch when new wallets inject
     this.mipdStoreUnsubscribe = this.mipdStore.subscribe(() => {
-      // Update modal if it exists and is open
-      if (this.modal && this.modal.open) {
-        this.renderModal();
-      }
-
       this.dispatch('walletsDetected', {
         detail: { wallets: this.walletManager.getDetectedWallets() }
       });
@@ -242,14 +209,8 @@ export default class ConnectorController extends Controller {
 
   connectingValueChanged(isConnecting) {
     // Update loading state on selected wallet button
-    if (this.hasModalTarget && this.selectedRdnsValue) {
-      const button = this.modalTarget.querySelector(
-        `[data-wallet-rdns="${this.selectedRdnsValue}"]`
-      );
-      if (button) {
-        button.classList.toggle('loading', isConnecting);
-      }
-    }
+    // This functionality may need to be handled by wallet buttons themselves
+    // or through communication with the modal controller
   }
 
   isConnectedValueChanged(isConnected) {

@@ -19,7 +19,11 @@ export default class WalletsController extends Controller {
       this.connectorOutlet.connectingValue = true;
       this.connectorOutlet.selectedRdnsValue = rdns;
       
-      this.connectorOutlet.closeModal();
+      // Close modal if modal outlet is available
+      if (this.connectorOutlet.hasModalOutlet) {
+        this.connectorOutlet.modalOutlet.close();
+      }
+      
       this.connectorOutlet.dispatch('connecting', { detail: { rdns } });
 
       try {
