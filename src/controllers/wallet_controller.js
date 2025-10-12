@@ -156,12 +156,12 @@ export default class extends Controller {
 
   initializeWalletDetection() {
     this.walletDetectionValue = true;
-    renderWallets(this.mipdStore, this);
+    renderWallets(this.walletManager, this);
 
     let walletDetectionCompleted = false;
 
     this.mipdStore.subscribe(() => {
-      renderWallets(this.mipdStore, this);
+      renderWallets(this.walletManager, this);
       if (!walletDetectionCompleted) {
         walletDetectionCompleted = true;
         this.walletDetectionValue = false;

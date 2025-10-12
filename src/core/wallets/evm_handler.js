@@ -1,3 +1,5 @@
+import { ethers } from 'ethers';
+
 /**
  * @typedef {object} Connection
  * @property {object} provider - The wallet provider object.
@@ -9,30 +11,22 @@
  * @property {string[]} chains - An array of supported chains.
  */
 
-/**
- * @interface WalletHandler
- * @method connect - Connects to the wallet and returns a Connection object.
- * @method disconnect - Disconnects from the wallet.
- */
-import { ethers } from 'ethers';
-
 class EvmHandler {
   constructor(onStateChanged) {
     this.onStateChanged = onStateChanged;
     this.provider = null;
-    this.originalProvider = null; // Store the original injected provider
+    this.originalProvider = null;
     this.boundAccountsChanged = this.handleAccountsChanged.bind(this);
     this.boundChainChanged = this.handleChainChanged.bind(this);
   }
 
   async connect(providerDetails, isReconnect = false) {
     try {
-      this.originalProvider = providerDetails.provider; // Store the original injected provider
+      this.originalProvider = providerDetails.provider;
       this.provider = new ethers.BrowserProvider(this.originalProvider);
       
-      const accounts = isReconnect 
-        ? await this.provider.send('eth_accounts', [])
-        : await this.provider.send('eth_requestAccounts', []);
+      const method = isReconnect ? 'eth_accounts' : 'eth_requestAccounts';
+      const accounts = await this.provider.send(method, []);
 
       if (accounts.length === 0) {
         if (isReconnect) {
@@ -42,12 +36,9 @@ class EvmHandler {
         throw new Error('No accounts found.');
       }
 
-      const signer = await this.provider.getSigner();
-      const address = await signer.getAddress();
-      const network = await this.provider.getNetwork();
-      const chainId = network.chainId.toString();
+      const address = ethers.getAddress(accounts[0]); // Checksummed
+      const chainId = await this.getChainId();
 
-      // Add event listeners for state changes to the injected provider directly
       this.originalProvider.on('accountsChanged', this.boundAccountsChanged);
       this.originalProvider.on('chainChanged', this.boundChainChanged);
 
@@ -62,59 +53,52 @@ class EvmHandler {
       };
     } catch (error) {
       if (error.code === 4001) {
-        console.log('User rejected connection request');
-      } else {
-        console.error('EVM connection error:', error);
+        throw new Error('User rejected connection request');
       }
+      console.error('EVM connection error:', error);
       throw error;
     }
   }
 
   async disconnect() {
-    if (this.originalProvider) {
-      try {
-        // Try to revoke permissions using wallet_revokePermissions if available
-        // This method is supported by MetaMask, Rabby and other modern EVM wallets
-        if (this.originalProvider.request && typeof this.originalProvider.request === 'function') {
-          await this.originalProvider.request({
-            method: 'wallet_revokePermissions',
-            params: [{
-              eth_accounts: {}
-            }]
-          });
-          console.log('Permissions revoked from EVM wallet');
-        }
-      } catch (error) {
-        console.log('wallet_revokePermissions not supported by this wallet, falling back to standard disconnection', error);
-        // If wallet_revokePermissions is not supported, continue with standard cleanup
-      } finally {
-        // Remove event listeners from the injected provider regardless of permission revocation success
-        this.originalProvider.removeListener('accountsChanged', this.boundAccountsChanged);
-        this.originalProvider.removeListener('chainChanged', this.boundChainChanged);
-      }
+    if (!this.originalProvider) return;
+
+    // Try to revoke permissions
+    try {
+      await this.originalProvider.request({
+        method: 'wallet_revokePermissions',
+        params: [{ eth_accounts: {} }]
+      });
+    } catch (error) {
+      console.debug('wallet_revokePermissions not supported:', error.message);
     }
+
+    // Remove listeners
+    this.originalProvider.removeListener('accountsChanged', this.boundAccountsChanged);
+    this.originalProvider.removeListener('chainChanged', this.boundChainChanged);
+    
     this.provider = null;
     this.originalProvider = null;
-    console.log('Disconnected from EVM handler');
+    console.log('Disconnected from EVM wallet');
   }
 
   handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
       this.onStateChanged({ address: null, chainId: null });
     } else {
-      this.onStateChanged({ address: accounts[0] });
+      this.onStateChanged({ address: ethers.getAddress(accounts[0]) });
     }
   }
 
-  async handleChainChanged(chainId) {
-    try {
-      const network = await this.provider.getNetwork();
-      this.onStateChanged({ chainId: network.chainId.toString() });
-    } catch (error) {
-      console.error('Error getting network during chain change:', error);
-      // Fallback to using the chainId from the event parameter
-      this.onStateChanged({ chainId: chainId.toString() });
-    }
+  handleChainChanged(chainId) {
+    // Use chainId from event directly (it's already hex string)
+    const decimal = parseInt(chainId, 16).toString();
+    this.onStateChanged({ chainId: decimal });
+  }
+
+  async getChainId() {
+    const network = await this.provider.getNetwork();
+    return network.chainId.toString();
   }
 }
 
