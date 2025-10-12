@@ -10,9 +10,19 @@ export default class extends Controller {
   }
 
   connect() {
+    // Bind event handlers for proper cleanup
+    this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
+    
     // Add event listener for closing modal on outside click
     if (this.hasModalTarget) {
-      this.modalTarget.addEventListener('click', this.handleOutsideClick.bind(this));
+      this.modalTarget.addEventListener('click', this.boundHandleOutsideClick);
+    }
+  }
+
+  disconnect() {
+    // Clean up event listeners
+    if (this.hasModalTarget) {
+      this.modalTarget.removeEventListener('click', this.boundHandleOutsideClick);
     }
   }
 
@@ -34,22 +44,11 @@ export default class extends Controller {
   renderModal(wallets) {
     if (this.hasModalTarget) {
       render(this.modalTarget, modalTemplate(wallets));
-
-      // Get the dialog element
-      const modal = this.modalTarget.querySelector('dialog');
-
-      // Close on backdrop click
-      if (modal) {
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) {
-            this.close();
-          }
-        });
-      }
     }
   }
 
   handleOutsideClick(event) {
+    // Check if the click occurred directly on the modal backdrop (not on child elements)
     if (event.target === this.modalTarget) {
       this.close();
     }

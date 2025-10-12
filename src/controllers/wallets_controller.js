@@ -1,6 +1,5 @@
 import { Controller } from "@hotwired/stimulus";
 
-// A controller for handling wallet selection
 export default class WalletsController extends Controller {
   static outlets = ["connector"]
   
@@ -19,10 +18,6 @@ export default class WalletsController extends Controller {
     // Clean up event listeners when disconnecting
     this.cleanupConnectorEventListeners();
   }
-
-  // ============================================================================
-  // Event Listener Management (Connector Controller Events)
-  // ============================================================================
 
   setupConnectorEventListeners() {
     this.boundHandleConnected = this.handleConnected.bind(this);
@@ -50,7 +45,6 @@ export default class WalletsController extends Controller {
     this.isConnectedValue = false;
   }
   
-  // Method called by other controllers to connect to a specific wallet
   async connectWallet(rdns) {
     if (!rdns) {
       this.dispatch('error', {
@@ -99,7 +93,6 @@ export default class WalletsController extends Controller {
     }
   }
 
-  // Method to select a wallet
   async selectWallet(event) {
     const button = event.currentTarget;
     const rdns = button.dataset.walletRdns;
@@ -113,10 +106,6 @@ export default class WalletsController extends Controller {
 
     await this.connectWallet(rdns);
   }
-
-  // ============================================================================
-  // Value Change Callbacks (Stimulus Reactive Updates)
-  // ============================================================================
 
   isConnectedValueChanged(isConnected) {
     // Add/remove class to controller element for CSS targeting
