@@ -10,6 +10,5 @@ import WalletsController from "./wallets_controller.js"
 // Register controllers with the application
 application.register("connector", ConnectorController)
 application.register("modal", ModalController)
-application.register("wallets", WalletsController)
 
 export { application }

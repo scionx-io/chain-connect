@@ -36,7 +36,7 @@ function walletButtonTemplate(wallet) {
     <button
       class="wallet-button"
       data-wallet-rdns="${wallet.rdns}"
-      data-action="click->connector#selectWallet">
+      data-action="click->wallets#selectWallet">
       ${wallet.icon
         ? html`<img src="${wallet.icon}" alt="${wallet.name}" width="40" height="40" />`
         : ''

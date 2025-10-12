@@ -43,6 +43,9 @@ export default class ConnectorController extends Controller {
 
     // Initialize wallet detection
     this.initializeWalletDetection();
+    
+    // Listen for wallet selection events from WalletsController
+    this.element.addEventListener('connector:walletSelected', this.onWalletSelected.bind(this));
   }
 
   disconnect() {
@@ -87,7 +90,7 @@ export default class ConnectorController extends Controller {
   // User Actions (Stimulus Actions)
   // ============================================================================
 
-  connectWallet() {
+  open() {
     this.openModal();
   }
 
@@ -98,10 +101,10 @@ export default class ConnectorController extends Controller {
     }
   }
 
-  async selectWallet(event) {
-    const button = event.currentTarget;
-    const rdns = button.dataset.walletRdns;
-
+  // Handle wallet selection event dispatched from WalletsController
+  onWalletSelected(event) {
+    const { rdns } = event.detail;
+    
     if (!rdns) {
       this.dispatch('error', {
         detail: { message: 'Invalid wallet selection' }
