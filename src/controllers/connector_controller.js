@@ -36,8 +36,7 @@ export default class ConnectorController extends Controller {
     // Initialize wallet manager for auto-reconnect
     this.walletManager.init();
 
-    // Initialize wallet detection
-    this.initializeWalletDetection();
+
   }
 
   disconnect() {
@@ -47,10 +46,7 @@ export default class ConnectorController extends Controller {
       this.walletManager.disconnect();
     }
 
-    // Unsubscribe from MIPD store
-    if (this.mipdStoreUnsubscribe) {
-      this.mipdStoreUnsubscribe();
-    }
+
   }
 
   // ============================================================================
@@ -99,23 +95,7 @@ export default class ConnectorController extends Controller {
 
 
 
-  // ============================================================================
-  // Wallet Detection
-  // ============================================================================
 
-  initializeWalletDetection() {
-    // Dispatch event for apps that want to show wallet info elsewhere
-    this.dispatch('walletsDetected', {
-      detail: { wallets: this.walletManager.getDetectedWallets() }
-    });
-
-    // Dispatch when new wallets inject
-    this.mipdStoreUnsubscribe = this.mipdStore.subscribe(() => {
-      this.dispatch('walletsDetected', {
-        detail: { wallets: this.walletManager.getDetectedWallets() }
-      });
-    });
-  }
 
   // ============================================================================
   // Event Listener Management (WalletManager EventTarget)
