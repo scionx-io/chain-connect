@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "description": "Multi-chain wallet connector supporting Ethereum, Solana, and Tron with minimalist Swiss design",
   "type": "module",
-  "main": "./dist/chain-connect.cjs",
-  "module": "./dist/chain-connect.js",
+  "main": "./dist/chain-connect.js",
+  "module": "./dist/chain-connect.es.js",
   "browser": "./dist/chain-connect.umd.js",
   "exports": {
     ".": {
-      "import": "./dist/chain-connect.js",
-      "require": "./dist/chain-connect.cjs",
-      "types": "./dist/types/index.d.ts"
-    }
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/chain-connect.es.js",
+      "require": "./dist/chain-connect.js"
+    },
+    "./style": "./dist/chain-connect.css",
+    "./chain-connect.css": "./dist/chain-connect.css"
   },
   "files": [
     "dist",
@@ -31,7 +33,8 @@
     "@solana/web3.js": "^1.98.4",
     "@tronweb3/tronwallet-adapters": "^1.2.14",
     "ethers": "^6.15.0",
-    "mipd": "^0.0.7"
+    "mipd": "^0.0.7",
+    "uhtml": "^5.0.9"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",

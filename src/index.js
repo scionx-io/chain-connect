@@ -1,6 +1,5 @@
 // Main entry point for the wallet connector library
 import { WalletManager } from './core/wallet_manager.js';
-import { WalletProviderResolver } from './core/services/wallet_provider_resolver.js';
 import { updateButtonState, resetWalletUI, updateWalletInfo } from './utils/utils.js';
 import { renderWallets } from './utils/wallets.js';
 import { WALLET_ICONS } from './utils/config.js';
@@ -10,7 +9,6 @@ import './css/wallet-connector.css';
 // Export core components
 export {
   WalletManager,
-  WalletProviderResolver,
   updateButtonState,
   resetWalletUI,
   updateWalletInfo,

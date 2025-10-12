@@ -1,12 +1,8 @@
-// Import Stimulus and the wallet connector
 import { Application } from '@hotwired/stimulus';
-import { WalletController, ChainConnectController } from '@scionx/chain-connect';
+import { WalletController } from '@scionx/chain-connect';
+import '@scionx/chain-connect/style';
 import DemoStatusController from './controllers/demo_status_controller.js';
 
-// Register the wallet controller with Stimulus
 const application = Application.start();
 application.register('wallet', WalletController);
-application.register('chain-connect', ChainConnectController);
 application.register('demo-status', DemoStatusController);
-
-console.log('Wallet connector example initialized');
