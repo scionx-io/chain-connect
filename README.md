@@ -120,13 +120,10 @@ A Stimulus controller that acts as a central hub connecting all other controller
 
 ### WalletsController (Stimulus)
 
-A Stimulus controller for managing the list of wallets with filtering and sorting:
+A Stimulus controller for providing the list of detected wallets:
 
-- `sortWallets(wallets)` - Sorts the list of wallets based on criteria
-- `updateSearch(event)` - Filters wallets based on search query
-- `changeSort(event)` - Changes the sorting criteria
-- `resetFilters()` - Resets all applied filters
 - Manages wallet detection and list operations
+- Dispatches events when wallets are detected or change
 
 ### ModalController (Stimulus)
 
