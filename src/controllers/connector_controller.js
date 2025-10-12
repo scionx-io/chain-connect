@@ -35,8 +35,6 @@ export default class ConnectorController extends Controller {
 
     // Initialize wallet manager for auto-reconnect
     this.walletManager.init();
-
-
   }
 
   disconnect() {
@@ -45,8 +43,6 @@ export default class ConnectorController extends Controller {
     if (this.walletManager.getActiveConnection()) {
       this.walletManager.disconnect();
     }
-
-
   }
 
   // ============================================================================
@@ -87,15 +83,6 @@ export default class ConnectorController extends Controller {
       await this.walletManager.disconnect(rdns);
     }
   }
-
-  // ============================================================================
-  // Wallet Detection
-  // ============================================================================
-
-
-
-
-
 
   // ============================================================================
   // Event Listener Management (WalletManager EventTarget)
@@ -183,13 +170,5 @@ export default class ConnectorController extends Controller {
     });
   }
 
-  // ============================================================================
-  // Value Change Callbacks (Stimulus Reactive Updates)
-  // ============================================================================
 
-  connectingValueChanged(isConnecting) {
-    // Update loading state on selected wallet button
-    // This functionality may need to be handled by wallet buttons themselves
-    // or through communication with the modal controller
-  }
 }
