@@ -135,113 +135,37 @@ The main class that manages wallet connections:
 - `getChainName(chainId)` - Get human-readable chain name
 - `formatChainDisplay(chainId)` - Format chain for display
 
-## Auto-detection & Multi-chain Support
+## Wallet Detection
 
-The library automatically detects wallets using multiple methods:
+Automatically discovers wallets using:
+- **EIP-6963** (MIPD) for Ethereum wallets
+- **window.solana** for Solana wallets
+- **window.tronWeb** for Tron wallets
 
-1. MIPD (Multi Injected Provider Discovery) for EIP-6963 compliant wallets
-2. Direct checks for `window.solana` (for Solana wallets like Phantom)
-3. Direct checks for `window.tronWeb` or `window.tronLink` (for Tron wallets like TronLink)
+## Swiss Design
 
-Wallets are grouped by blockchain family (EVM, Solana, Tron, Multi-chain) and prioritized (Phantom, MetaMask, Coinbase Wallet).
-
-## Error Handling
-
-The library provides comprehensive error handling with user-friendly messages for:
-- Connection timeout (30 seconds)
-- Wallet not found or not available
-- Unsupported wallet family
-- User rejection of connection request
-- Network errors
-- Account not found in wallet
-- Tron wallet not accessible
-
-## Supported Wallets
-
-This library supports:
-
-- Ethereum/EVM wallets via EIP-6963 (MetaMask, Rabby, Trust Wallet, etc.)
-- Solana wallets (Phantom, Solflare, etc.)
-- Tron wallets (TronLink, TokenPocket, etc.)
-- Multi-chain wallets that support multiple networks
-
-## CSS Styling and Swiss Design
-
-The library includes built-in CSS styles following Swiss design principles:
-- Minimalist, clean interface
+Built-in minimalist styling:
 - 8px grid system
-- Mobile-first responsive design
+- Mobile-first responsive
 - Helvetica Neue typography
-- Monochromatic color palette with accent colors for wallet brands
+- Clean monochromatic palette
 
-## Project Structure
+## Architecture
 
-This library follows a modular architecture with clear separation of concerns:
+Clean separation between UI and business logic:
 
-```
-src/
-├── core/                    # Core wallet business logic
-│   ├── wallet_manager.js    # Main wallet management class
-│   ├── wallet_discovery.js  # Wallet detection and discovery
-│   ├── wallet_registry.js   # Handler registry for different wallet families
-│   ├── connection_manager.js # Connection lifecycle management
-│   └── wallets/             # Wallet family handlers
-│       ├── evm_handler.js   # EVM-based wallet (MetaMask, etc.) handler
-│       ├── solana_handler.js # Solana wallet (Phantom, etc.) handler
-│       ├── tron_handler.js   # Tron wallet (TronLink, etc.) handler
-│       └── index.js          # Handler registration
-├── controllers/             # Stimulus controllers (UI layer)
-│   ├── connector_controller.js # Central hub controller for all wallet operations
-│   ├── wallets_controller.js   # Controller for wallet list management and selection modal
-│   └── modal_controller.js     # Controller for general modal interactions
-├── services/                # External service integrations
-│   └── (currently empty)    # Reserved for future services
-├── utils/                   # Utility functions
-│   ├── chain_utils.js       # Chain utility functions
-│   └── utils.js             # General utility functions
-├── config.js                # Configuration constants and wallet icons
-├── index.js                 # Main entry point
-└── wallets.js               # Wallet rendering utilities
-```
+- **WalletController** - Single Stimulus controller managing UI and events
+- **WalletManager** - Core connection logic and state management
+- **Chain Handlers** - EVM, Solana, and Tron-specific implementations
+- **Modal Renderer** - Pure function for modal UI generation
 
-### Architecture Overview
+## Example
 
-- **Core Logic (`core/`)**: Contains all wallet business logic including connection management, wallet discovery, and chain-specific handlers
-- **Controllers (`controllers/`)**: Stimulus controllers managing UI interactions
-- **Services (`services/`)**: Service layer for external integrations (future use)
-- **Utils (`utils/`)**: Reusable utility functions
-
-## Example Implementation
-
-A complete example implementation demonstrating how to use this package is available in the `example/` directory:
+See `example/` directory for a complete working implementation.
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd chain-connect
-
-# Build the package
-yarn build && yarn pack
-
-# Navigate to the example directory
-cd example
-
-# Install dependencies
-npm install  # or yarn install
-
-# Run the development server
-npm run dev  # or yarn dev
+cd example && yarn dev
 ```
-
-The example shows how to integrate the wallet connector in a standalone project with all the necessary HTML structure, JavaScript setup, and styling.
-
-## Browser Compatibility
-
-Modern browsers with Web3 wallet support (Chrome, Firefox, Edge, Safari)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
 ## License
 
