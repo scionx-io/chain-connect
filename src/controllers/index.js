@@ -10,6 +10,6 @@ import WalletController from "./wallet_controller.js"
 // Register controllers with the application
 application.register("connector", ConnectorController)
 application.register("modal", ModalController)
-application.register("wallet-status", WalletController)
+application.register("wallet", WalletController)
 
 export { application }

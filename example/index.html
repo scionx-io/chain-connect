@@ -7,20 +7,20 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div data-controller="wallet demo-status"
-       data-demo-status-wallet-outlet="wallet"
-       data-action="wallet:connecting->demo-status#handleConnecting
-                    wallet:connected->demo-status#handleConnected
-                    wallet:disconnected->demo-status#handleDisconnected
-                    wallet:chainChanged->demo-status#handleChainChanged
-                    wallet:accountChanged->demo-status#handleAccountChanged
-                    wallet:error->demo-status#handleError">
+  <div data-controller="connector demo-status"
+       data-demo-status-connector-outlet="connector"
+       data-action="connector:connecting->demo-status#handleConnecting
+                    connector:connected->demo-status#handleConnected
+                    connector:disconnected->demo-status#handleDisconnected
+                    connector:chainChanged->demo-status#handleChainChanged
+                    connector:accountChanged->demo-status#handleAccountChanged
+                    connector:error->demo-status#handleError">
 
     <div class="container">
       <h1>@scionx/chain-connect Example</h1>
       <p>Simple example showing how to integrate the multi-chain wallet connector</p>
 
-      <button data-action="click->wallet#connectWallet">Connect Wallet</button>
+      <button data-action="click->connector#connectWallet">Connect Wallet</button>
 
       <!-- Demo section showing event-based updates -->
       <div class="demo-info">
@@ -37,14 +37,14 @@
       <!-- Demo section showing wallet status with new controller -->
       <div class="demo-info">
         <h2>Wallet Status (using WalletController)</h2>
-        <div data-controller="wallet-status" 
-             data-action="wallet:connected->wallet-status#handleConnected
-                         wallet:disconnected->wallet-status#handleDisconnected
-                         wallet:chainChanged->wallet-status#handleChainChanged
-                         wallet:accountChanged->wallet-status#handleAccountChanged">
-          <p>Status: <span data-wallet-status-target="status"></span></p>
-          <p>Address: <span data-wallet-status-target="address"></span></p>
-          <p>Chain: <span data-wallet-status-target="chain"></span></p>
+        <div data-controller="wallet" 
+             data-action="connector:connected->wallet#handleConnected
+                         connector:disconnected->wallet#handleDisconnected
+                         connector:chainChanged->wallet#handleChainChanged
+                         connector:accountChanged->wallet#handleAccountChanged">
+          <p>Status: <span data-wallet-target="status"></span></p>
+          <p>Address: <span data-wallet-target="address"></span></p>
+          <p>Chain: <span data-wallet-target="chain"></span></p>
         </div>
       </div>
     </div>

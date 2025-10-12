@@ -104,18 +104,23 @@ The main class that manages wallet connections:
 
 ### ConnectorController (Stimulus)
 
-A Stimulus controller with UI functionality:
+A Stimulus controller that handles wallet connection management:
 
-- `openModal()` - Open the wallet selection modal
-- `closeModal()` - Close the wallet selection modal
 - `disconnectWallet()` - Disconnect the currently connected wallet
-- `selectWallet(event)` - Handle wallet selection
-- `toggleAllWallets(event)` - Toggle visibility of additional wallet options
+- `handleConnected(event)` - Handles wallet connection events
+- `handleDisconnected()` - Handles wallet disconnection events
+- `handleChainChanged(event)` - Handles chain change events
+- `handleAccountChanged(event)` - Handles account change events
+- Manages the connection state and wallet manager instance
 
 ### WalletController (Stimulus)
 
-A Stimulus controller for displaying wallet status and information:
+A Stimulus controller for wallet UI and status display:
 
+- `connectWallet()` - Opens the wallet selection modal
+- `selectWallet(event)` - Handles wallet selection from the list
+- `openModal()` - Open the wallet selection modal
+- `closeModal()` - Close the wallet selection modal
 - `updateStatusDisplay()` - Updates the display of wallet status, address, and chain
 - `handleConnected(event)` - Handles wallet connection events
 - `handleDisconnected()` - Handles wallet disconnection events
@@ -193,8 +198,8 @@ src/
 │       ├── tron_handler.js   # Tron wallet (TronLink, etc.) handler
 │       └── index.js          # Handler registration
 ├── controllers/             # Stimulus controllers (UI layer)
-│   ├── connector_controller.js # Main UI controller for wallet interactions
-│   ├── wallet_controller.js    # Utility controller for displaying wallet status
+│   ├── connector_controller.js # Core controller for wallet connection management
+│   ├── wallet_controller.js    # UI controller for wallet selection and status display
 │   └── modal_controller.js     # Controller for modal interactions
 ├── services/                # External service integrations
 │   └── (currently empty)    # Reserved for future services
