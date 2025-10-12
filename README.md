@@ -14,82 +14,100 @@ Multi-chain wallet connector supporting Ethereum, Solana, and Tron with minimali
 - Built-in error handling with user-friendly error messages
 - 30-second connection timeout to prevent hanging connections
 
-## Installation
+## Quick Start
+
+### Installation
 
 ```bash
 npm install @scionx/chain-connect
-```
-
-Or with yarn:
-
-```bash
+# or
 yarn add @scionx/chain-connect
 ```
 
-## Usage
-
-### CSS Styles
-
-The wallet connector uses built-in CSS styles following Swiss design principles. You need to import the CSS file in your application:
-
-```javascript
-// Option 1: Named export (recommended)
-import '@scionx/chain-connect/style';
-
-// Option 2: Direct file path
-import '@scionx/chain-connect/dist/chain-connect.css';
-```
-
-Alternatively, you can link the CSS in your HTML:
-```html
-<link rel="stylesheet" href="node_modules/@scionx/chain-connect/dist/chain-connect.css">
-```
-
-### HTML Structure
-
-Set up a minimal HTML structure for the wallet connector:
+### Basic Usage
 
 ```html
 <div data-controller="wallet">
-  <button data-action="wallet#openModal">Connect Wallet</button>
-  <!-- The controller creates all other UI elements dynamically -->
+  <button data-action="click->wallet#open">Connect Wallet</button>
+  <button data-action="click->wallet#disconnectWallet">Disconnect</button>
 </div>
 ```
 
-### With Stimulus (Recommended)
-
-If you're using Stimulus (Hotwire), use the provided controller:
-
 ```javascript
-// Import CSS in your main application file
-import '@scionx/chain-connect/style';
-
 import { Application } from '@hotwired/stimulus';
-import { ConnectorController } from '@scionx/chain-connect';
+import { WalletController } from '@scionx/chain-connect';
+import '@scionx/chain-connect/style';
 
 const application = Application.start();
-application.register('wallet', ConnectorController);
+application.register('wallet', WalletController);
 ```
 
-The controller will dynamically create all necessary UI elements (modal, wallet buttons, connection info, etc.) when needed. You only need to provide a trigger button in your HTML.
+That's it! The controller handles everything:
+- EIP-6963 wallet detection
+- Modal rendering
+- Connection management
+- State persistence
 
-### Direct Usage
+### Listening to Events
 
-For direct usage without Stimulus:
+```html
+<div data-controller="wallet"
+     data-action="wallet:connected->mycontroller#handleConnected
+                  wallet:disconnected->mycontroller#handleDisconnected">
+  <button data-action="click->wallet#open">Connect Wallet</button>
+</div>
+```
+
+### Accessing Wallet State
 
 ```javascript
-// Import CSS in your main application file
-import '@scionx/chain-connect/style';
+// Via Stimulus values
+const address = walletController.addressValue;
+const chainId = walletController.chainIdValue;
+const isConnected = walletController.isConnectedValue;
 
-import { createWalletConnector } from '@scionx/chain-connect';
+// Via outlets
+static outlets = ['wallet'];
 
-// Create and initialize the wallet connector
-const walletConnector = await createWalletConnector();
+if (this.walletOutlet.isConnectedValue) {
+  console.log('Connected to:', this.walletOutlet.addressValue);
+}
 ```
 
-Note: The direct usage approach bypasses the Stimulus controller and requires manual UI implementation. For the full UI experience with modals and wallet selection, the Stimulus approach is recommended.
+### Supported Wallets
+
+- **Ethereum**: MetaMask, Coinbase Wallet, Rainbow, any EIP-6963 wallet
+- **Solana**: Phantom, Solflare, any wallet with `window.solana`
+- **Tron**: TronLink, any wallet with `window.tronWeb`
 
 ## API Reference
+
+### WalletController (Stimulus)
+
+Main controller for wallet connection management:
+
+**Actions:**
+- `open()` - Open the wallet selection modal
+- `close()` - Close the wallet selection modal
+- `selectWallet(event)` - Handle wallet selection from modal
+- `disconnectWallet()` - Disconnect the currently connected wallet
+
+**Stimulus Values:**
+- `addressValue` - Connected wallet address
+- `chainIdValue` - Current chain ID
+- `walletNameValue` - Name of connected wallet
+- `rdnsValue` - RDNS identifier of connected wallet
+- `familyValue` - Wallet family (evm, solana, tron)
+- `isConnectedValue` - Boolean connection state
+- `connectingValue` - Boolean loading state
+
+**Events Dispatched:**
+- `wallet:connected` - When a wallet successfully connects
+- `wallet:disconnected` - When a wallet disconnects
+- `wallet:chainChanged` - When the connected wallet's chain changes
+- `wallet:accountChanged` - When the connected wallet's account changes
+- `wallet:connecting` - When a connection attempt starts
+- `wallet:error` - When a connection error occurs
 
 ### WalletManager
 
@@ -100,54 +118,22 @@ The main class that manages wallet connections:
 - `init()` - Initialize the manager and attempt auto-reconnection from stored state
 - `addEventListener(type, listener)` - Add event listeners
 - `removeEventListener(type, listener)` - Remove event listeners
-- `findProvider(rdns)` - Find a wallet provider by its RDNS identifier
+- `getActiveConnection()` - Get the currently active connection
+- `getDetectedWallets()` - Get list of detected wallets
 
-### ConnectorController (Stimulus)
-
-A Stimulus controller that acts as a central hub connecting all other controllers:
-
-- `connectWallet()` - Opens the wallet selection modal
-- `selectWallet(event)` - Handles wallet selection from the list 
-- `disconnectWallet()` - Disconnect the currently connected wallet
-- `openModal()` - Open the wallet selection modal
-- `closeModal()` - Close the wallet selection modal
-- `handleConnected(event)` - Handles wallet connection events
-- `handleDisconnected()` - Handles wallet disconnection events
-- `handleChainChanged(event)` - Handles chain change events
-- `handleAccountChanged(event)` - Handles account change events
-- Manages the connection state and wallet manager instance
-- Provides outlets to communicate with other controllers
-
-### WalletsController (Stimulus)
-
-A Stimulus controller for providing the list of detected wallets:
-
-- Manages wallet detection and list operations
-- Dispatches events when wallets are detected or change
-
-### ModalController (Stimulus)
-
-A Stimulus controller for general modal functionality:
-
-- `open()` - Open the modal
-- `close()` - Close the modal
-- Handles clicking outside the modal to close it
-- Manages modal open/close state
-
-### Utility Functions
-
-- `createWalletConnector()` - Creates and initializes a new wallet connector
-- `renderWallets(mipdStore, controller)` - Render wallet buttons based on detected wallets
-
-### Events
-
-The WalletManager emits the following events:
-
+**Events Emitted:**
 - `connected` - When a wallet is successfully connected
 - `disconnected` - When a wallet is disconnected
 - `chainChanged` - When the connected wallet's chain changes
 - `accountChanged` - When the connected wallet's account changes
 - `stateChanged` - When any state changes occur (chain or account)
+
+### Utility Functions
+
+- `createWalletConnector()` - Creates and initializes a new wallet connector
+- `renderWalletModal(wallets, onSelect, onClose)` - Render wallet modal DOM
+- `getChainName(chainId)` - Get human-readable chain name
+- `formatChainDisplay(chainId)` - Format chain for display
 
 ## Auto-detection & Multi-chain Support
 
