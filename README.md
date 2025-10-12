@@ -128,13 +128,13 @@ A Stimulus controller for managing the list of wallets:
 
 ### WalletController (Stimulus)
 
-A Stimulus controller for individual wallet actions and status display:
+A Stimulus controller for individual wallet actions and display:
 
 - `disconnectWallet()` - Disconnects the currently connected wallet
 - `copyAddress()` - Copies the wallet address to clipboard
 - `showDetails()` - Shows detailed information about the wallet
 - `hideDetails()` - Hides the detailed information
-- `updateStatusDisplay()` - Updates the display of wallet status, address, and chain
+- `updateWalletDisplay()` - Updates the display of wallet icon and name
 - `handleConnected(event)` - Handles wallet connection events
 - `handleDisconnected()` - Handles wallet disconnection events
 - `handleChainChanged(event)` - Handles chain change events

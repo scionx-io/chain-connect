@@ -34,17 +34,18 @@
         <div data-demo-status-target="valuesDisplay"></div>
       </div>
 
-      <!-- Demo section showing wallet status with new controller -->
+      <!-- Demo section showing wallet with icon and name only -->
       <div class="demo-info">
-        <h2>Wallet Status (using WalletController)</h2>
+        <h2>Wallet Information (using WalletController)</h2>
         <div data-controller="wallet" 
              data-action="connector:connected->wallet#handleConnected
                          connector:disconnected->wallet#handleDisconnected
                          connector:chainChanged->wallet#handleChainChanged
                          connector:accountChanged->wallet#handleAccountChanged">
-          <p>Status: <span data-wallet-target="status"></span></p>
-          <p>Address: <span data-wallet-target="address"></span></p>
-          <p>Chain: <span data-wallet-target="chain"></span></p>
+          <div>
+            <img data-wallet-target="icon" width="40" height="40" alt="Wallet Icon" />
+            <span data-wallet-target="name">Not connected</span>
+          </div>
           <button data-action="click->wallet#copyAddress" data-wallet-target="copyButton">Copy Address</button>
         </div>
       </div>

@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
-// A controller for managing individual wallet actions and status
+// A controller for managing individual wallet actions
 export default class WalletController extends Controller {
-  static targets = ["status", "address", "chain", "details", "copyButton"]
+  static targets = ["icon", "name", "details", "copyButton"]
 
   static values = {
     address: String,
@@ -10,12 +10,12 @@ export default class WalletController extends Controller {
     walletName: String,
     rdns: String,
     family: String,
-    isConnected: { type: Boolean, default: false }
+    icon: String
   }
 
   connect() {
-    // Initialize wallet status display when controller connects
-    this.updateStatusDisplay();
+    // Initialize wallet display when controller connects
+    this.updateWalletDisplay();
   }
 
   // ============================================================================
@@ -72,30 +72,22 @@ export default class WalletController extends Controller {
   }
 
   // ============================================================================
-  // Status Display Methods
+  // Wallet Display Methods
   // ============================================================================
 
-  updateStatusDisplay() {
-    if (this.hasStatusTarget) {
-      if (this.isConnectedValue) {
-        this.statusTarget.textContent = "Connected";
-        this.statusTarget.classList.add("connected");
-        this.statusTarget.classList.remove("disconnected");
+  updateWalletDisplay() {
+    // Update wallet icon if target exists
+    if (this.hasIconTarget && this.iconValue) {
+      if (this.iconTarget.tagName === 'IMG') {
+        this.iconTarget.src = this.iconValue;
       } else {
-        this.statusTarget.textContent = "Disconnected";
-        this.statusTarget.classList.add("disconnected");
-        this.statusTarget.classList.remove("connected");
+        this.iconTarget.innerHTML = `<img src="${this.iconValue}" alt="${this.walletNameValue}" />`;
       }
     }
 
-    // Update address display if target exists
-    if (this.hasAddressTarget && this.addressValue) {
-      this.addressTarget.textContent = this.formatAddress(this.addressValue);
-    }
-
-    // Update chain display if target exists
-    if (this.hasChainTarget && this.chainIdValue) {
-      this.chainTarget.textContent = this.formatChainId(this.chainIdValue);
+    // Update wallet name if target exists
+    if (this.hasNameTarget && this.walletNameValue) {
+      this.nameTarget.textContent = this.walletNameValue;
     }
   }
 
@@ -104,27 +96,19 @@ export default class WalletController extends Controller {
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   }
 
-  formatChainId(chainId) {
-    // Convert hex chain ID to decimal if needed
-    if (chainId && chainId.startsWith('0x')) {
-      return parseInt(chainId, 16).toString();
-    }
-    return chainId || '';
-  }
-
   // ============================================================================
   // Event Handlers
   // ============================================================================
 
   handleConnected(event) {
-    const { address, chainId, name, rdns, family } = event.detail;
+    const { address, chainId, name, rdns, family, icon } = event.detail;
     this.addressValue = address;
     this.chainIdValue = chainId;
     this.walletNameValue = name;
     this.rdnsValue = rdns;
     this.familyValue = family;
-    this.isConnectedValue = true;
-    this.dispatch('walletConnected', { detail: { address, chainId, name, rdns, family } });
+    this.iconValue = icon;
+    this.dispatch('walletConnected', { detail: { address, chainId, name, rdns, family, icon } });
   }
 
   handleDisconnected() {
@@ -133,7 +117,7 @@ export default class WalletController extends Controller {
     this.walletNameValue = "";
     this.rdnsValue = "";
     this.familyValue = "";
-    this.isConnectedValue = false;
+    this.iconValue = "";
     this.dispatch('walletDisconnected');
   }
 
@@ -153,19 +137,19 @@ export default class WalletController extends Controller {
   // Value Change Callbacks
   // ============================================================================
 
-  addressValueChanged() {
-    if (this.hasAddressTarget) {
-      this.addressTarget.textContent = this.formatAddress(this.addressValue);
+  iconValueChanged() {
+    if (this.hasIconTarget) {
+      if (this.iconTarget.tagName === 'IMG') {
+        this.iconTarget.src = this.iconValue;
+      } else {
+        this.iconTarget.innerHTML = `<img src="${this.iconValue}" alt="${this.walletNameValue}" />`;
+      }
     }
   }
 
-  chainIdValueChanged() {
-    if (this.hasChainTarget) {
-      this.chainTarget.textContent = this.formatChainId(this.chainIdValue);
+  walletNameValueChanged() {
+    if (this.hasNameTarget) {
+      this.nameTarget.textContent = this.walletNameValue;
     }
-  }
-
-  isConnectedValueChanged() {
-    this.updateStatusDisplay();
   }
 }
