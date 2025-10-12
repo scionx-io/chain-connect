@@ -1,6 +1,6 @@
 {
   "name": "@scionx/chain-connect",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Multi-chain wallet connector supporting Ethereum, Solana, and Tron with minimalist Swiss design",
   "type": "module",
   "main": "./dist/chain-connect.js",
