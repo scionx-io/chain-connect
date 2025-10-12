@@ -1,6 +1,6 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 20px;
   background-color: #f8f9fa;
@@ -19,7 +19,8 @@ h1 {
 /* The wallet connector UI styles are now handled by the imported CSS */
 /* Only keeping styles for static demo elements */
 
-button[data-action="wallet#openModal"] {
+button[data-action="click->wallet#open"],
+button[data-action="click->wallet#disconnectWallet"] {
   background-color: #007bff;
   color: white;
   border: none;
@@ -30,29 +31,70 @@ button[data-action="wallet#openModal"] {
   margin: 5px;
 }
 
-button[data-action="wallet#openModal"]:hover {
+button[data-action="click->wallet#open"]:hover,
+button[data-action="click->wallet#disconnectWallet"]:hover {
   background-color: #0056b3;
 }
 
-.demo-info {
-  margin-top: 30px;
-  padding: 20px;
-  background-color: #e9ecef;
+.status {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: white;
   border-radius: 8px;
   text-align: left;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.event-log {
+.events {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   max-height: 200px;
   overflow-y: auto;
-  margin-top: 10px;
-  padding: 10px;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
 }
 
-.event-entry {
-  padding: 5px;
+.event-log-entry {
+  padding: 8px;
   border-bottom: 1px solid #eee;
+  border-left: 3px solid #007bff;
+  margin-bottom: 5px;
+  background-color: #f8f9fa;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.event-timestamp {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.event-name {
+  font-weight: bold;
+  color: #007bff;
+}
+
+.event-description {
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.event-details {
+  font-size: 0.85em;
+  background-color: #e9ecef;
+  padding: 6px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.event-details pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
 }

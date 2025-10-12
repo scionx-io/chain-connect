@@ -8,20 +8,22 @@
 </head>
 <body>
   <div data-controller="wallet"
-       data-action="wallet:connected->demo#handleConnected
-                    wallet:disconnected->demo#handleDisconnected
-                    wallet:error->demo#handleError">
+       data-action="wallet:connected->demo#handleEvent
+                    wallet:disconnected->demo#handleEvent
+                    wallet:connecting->demo#handleEvent
+                    wallet:chainChanged->demo#handleEvent
+                    wallet:accountChanged->demo#handleEvent
+                    wallet:error->demo#handleEvent">
 
     <div class="container">
-      <h1>@scionx/chain-connect Example</h1>
-      <p>Simple wallet connector - just one controller!</p>
+      <h1>Wallet Connector</h1>
 
       <button data-action="click->wallet#open">Connect Wallet</button>
       <button data-action="click->wallet#disconnectWallet">Disconnect</button>
 
       <div data-controller="demo" data-demo-wallet-outlet="wallet">
-        <h2>Connection Status</h2>
-        <div data-demo-target="status"></div>
+        <div data-demo-target="status" class="status"></div>
+        <div data-demo-target="events" class="events"></div>
       </div>
     </div>
   </div>

@@ -256,6 +256,18 @@
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.8.tgz#958b91c991b1867ced318bedea0e215ee050726e"
   integrity sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==
 
+"@webreflection/alien-signals@^0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@webreflection/alien-signals/-/alien-signals-0.3.2.tgz#d2771f5ba316075ba1ba5bdb18fb07712679769b"
+  integrity sha512-DmNjD8Kq5iM+Toirp3llS/izAiI3Dwav5nHRvKdR/YJBTgun3y4xK76rs9CFYD2bZwZJN/rP+HjEqKTteGK+Yw==
+  dependencies:
+    alien-signals "^2.0.6"
+
+alien-signals@^2.0.6:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/alien-signals/-/alien-signals-2.0.8.tgz#f1592509482c6cf0a5710f09bfcad3ca60f347db"
+  integrity sha512-844G1VLkk0Pe2SJjY0J8vp8ADI73IM4KliNu2OGlYzWpO28NexEUvjHTcFjFX3VXoiUtwTbHxLNI9ImkcoBqzA==
+
 esbuild@^0.25.0:
   version "0.25.10"
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.25.10.tgz#37f5aa5cd14500f141be121c01b096ca83ac34a9"
@@ -365,6 +377,13 @@ tinyglobby@^0.2.15:
   dependencies:
     fdir "^6.5.0"
     picomatch "^4.0.3"
+
+uhtml@^5.0.9:
+  version "5.0.9"
+  resolved "https://registry.yarnpkg.com/uhtml/-/uhtml-5.0.9.tgz#0a4e8af97a7103248ad747fa09500b4ce59132a9"
+  integrity sha512-qPyu3vGilaLe6zrjOCD/xezWEHLwdevxmbY3hzyhT25KBDF4F7YYW3YZcL3kylD/6dMoVISHjn8ggV3+9FY+5g==
+  dependencies:
+    "@webreflection/alien-signals" "^0.3.2"
 
 vite@^7.1.9:
   version "7.1.9"

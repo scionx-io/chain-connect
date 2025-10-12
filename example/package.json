@@ -9,8 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@hotwired/stimulus": "^3.2.2",
     "@scionx/chain-connect": "link:@scionx/chain-connect",
-    "@hotwired/stimulus": "^3.2.2"
+    "uhtml": "^5.0.9"
   },
   "devDependencies": {
     "vite": "^7.1.9"
