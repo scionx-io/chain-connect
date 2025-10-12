@@ -106,7 +106,11 @@ The main class that manages wallet connections:
 
 A Stimulus controller that acts as a central hub connecting all other controllers:
 
+- `connectWallet()` - Opens the wallet selection modal
+- `selectWallet(event)` - Handles wallet selection from the list 
 - `disconnectWallet()` - Disconnect the currently connected wallet
+- `openModal()` - Open the wallet selection modal
+- `closeModal()` - Close the wallet selection modal
 - `handleConnected(event)` - Handles wallet connection events
 - `handleDisconnected()` - Handles wallet disconnection events
 - `handleChainChanged(event)` - Handles chain change events
@@ -116,16 +120,13 @@ A Stimulus controller that acts as a central hub connecting all other controller
 
 ### WalletsController (Stimulus)
 
-A Stimulus controller for managing the list of wallets and the selection modal:
+A Stimulus controller for managing the list of wallets with filtering and sorting:
 
-- `openModal()` - Open the wallet selection modal
-- `closeModal()` - Close the wallet selection modal
-- `selectWallet(event, rdns)` - Handles wallet selection from the list
 - `sortWallets(wallets)` - Sorts the list of wallets based on criteria
 - `updateSearch(event)` - Filters wallets based on search query
 - `changeSort(event)` - Changes the sorting criteria
 - `resetFilters()` - Resets all applied filters
-- Manages wallet detection and list rendering
+- Manages wallet detection and list operations
 
 ### ModalController (Stimulus)
 
