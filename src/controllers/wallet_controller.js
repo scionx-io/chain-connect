@@ -27,6 +27,7 @@ export default class WalletController extends Controller {
     this.mipdStore = createStore();
     this.walletManager = new WalletManager(this.mipdStore);
     this.modalElement = null;
+    this.lastSelectedRdns = null;
 
     // Set up event listeners for WalletManager events
     this.setupEventListeners();
@@ -82,12 +83,39 @@ export default class WalletController extends Controller {
     // Render modal
     this.modalElement = renderWalletModal(wallets, this.boundSelectWallet, this.boundClose);
     document.body.appendChild(this.modalElement);
+
+    // Store references for loading state (can't use Stimulus targets since modal is outside controller element)
+    this.loadingOverlay = this.modalElement.querySelector('.wallet-loading-overlay');
+    this.buttonsContainer = this.modalElement.querySelector('.wallet-buttons-container');
+    this.walletButtons = this.modalElement.querySelectorAll('.wallet-button');
+
+    // Store references for error state
+    this.errorOverlay = this.modalElement.querySelector('.wallet-error-overlay');
+    this.errorMessage = this.modalElement.querySelector('.wallet-error-message');
+    this.errorBackButton = this.modalElement.querySelector('.wallet-error-back');
+    this.errorRetryButton = this.modalElement.querySelector('.wallet-error-retry');
+
+    // Bind error button handlers
+    if (this.errorBackButton) {
+      this.errorBackButton.addEventListener('click', () => this.hideError());
+    }
+    if (this.errorRetryButton) {
+      this.errorRetryButton.addEventListener('click', () => this.retryConnection());
+    }
   }
 
   close() {
     if (this.modalElement) {
       this.modalElement.remove();
       this.modalElement = null;
+      // Clean up references
+      this.loadingOverlay = null;
+      this.buttonsContainer = null;
+      this.walletButtons = null;
+      this.errorOverlay = null;
+      this.errorMessage = null;
+      this.errorBackButton = null;
+      this.errorRetryButton = null;
     }
   }
 
@@ -102,6 +130,14 @@ export default class WalletController extends Controller {
       return;
     }
 
+    // Store for retry functionality
+    this.lastSelectedRdns = rdns;
+
+    // Call connection logic
+    await this.connectToWallet(rdns);
+  }
+
+  async connectToWallet(rdns) {
     // Set connecting state
     this.connectingValue = true;
 
@@ -118,6 +154,10 @@ export default class WalletController extends Controller {
       ]);
     } catch (error) {
       console.error('Wallet connection error:', error);
+
+      // Show error overlay
+      this.showError(error);
+
       this.dispatch('error', {
         detail: {
           message: error.message || 'Connection failed',
@@ -127,6 +167,50 @@ export default class WalletController extends Controller {
     } finally {
       this.connectingValue = false;
     }
+  }
+
+  showError(error) {
+    if (!this.modalElement || !this.errorOverlay) return;
+
+    // Determine error message based on error type
+    let message = 'Please try again or choose a different wallet.';
+
+    if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
+      message = 'You cancelled the connection request.';
+    } else if (error.message) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes('reject') || msg.includes('cancel') || msg.includes('denied')) {
+        message = 'You cancelled the connection request.';
+      } else if (msg.includes('timeout')) {
+        message = 'Connection request timed out.';
+      } else {
+        message = error.message;
+      }
+    }
+
+    // Update error message text
+    if (this.errorMessage) {
+      this.errorMessage.textContent = message;
+    }
+
+    // Show error overlay
+    this.errorOverlay.classList.remove('hidden');
+  }
+
+  hideError() {
+    if (this.errorOverlay) {
+      this.errorOverlay.classList.add('hidden');
+    }
+  }
+
+  async retryConnection() {
+    if (!this.lastSelectedRdns) return;
+
+    // Hide error overlay
+    this.hideError();
+
+    // Retry connection directly - no fake events needed
+    await this.connectToWallet(this.lastSelectedRdns);
   }
 
   async disconnectWallet() {
@@ -226,10 +310,34 @@ export default class WalletController extends Controller {
   }
 
   // ============================================================================
-  // Reactive Callbacks
+  // Reactive Callbacks (Stimulus pattern for state changes)
   // ============================================================================
 
-  /*isConnectedValueChanged() {
-    this.element.classList.toggle('wallet-connected', this.isConnectedValue);
-  }*/
+  connectingValueChanged() {
+    if (!this.modalElement) return;
+
+    if (this.connectingValue) {
+      // Show loading state - disable all buttons and show overlay
+      if (this.loadingOverlay) this.loadingOverlay.classList.remove('hidden');
+      if (this.buttonsContainer) {
+        this.buttonsContainer.style.pointerEvents = 'none';
+        this.buttonsContainer.style.opacity = '0.5';
+      }
+      if (this.walletButtons) {
+        this.walletButtons.forEach(btn => btn.disabled = true);
+      }
+    } else {
+      // Hide loading state - re-enable buttons
+      if (this.loadingOverlay) this.loadingOverlay.classList.add('hidden');
+      if (this.buttonsContainer) {
+        this.buttonsContainer.style.pointerEvents = '';
+        this.buttonsContainer.style.opacity = '';
+      }
+      if (this.walletButtons) {
+        this.walletButtons.forEach(btn => btn.disabled = false);
+      }
+    }
+  }
+
+ 
 }

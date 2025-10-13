@@ -2,32 +2,50 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="Multi-chain wallet connector with minimalist Swiss design">
-  <meta name="theme-color" content="#fafafa">
-  <title>Wallet Connector Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Multi-chain wallet connector">
+  <title>Wallet Connector</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
   <main data-controller="demo">
     <div class="container">
-      <div class="button-group" role="group" aria-label="Wallet connection controls">
+      <div class="button-group">
         <button
-          type="button"
           data-demo-target="connectButton"
-          data-action="click->demo#open"
-          aria-label="Connect to your wallet">
+          data-action="click->demo#open">
           Connect Wallet
         </button>
         <button
-          type="button"
           class="hidden"
           data-demo-target="disconnectButton"
-          data-action="click->demo#disconnectWallet"
-          aria-label="Disconnect from wallet">
+          data-action="click->demo#disconnectWallet">
           Disconnect
         </button>
       </div>
+      
+      <dl class="status-display" data-demo-target="status">
+        <div class="status-item">
+          <dt>Address</dt>
+          <dd data-demo-target="addressDisplay"></dd>
+        </div>
+        <div class="status-item">
+          <dt>Chain ID</dt>
+          <dd data-demo-target="chainIdDisplay"></dd>
+        </div>
+        <div class="status-item">
+          <dt>Wallet</dt>
+          <dd data-demo-target="walletNameDisplay"></dd>
+        </div>
+        <div class="status-item">
+          <dt>RDNS</dt>
+          <dd data-demo-target="rdnsDisplay"></dd>
+        </div>
+        <div class="status-item">
+          <dt>Family</dt>
+          <dd data-demo-target="familyDisplay"></dd>
+        </div>
+      </dl>
     </div>
   </main>
   <script type="module" src="./main.js"></script>

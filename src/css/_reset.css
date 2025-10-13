@@ -1,5 +1,11 @@
-/* Reset */
-* {
+/* Reset - Scoped to wallet connector elements only */
+#walletModal *,
+#errorModal *,
+.wallet-button *,
+.connection-info *,
+.connect-wallet-btn *,
+.disconnect-btn *,
+.view-all-wallets-btn * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;

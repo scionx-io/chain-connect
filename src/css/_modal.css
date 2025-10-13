@@ -1,44 +1,55 @@
-/* Modal - Swiss Grid */
-#walletModal {
+/**
+ * Modal - Swiss Design System
+ * Mobile-first responsive modal with 8px grid system
+ */
+
+/* Modal Backdrop - Full viewport overlay */
+.wallet-connector-modal.modal-backdrop {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(100vw - var(--grid-4));
-  max-width: 100%;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: var(--grid-2);
+}
+
+/* Modal Content - Mobile First (< 640px) */
+.wallet-connector-modal .wallet-connector-content {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
   max-height: calc(100vh - var(--grid-8));
-  padding: var(--grid-4) var(--grid-2);
+  padding: var(--grid-3);
   border: 1px solid var(--black);
   background: var(--white);
   overflow-y: auto;
   margin: 0;
 }
 
-#walletModal::backdrop {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(2px);
-}
-
-.modal-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: var(--grid-2);
-  margin-bottom: var(--grid-4);
-  padding-bottom: var(--grid-3);
-  border-bottom: 1px solid var(--gray-10);
-}
-
-.modal-header h2 {
-  font-size: var(--text-lg);
+/* Modal Title */
+.wallet-connector-modal .wallet-connector-title {
+  font-size: var(--text-base);
   font-weight: 400;
   letter-spacing: -0.01em;
   text-transform: uppercase;
+  margin: 0 0 var(--grid-4) 0;
+  padding: 0 var(--grid-6) var(--grid-3) 0;
+  border-bottom: 1px solid var(--gray-10);
 }
 
-.close-modal-btn {
-  width: 44px;
-  height: 44px;
+/* Close Button - Mobile */
+.wallet-connector-modal .close-modal-button {
+  position: absolute;
+  top: var(--grid-3);
+  right: var(--grid-3);
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: 1px solid var(--gray-30);
   background: var(--white);
@@ -50,100 +61,202 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.close-modal-btn:active {
+.wallet-connector-modal .close-modal-button:active {
   background: var(--black);
   color: var(--white);
   border-color: var(--black);
 }
 
-/* Error Modal - Swiss Design */
-#errorModal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(100vw - var(--grid-4));
-  max-width: 100%;
-  min-height: 200px;
-  max-height: calc(100vh - var(--grid-8));
-  padding: var(--grid-4) var(--grid-2);
-  border: 1px solid var(--black);
-  background: var(--white);
-  overflow-y: auto;
+/* Wallet Buttons Container - Mobile First */
+.wallet-connector-modal .wallet-buttons-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--grid-2);
+  margin-top: var(--grid-2);
+}
+
+/* Loading Overlay - Swiss Design */
+.wallet-connector-modal .wallet-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.wallet-connector-modal .wallet-loading-overlay.hidden {
+  display: none;
+}
+
+.wallet-connector-modal .wallet-loading-content {
+  text-align: center;
+  padding: var(--grid-4);
+}
+
+.wallet-connector-modal .wallet-loading-spinner {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--grid-3);
+  border: 2px solid var(--gray-20);
+  border-top-color: var(--black);
+  border-radius: 50%;
+  animation: wallet-spin 0.8s linear infinite;
+}
+
+@keyframes wallet-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.wallet-connector-modal .wallet-loading-text {
+  font-size: var(--text-base);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--black);
+  margin: 0 0 var(--grid-1) 0;
+}
+
+.wallet-connector-modal .wallet-loading-subtext {
+  font-size: var(--text-sm);
+  color: var(--gray-70);
   margin: 0;
 }
 
-#errorModal::backdrop {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(2px);
-}
-
-.error-modal-header {
-  display: grid;
-  grid-template-columns: 1fr auto;
+/* Error Overlay - Swiss Design */
+.wallet-connector-modal .wallet-error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  display: flex;
   align-items: center;
-  gap: var(--grid-2);
-  margin-bottom: var(--grid-4);
-  padding-bottom: var(--grid-3);
-  border-bottom: 1px solid var(--gray-10);
+  justify-content: center;
+  z-index: 10;
 }
 
-.error-modal-header h2 {
+.wallet-connector-modal .wallet-error-overlay.hidden {
+  display: none;
+}
+
+.wallet-connector-modal .wallet-error-content {
+  text-align: center;
+  padding: var(--grid-4);
+  max-width: 320px;
+}
+
+.wallet-connector-modal .wallet-error-icon {
+  font-size: 48px;
+  line-height: 1;
+  margin: 0 auto var(--grid-3);
+  color: var(--black);
+}
+
+.wallet-connector-modal .wallet-error-title {
   font-size: var(--text-lg);
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-weight: 500;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--black);
+  margin: 0 0 var(--grid-2) 0;
 }
 
-.error-message-content {
-  margin-bottom: var(--grid-4);
-  margin-top: var(--grid-2);
-  line-height: var(--leading-relaxed);
+.wallet-connector-modal .wallet-error-message {
+  font-size: var(--text-sm);
   color: var(--gray-70);
-  min-height: 60px;
-  display: flex;
-  align-items: center;
+  margin: 0 0 var(--grid-4) 0;
+  line-height: var(--leading-relaxed);
 }
 
-.error-modal-actions {
-  display: flex;
+.wallet-connector-modal .wallet-error-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--grid-2);
-  justify-content: flex-end;
+}
+
+.wallet-connector-modal .wallet-error-button {
+  padding: var(--grid-3) var(--grid-4);
+  border: 1px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.wallet-connector-modal .wallet-error-button:active {
+  background: var(--black);
+  color: var(--white);
+}
+
+.wallet-connector-modal .wallet-error-button.wallet-error-retry {
+  background: var(--black);
+  color: var(--white);
+}
+
+.wallet-connector-modal .wallet-error-button.wallet-error-retry:active {
+  background: var(--white);
+  color: var(--black);
 }
 
 /* Tablet - 640px+ */
 @media (min-width: 40rem) {
-  #walletModal {
-    width: 28rem;
-    padding: var(--grid-5) var(--grid-4);
+  .wallet-connector-modal .wallet-connector-content {
+    max-width: 380px;
+    padding: var(--grid-4);
   }
 
-  #errorModal {
-    width: 28rem;
-    min-height: 220px;
-    padding: var(--grid-5) var(--grid-4);
-  }
-
-  .modal-header h2,
-  .error-modal-header h2 {
+  .wallet-connector-modal .wallet-connector-title {
     font-size: var(--text-lg);
+    padding-right: var(--grid-7);
+  }
+
+  .wallet-connector-modal .close-modal-button {
+    top: var(--grid-4);
+    right: var(--grid-4);
+    width: 44px;
+    height: 44px;
+  }
+
+  .wallet-connector-modal .wallet-buttons-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--grid-2);
   }
 }
 
 /* Desktop - 1024px+ */
 @media (min-width: 64rem) {
-  #walletModal {
-    width: 32rem;
-    padding: var(--grid-6) var(--grid-5);
+  .wallet-connector-modal .wallet-connector-content {
+    max-width: 400px;
+    padding: var(--grid-5);
   }
 
-  #errorModal {
-    width: 32rem;
-    min-height: 240px;
-    padding: var(--grid-6) var(--grid-5);
+  .wallet-connector-modal .wallet-connector-title {
+    padding-right: var(--grid-8);
   }
 
-  .close-modal-btn:hover {
+  .wallet-connector-modal .close-modal-button {
+    top: var(--grid-5);
+    right: var(--grid-5);
+  }
+
+  .wallet-connector-modal .close-modal-button:hover {
     border-color: var(--black);
+  }
+
+  .wallet-connector-modal .wallet-buttons-container {
+    gap: var(--grid-2);
   }
 }

@@ -15,6 +15,7 @@
   --gray-70: #4a4a4a;
   --gray-50: #808080;
   --gray-30: #b3b3b3;
+  --gray-20: #cccccc;
   --gray-10: #e6e6e6;
   --gray-05: #f5f5f5;
   --white: #ffffff;
@@ -32,4 +33,7 @@
   --leading-tight: 1.2;
   --leading-normal: 1.5;
   --leading-relaxed: 1.75;
+
+  /* Border Radius */
+  --radius-full: 50%;
 }
