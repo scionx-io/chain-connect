@@ -22,7 +22,10 @@ class EvmHandler {
 
   async connect(providerDetails, isReconnect = false) {
     try {
-      console.log('[EvmHandler] Connecting with provider details:', providerDetails);
+      console.log(
+        '[EvmHandler] Connecting with provider details:',
+        providerDetails
+      );
       this.originalProvider = providerDetails.provider;
       this.provider = new ethers.BrowserProvider(this.originalProvider);
 

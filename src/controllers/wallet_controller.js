@@ -1,4 +1,4 @@
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 import { createStore } from 'mipd';
 import { WalletManager } from '../core/wallet_manager.js';
 import { renderWalletModal } from '../utils/modal_renderer.js';
@@ -15,8 +15,8 @@ export default class WalletController extends Controller {
     rdns: String,
     family: String,
     isConnected: { type: Boolean, default: false },
-    connecting: { type: Boolean, default: false }
-  }
+    connecting: { type: Boolean, default: false },
+  };
 
   // ============================================================================
   // Lifecycle
@@ -81,26 +81,43 @@ export default class WalletController extends Controller {
     this.boundClose = this.close.bind(this);
 
     // Render modal
-    this.modalElement = renderWalletModal(wallets, this.boundSelectWallet, this.boundClose);
+    this.modalElement = renderWalletModal(
+      wallets,
+      this.boundSelectWallet,
+      this.boundClose
+    );
     document.body.appendChild(this.modalElement);
 
     // Store references for loading state (can't use Stimulus targets since modal is outside controller element)
-    this.loadingOverlay = this.modalElement.querySelector('.wallet-loading-overlay');
-    this.buttonsContainer = this.modalElement.querySelector('.wallet-buttons-container');
+    this.loadingOverlay = this.modalElement.querySelector(
+      '.wallet-loading-overlay'
+    );
+    this.buttonsContainer = this.modalElement.querySelector(
+      '.wallet-buttons-container'
+    );
     this.walletButtons = this.modalElement.querySelectorAll('.wallet-button');
 
     // Store references for error state
-    this.errorOverlay = this.modalElement.querySelector('.wallet-error-overlay');
-    this.errorMessage = this.modalElement.querySelector('.wallet-error-message');
-    this.errorBackButton = this.modalElement.querySelector('.wallet-error-back');
-    this.errorRetryButton = this.modalElement.querySelector('.wallet-error-retry');
+    this.errorOverlay = this.modalElement.querySelector(
+      '.wallet-error-overlay'
+    );
+    this.errorMessage = this.modalElement.querySelector(
+      '.wallet-error-message'
+    );
+    this.errorBackButton =
+      this.modalElement.querySelector('.wallet-error-back');
+    this.errorRetryButton = this.modalElement.querySelector(
+      '.wallet-error-retry'
+    );
 
     // Bind error button handlers
     if (this.errorBackButton) {
       this.errorBackButton.addEventListener('click', () => this.hideError());
     }
     if (this.errorRetryButton) {
-      this.errorRetryButton.addEventListener('click', () => this.retryConnection());
+      this.errorRetryButton.addEventListener('click', () =>
+        this.retryConnection()
+      );
     }
   }
 
@@ -125,7 +142,7 @@ export default class WalletController extends Controller {
 
     if (!rdns) {
       this.dispatch('error', {
-        detail: { message: 'Invalid wallet selection' }
+        detail: { message: 'Invalid wallet selection' },
       });
       return;
     }
@@ -148,10 +165,7 @@ export default class WalletController extends Controller {
         setTimeout(() => reject(new Error('Connection timeout')), 30000);
       });
 
-      await Promise.race([
-        this.walletManager.connect(rdns),
-        timeoutPromise
-      ]);
+      await Promise.race([this.walletManager.connect(rdns), timeoutPromise]);
     } catch (error) {
       console.error('Wallet connection error:', error);
 
@@ -161,8 +175,8 @@ export default class WalletController extends Controller {
       this.dispatch('error', {
         detail: {
           message: error.message || 'Connection failed',
-          error
-        }
+          error,
+        },
       });
     } finally {
       this.connectingValue = false;
@@ -179,7 +193,11 @@ export default class WalletController extends Controller {
       message = 'You cancelled the connection request.';
     } else if (error.message) {
       const msg = error.message.toLowerCase();
-      if (msg.includes('reject') || msg.includes('cancel') || msg.includes('denied')) {
+      if (
+        msg.includes('reject') ||
+        msg.includes('cancel') ||
+        msg.includes('denied')
+      ) {
         message = 'You cancelled the connection request.';
       } else if (msg.includes('timeout')) {
         message = 'Connection request timed out.';
@@ -231,17 +249,38 @@ export default class WalletController extends Controller {
     this.boundHandleAccountChanged = this.handleAccountChanged.bind(this);
 
     this.walletManager.addEventListener('connected', this.boundHandleConnected);
-    this.walletManager.addEventListener('disconnected', this.boundHandleDisconnected);
-    this.walletManager.addEventListener('chainChanged', this.boundHandleChainChanged);
-    this.walletManager.addEventListener('accountChanged', this.boundHandleAccountChanged);
+    this.walletManager.addEventListener(
+      'disconnected',
+      this.boundHandleDisconnected
+    );
+    this.walletManager.addEventListener(
+      'chainChanged',
+      this.boundHandleChainChanged
+    );
+    this.walletManager.addEventListener(
+      'accountChanged',
+      this.boundHandleAccountChanged
+    );
   }
 
   cleanupEventListeners() {
     if (this.walletManager) {
-      this.walletManager.removeEventListener('connected', this.boundHandleConnected);
-      this.walletManager.removeEventListener('disconnected', this.boundHandleDisconnected);
-      this.walletManager.removeEventListener('chainChanged', this.boundHandleChainChanged);
-      this.walletManager.removeEventListener('accountChanged', this.boundHandleAccountChanged);
+      this.walletManager.removeEventListener(
+        'connected',
+        this.boundHandleConnected
+      );
+      this.walletManager.removeEventListener(
+        'disconnected',
+        this.boundHandleDisconnected
+      );
+      this.walletManager.removeEventListener(
+        'chainChanged',
+        this.boundHandleChainChanged
+      );
+      this.walletManager.removeEventListener(
+        'accountChanged',
+        this.boundHandleAccountChanged
+      );
     }
   }
 
@@ -271,18 +310,18 @@ export default class WalletController extends Controller {
         name: connection.name,
         rdns: connection.rdns,
         family: connection.family,
-        provider: connection.provider
-      }
+        provider: connection.provider,
+      },
     });
   }
 
   handleDisconnected() {
     // Clear Stimulus values
-    this.addressValue = "";
-    this.chainIdValue = "";
-    this.walletNameValue = "";
-    this.rdnsValue = "";
-    this.familyValue = "";
+    this.addressValue = '';
+    this.chainIdValue = '';
+    this.walletNameValue = '';
+    this.rdnsValue = '';
+    this.familyValue = '';
     this.isConnectedValue = false;
 
     // Dispatch Stimulus event
@@ -295,7 +334,7 @@ export default class WalletController extends Controller {
 
     // Dispatch Stimulus event
     this.dispatch('chainChanged', {
-      detail: { chainId: event.detail.connection.chainId }
+      detail: { chainId: event.detail.connection.chainId },
     });
   }
 
@@ -305,7 +344,7 @@ export default class WalletController extends Controller {
 
     // Dispatch Stimulus event
     this.dispatch('accountChanged', {
-      detail: { address: event.detail.connection.address }
+      detail: { address: event.detail.connection.address },
     });
   }
 
@@ -324,7 +363,7 @@ export default class WalletController extends Controller {
         this.buttonsContainer.style.opacity = '0.5';
       }
       if (this.walletButtons) {
-        this.walletButtons.forEach(btn => btn.disabled = true);
+        this.walletButtons.forEach((btn) => (btn.disabled = true));
       }
     } else {
       // Hide loading state - re-enable buttons
@@ -334,10 +373,8 @@ export default class WalletController extends Controller {
         this.buttonsContainer.style.opacity = '';
       }
       if (this.walletButtons) {
-        this.walletButtons.forEach(btn => btn.disabled = false);
+        this.walletButtons.forEach((btn) => (btn.disabled = false));
       }
     }
   }
-
- 
 }

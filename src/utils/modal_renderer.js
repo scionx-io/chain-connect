@@ -21,7 +21,13 @@ export function renderWalletModal(wallets, onSelect, onClose) {
           class="wallet-connector-content"
           onclick=${(e) => e.stopPropagation()}
         >
-          <button class="close-modal-button" data-action="close" onclick=${onClose}>×</button>
+          <button
+            class="close-modal-button"
+            data-action="close"
+            onclick=${onClose}
+          >
+            ×
+          </button>
           <h2 class="wallet-connector-title">Connect Wallet</h2>
           <div class="wallet-loading-overlay hidden">
             <div class="wallet-loading-content">
@@ -36,8 +42,12 @@ export function renderWalletModal(wallets, onSelect, onClose) {
               <p class="wallet-error-title">Connection Failed</p>
               <p class="wallet-error-message"></p>
               <div class="wallet-error-actions">
-                <button class="wallet-error-button wallet-error-back">Back</button>
-                <button class="wallet-error-button wallet-error-retry">Retry</button>
+                <button class="wallet-error-button wallet-error-back">
+                  Back
+                </button>
+                <button class="wallet-error-button wallet-error-retry">
+                  Retry
+                </button>
               </div>
             </div>
           </div>

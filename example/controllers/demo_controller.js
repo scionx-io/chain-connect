@@ -3,24 +3,24 @@ import { html, render } from 'uhtml';
 
 export default class DemoController extends WalletController {
   static targets = [
-    'status', 
-    'events', 
-    'connectButton', 
+    'status',
+    'events',
+    'connectButton',
     'disconnectButton',
     'addressDisplay',
-    'chainIdDisplay', 
+    'chainIdDisplay',
     'walletNameDisplay',
     'rdnsDisplay',
-    'familyDisplay'
+    'familyDisplay',
   ];
   static classes = ['connected', 'disconnected'];
-  
+
   connect() {
     super.connect();
   }
- 
+
   isConnectedValueChanged() {
-    console.log("isConnectedValueChanged", this.isConnectedValue);
+    console.log('isConnectedValueChanged', this.isConnectedValue);
     if (this.isConnectedValue) {
       this.connectButtonTarget.classList.add('hidden');
       this.disconnectButtonTarget.classList.remove('hidden');

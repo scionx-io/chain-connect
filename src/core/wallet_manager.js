@@ -172,10 +172,13 @@ class WalletManager extends EventTarget {
       );
       this.handlers.set(rdns, handler);
 
-      console.log('[WalletManager] About to connect with handler for family:', family);
+      console.log(
+        '[WalletManager] About to connect with handler for family:',
+        family
+      );
       const connection = await handler.connect(providerDetails, isReconnect);
       console.log('[WalletManager] Handler connection result:', connection);
-      
+
       if (!connection) {
         this.handlers.delete(rdns);
         throw new Error('Connection failed');

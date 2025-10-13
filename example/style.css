@@ -6,7 +6,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
   background-color: #fafafa;
   color: #111;
   line-height: 1.5;
@@ -38,7 +39,9 @@ button {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.15s, color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
   font-family: inherit;
   width: 100%;
 }
@@ -105,16 +108,16 @@ button:disabled {
     margin: 32px auto;
     padding: 0 16px;
   }
-  
+
   .status-item {
     flex-direction: column;
     margin-bottom: 12px;
   }
-  
+
   .status-item dt {
     margin-bottom: 4px;
   }
-  
+
   .status-item dd {
     margin-left: 0;
     text-align: left;

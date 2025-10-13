@@ -13,6 +13,7 @@
 ## Task 1: Add MIPD Store to WalletManager Constructor
 
 **Files:**
+
 - Modify: `src/wallet_manager.js:1-20`
 - Test: Manual verification
 
@@ -59,6 +60,7 @@ git commit -m "refactor: add mipdStore to WalletManager constructor"
 ## Task 2: Add Debug Logging Helper to WalletManager
 
 **Files:**
+
 - Modify: `src/wallet_manager.js` (top of file)
 
 **Step 1: Add debug logging helper method**
@@ -77,6 +79,7 @@ _debug(...args) {
 
 Run: `yarn dev`
 Open browser console and test:
+
 ```javascript
 window.WALLET_DEBUG = true;
 // Should enable debug logging for future calls
@@ -94,9 +97,10 @@ git commit -m "feat: add debug logging helper with WALLET_DEBUG flag"
 ## Task 3: Add Helper Method to Get Families from Chains
 
 **Files:**
+
 - Modify: `src/wallet_manager.js` (add new private method)
 
-**Step 1: Add _getFamiliesFromChains method**
+**Step 1: Add \_getFamiliesFromChains method**
 
 Add this method to WalletManager class:
 
@@ -149,9 +153,10 @@ git commit -m "feat: add _getFamiliesFromChains helper method"
 ## Task 4: Add Helper Method to Get Families from RDNS
 
 **Files:**
+
 - Modify: `src/wallet_manager.js` (add new private method)
 
-**Step 1: Add _getFamiliesFromRdns method**
+**Step 1: Add \_getFamiliesFromRdns method**
 
 Add this method to WalletManager class:
 
@@ -206,9 +211,10 @@ git commit -m "feat: add _getFamiliesFromRdns helper method"
 ## Task 5: Add Helper Method to Categorize Wallets
 
 **Files:**
+
 - Modify: `src/wallet_manager.js` (add new private method)
 
-**Step 1: Add _categorizeWallet method**
+**Step 1: Add \_categorizeWallet method**
 
 Add this method to WalletManager class:
 
@@ -253,6 +259,7 @@ git commit -m "feat: add _categorizeWallet helper method"
 ## Task 6: Add Helper Method to Get Global Providers
 
 **Files:**
+
 - Modify: `src/wallet_manager.js` (add new private method)
 - Modify: `src/config.js` (import WALLET_ICONS)
 
@@ -262,7 +269,7 @@ git commit -m "feat: add _categorizeWallet helper method"
 import { WALLET_ICONS } from './config.js';
 ```
 
-**Step 2: Add _getGlobalProviders method**
+**Step 2: Add \_getGlobalProviders method**
 
 Add this method to WalletManager class:
 
@@ -317,9 +324,10 @@ git commit -m "feat: add _getGlobalProviders helper method"
 ## Task 7: Add Helper Method to Sort by Priority
 
 **Files:**
+
 - Modify: `src/wallet_manager.js` (add new private method)
 
-**Step 1: Add _sortByPriority method**
+**Step 1: Add \_sortByPriority method**
 
 Add this method to WalletManager class:
 
@@ -369,6 +377,7 @@ git commit -m "feat: add _sortByPriority helper method"
 ## Task 8: Add Main getDetectedWallets Method
 
 **Files:**
+
 - Modify: `src/wallet_manager.js` (add new public method)
 
 **Step 1: Add getDetectedWallets method**
@@ -480,6 +489,7 @@ getDetectedWallets() {
 
 Run: `yarn dev`
 Open browser console:
+
 ```javascript
 window.WALLET_DEBUG = true;
 // Should see debug logs
@@ -497,6 +507,7 @@ git commit -m "feat: add getDetectedWallets method to WalletManager"
 ## Task 9: Simplify wallets.js to Pure Rendering
 
 **Files:**
+
 - Modify: `src/wallets.js:1-329` (major refactor)
 
 **Step 1: Replace entire renderWallets function**
@@ -514,7 +525,8 @@ export function renderWallets(walletData, controller) {
 
   if (totalCount === 0) {
     // If no wallets are detected at all, show the "No wallets detected" message
-    walletButtonsContainer.innerHTML = '<p class="no-wallets-message">No wallets detected</p>';
+    walletButtonsContainer.innerHTML =
+      '<p class="no-wallets-message">No wallets detected</p>';
     return;
   }
 
@@ -523,11 +535,19 @@ export function renderWallets(walletData, controller) {
   walletGrid.className = 'top-wallets-grid';
 
   // Add top wallets as individual buttons
-  topWallets.forEach(wallet => {
-    const button = createWalletButton(wallet.info.name, wallet.info.icon, wallet.info.rdns);
+  topWallets.forEach((wallet) => {
+    const button = createWalletButton(
+      wallet.info.name,
+      wallet.info.icon,
+      wallet.info.rdns
+    );
 
     // Add data attribute for chain features if available
-    if (wallet.families && Array.isArray(wallet.families) && wallet.families.length > 0) {
+    if (
+      wallet.families &&
+      Array.isArray(wallet.families) &&
+      wallet.families.length > 0
+    ) {
       button.setAttribute('data-chain-features', wallet.families.join(','));
     }
 
@@ -537,7 +557,9 @@ export function renderWallets(walletData, controller) {
   walletButtonsContainer.appendChild(walletGrid);
 
   // Check if there are remaining wallets
-  const hasRemainingWallets = Object.values(groupedWallets).some(group => group.length > 0);
+  const hasRemainingWallets = Object.values(groupedWallets).some(
+    (group) => group.length > 0
+  );
 
   // Add "View all wallets" button if there are additional wallets
   if (hasRemainingWallets) {
@@ -558,20 +580,34 @@ export function renderWallets(walletData, controller) {
     Object.entries(groupedWallets).forEach(([family, wallets]) => {
       if (wallets.length > 0) {
         const sectionTitle =
-          family === 'multiChain' ? 'Multi-chain' :
-          family === 'evm' ? 'Ethereum & EVM' :
-          family === 'solana' ? 'Solana' :
-          'Tron';
+          family === 'multiChain'
+            ? 'Multi-chain'
+            : family === 'evm'
+              ? 'Ethereum & EVM'
+              : family === 'solana'
+                ? 'Solana'
+                : 'Tron';
 
         const section = createSectionElement(sectionTitle, family);
         const walletGroup = section.querySelector('.wallet-group');
 
-        wallets.forEach(wallet => {
-          const button = createWalletButton(wallet.info.name, wallet.info.icon, wallet.info.rdns);
+        wallets.forEach((wallet) => {
+          const button = createWalletButton(
+            wallet.info.name,
+            wallet.info.icon,
+            wallet.info.rdns
+          );
 
           // Add data attribute for chain features if available
-          if (wallet.families && Array.isArray(wallet.families) && wallet.families.length > 0) {
-            button.setAttribute('data-chain-features', wallet.families.join(','));
+          if (
+            wallet.families &&
+            Array.isArray(wallet.families) &&
+            wallet.families.length > 0
+          ) {
+            button.setAttribute(
+              'data-chain-features',
+              wallet.families.join(',')
+            );
           }
 
           walletGroup.appendChild(button);
@@ -627,9 +663,11 @@ function createWalletButton(name, icon, rdns) {
 **Step 2: Verify the change**
 
 Count lines:
+
 ```bash
 wc -l src/wallets.js
 ```
+
 Expected: ~140-150 lines (down from 328)
 
 **Step 3: Commit**
@@ -644,6 +682,7 @@ git commit -m "refactor: simplify wallets.js to pure rendering function"
 ## Task 10: Update ConnectorController to Use New API
 
 **Files:**
+
 - Modify: `src/controllers/connector_controller.js:55` (line that calls renderWallets)
 - Modify: `src/controllers/connector_controller.js:61` (line in subscribe callback)
 
@@ -703,6 +742,7 @@ git commit -m "refactor: update controller to use WalletManager.getDetectedWalle
 ## Task 11: Manual Testing & Verification
 
 **Files:**
+
 - All modified files
 
 **Step 1: Run the dev server**
@@ -745,6 +785,7 @@ wc -l src/wallets.js src/wallet_manager.js src/controllers/wallet_controller.js
 ```
 
 Expected:
+
 - `wallets.js`: ~140-150 lines (was 328)
 - `wallet_manager.js`: ~280 lines (was 171)
 - `connector_controller.js`: ~309 lines (unchanged)
@@ -755,6 +796,7 @@ Expected:
 ## Task 12: Run Tests (if they exist)
 
 **Files:**
+
 - Test files in `src/__tests__/`
 
 **Step 1: Check if tests exist**
@@ -774,6 +816,7 @@ Expected: Tests pass (or update tests if needed)
 **Step 3: If tests fail, fix them**
 
 Update test files to use new API:
+
 - Mock `walletManager.getDetectedWallets()` instead of MIPD store
 - Update expected data structures
 
@@ -800,6 +843,7 @@ Expected: See all commits from this refactoring
 **Step 3: Create summary**
 
 Document the changes:
+
 - wallets.js: 328 → ~150 lines (54% reduction)
 - wallet_manager.js: 171 → ~280 lines (fat model)
 - Separation of concerns: Model handles logic, View handles rendering
@@ -810,18 +854,21 @@ Document the changes:
 ## Summary
 
 **What was built:**
+
 - Fat model, thin view architecture following Stimulus conventions
 - WalletManager now handles all wallet detection, categorization, sorting
 - wallets.js reduced to pure rendering function
 - Debug logging controlled by `window.WALLET_DEBUG` flag
 
 **Key architectural improvements:**
+
 - Clear separation of concerns
 - Easier to test (business logic in model)
 - Easier to maintain (each file has single responsibility)
 - Following Rails/Hotwire conventions
 
 **Testing:**
+
 - Manual testing in browser with/without wallet extensions
 - Debug mode verification
 - Connection flow verification
