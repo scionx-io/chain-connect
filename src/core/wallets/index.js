@@ -6,5 +6,5 @@ import TronHandler from './tron_handler.js';
 export const WALLET_HANDLERS = {
   evm: EvmHandler,
   solana: SolanaHandler,
-  tron: TronHandler
+  tron: TronHandler,
 };

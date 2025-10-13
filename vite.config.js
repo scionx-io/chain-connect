@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   define: {
-    'global': {},
+    global: {},
   },
   assetsInclude: ['**/*.svg'],
   build: {
@@ -18,24 +18,24 @@ export default defineConfig({
         'mipd',
         '@solana/web3.js',
         '@tronweb3/tronwallet-adapters',
-        'ethers'
+        'ethers',
       ],
       output: {
         globals: {
           '@hotwired/stimulus': 'Stimulus',
-          'mipd': 'mipd',
+          mipd: 'mipd',
           '@solana/web3.js': 'web3',
           '@tronweb3/tronwallet-adapters': 'tronwalletAdapters',
-          'ethers': 'ethers'
+          ethers: 'ethers',
         },
         assetFileNames: (assetInfo) => {
           if (assetInfo.name.endsWith('.css')) {
             return 'chain-connect.css';
           }
           return assetInfo.name;
-        }
+        },
       },
     },
-    cssCodeSplit: false,  // Prevents CSS from being split into separate chunks
+    cssCodeSplit: false, // Prevents CSS from being split into separate chunks
   },
 });

@@ -12,33 +12,41 @@ export function renderWalletModal(wallets, onSelect, onClose) {
   // Create container element
   const container = document.createElement('div');
 
-  // Render modal structure using uhtml
-  render(container, html`
-    <div class="modal-backdrop" onclick=${onClose}>
-      <div class="modal-content" onclick=${(e) => e.stopPropagation()}>
-        <div class="modal-header">
-          <h2>Connect Wallet</h2>
-          <button class="modal-close" data-action="close" onclick=${onClose}>×</button>
-        </div>
-        <div class="modal-body">
-          <div class="wallet-grid">
-            ${wallets.map(wallet => html`
-              <button
-                class="wallet-button"
-                data-wallet-rdns=${wallet.rdns}
-                onclick=${onSelect}>
-                <img
-                  src=${wallet.icon || WALLET_ICONS[wallet.rdns] || WALLET_ICONS.default}
-                  alt=${wallet.name}
-                  class="wallet-icon" />
-                <span class="wallet-name">${wallet.name}</span>
-              </button>
-            `)}
+  // Render modal structure using uhtml - class names match dist/chain-connect.css
+  render(
+    container,
+    html`
+      <div class="wallet-connector-modal modal-backdrop" onclick=${onClose}>
+        <div
+          class="wallet-connector-content"
+          onclick=${(e) => e.stopPropagation()}
+        >
+          <button class="close-modal-button" data-action="close" onclick=${onClose}>×</button>
+          <h2 class="wallet-connector-title">Connect Wallet</h2>
+          <div class="wallet-buttons-container">
+            ${wallets.map(
+              (wallet) => html`
+                <button
+                  class="wallet-button"
+                  data-wallet-rdns=${wallet.rdns}
+                  onclick=${onSelect}
+                >
+                  <img
+                    src=${wallet.icon ||
+                    WALLET_ICONS[wallet.rdns] ||
+                    WALLET_ICONS.default}
+                    alt=${wallet.name}
+                    class="wallet-button-icon"
+                  />
+                  <span class="wallet-button-name">${wallet.name}</span>
+                </button>
+              `
+            )}
           </div>
         </div>
       </div>
-    </div>
-  `);
+    `
+  );
 
   return container.firstElementChild;
 }

@@ -13,6 +13,7 @@
 ## Task 1: Create Modal Renderer Utility
 
 **Files:**
+
 - Create: `src/utils/modal_renderer.js`
 - Test: `src/__tests__/modal_renderer.test.js`
 
@@ -30,14 +31,14 @@ describe('renderWalletModal', () => {
       rdns: 'io.metamask',
       name: 'MetaMask',
       icon: 'data:image/svg+xml;base64,PHN2Zy...',
-      chains: ['eip155']
+      chains: ['eip155'],
     },
     {
       rdns: 'app.phantom',
       name: 'Phantom',
       icon: 'data:image/svg+xml;base64,PHN2Zy...',
-      chains: ['solana']
-    }
+      chains: ['solana'],
+    },
   ];
 
   it('should return a DOM element', () => {
@@ -70,9 +71,11 @@ describe('renderWalletModal', () => {
     const button = element.querySelector('[data-wallet-rdns="io.metamask"]');
     button.click();
 
-    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({
-      currentTarget: button
-    }));
+    expect(onSelect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentTarget: button,
+      })
+    );
   });
 
   it('should attach click handler to close button', () => {
@@ -126,32 +129,43 @@ export function renderWalletModal(wallets, onSelect, onClose) {
   const container = document.createElement('div');
 
   // Render modal structure using uhtml
-  render(container, html`
-    <div class="modal-backdrop" onclick=${onClose}>
-      <div class="modal-content" onclick=${(e) => e.stopPropagation()}>
-        <div class="modal-header">
-          <h2>Connect Wallet</h2>
-          <button class="modal-close" data-action="close" onclick=${onClose}>×</button>
-        </div>
-        <div class="modal-body">
-          <div class="wallet-grid">
-            ${wallets.map(wallet => html`
-              <button
-                class="wallet-button"
-                data-wallet-rdns=${wallet.rdns}
-                onclick=${onSelect}>
-                <img
-                  src=${wallet.icon || WALLET_ICONS[wallet.rdns] || WALLET_ICONS.default}
-                  alt=${wallet.name}
-                  class="wallet-icon" />
-                <span class="wallet-name">${wallet.name}</span>
-              </button>
-            `)}
+  render(
+    container,
+    html`
+      <div class="modal-backdrop" onclick=${onClose}>
+        <div class="modal-content" onclick=${(e) => e.stopPropagation()}>
+          <div class="modal-header">
+            <h2>Connect Wallet</h2>
+            <button class="modal-close" data-action="close" onclick=${onClose}>
+              ×
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="wallet-grid">
+              ${wallets.map(
+                (wallet) => html`
+                  <button
+                    class="wallet-button"
+                    data-wallet-rdns=${wallet.rdns}
+                    onclick=${onSelect}
+                  >
+                    <img
+                      src=${wallet.icon ||
+                      WALLET_ICONS[wallet.rdns] ||
+                      WALLET_ICONS.default}
+                      alt=${wallet.name}
+                      class="wallet-icon"
+                    />
+                    <span class="wallet-name">${wallet.name}</span>
+                  </button>
+                `
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  `);
+    `
+  );
 
   return container.firstElementChild;
 }
@@ -179,6 +193,7 @@ git commit -m "feat: add modal renderer utility
 ## Task 2: Create New WalletController
 
 **Files:**
+
 - Create: `src/controllers/wallet_controller.js`
 - Reference: `src/controllers/connector_controller.js` (copy base structure)
 - Reference: `src/controllers/modal_controller.js` (copy modal logic)
@@ -214,21 +229,30 @@ describe('WalletController', () => {
   });
 
   it('should initialize with disconnected state', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     expect(controller.isConnectedValue).toBe(false);
     expect(controller.addressValue).toBe('');
   });
 
   it('should create WalletManager on connect', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     expect(controller.walletManager).toBeDefined();
     expect(controller.mipdStore).toBeDefined();
   });
 
   it('should open modal when open() is called', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     controller.open();
 
@@ -237,7 +261,10 @@ describe('WalletController', () => {
   });
 
   it('should close modal when close() is called', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     controller.open();
     controller.close();
@@ -247,7 +274,10 @@ describe('WalletController', () => {
   });
 
   it('should emit wallet:connected event when wallet connects', async () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
     const eventSpy = vi.fn();
     element.addEventListener('wallet:connected', eventSpy);
 
@@ -257,9 +287,11 @@ describe('WalletController', () => {
       chainId: '1',
       name: 'MetaMask',
       rdns: 'io.metamask',
-      family: 'evm'
+      family: 'evm',
     };
-    vi.spyOn(controller.walletManager, 'connect').mockResolvedValue(mockConnection);
+    vi.spyOn(controller.walletManager, 'connect').mockResolvedValue(
+      mockConnection
+    );
 
     controller.open();
     const button = document.querySelector('[data-wallet-rdns="io.metamask"]');
@@ -281,7 +313,7 @@ Expected: FAIL with "Cannot find module '../controllers/wallet_controller.js'"
 Create the merged controller:
 
 ```javascript
-import { Controller } from "@hotwired/stimulus";
+import { Controller } from '@hotwired/stimulus';
 import { createStore } from 'mipd';
 import { WalletManager } from '../core/wallet_manager.js';
 import { renderWalletModal } from '../utils/modal_renderer.js';
@@ -298,8 +330,8 @@ export default class WalletController extends Controller {
     rdns: String,
     family: String,
     isConnected: { type: Boolean, default: false },
-    connecting: { type: Boolean, default: false }
-  }
+    connecting: { type: Boolean, default: false },
+  };
 
   // ============================================================================
   // Lifecycle
@@ -363,7 +395,11 @@ export default class WalletController extends Controller {
     this.boundClose = this.close.bind(this);
 
     // Render modal
-    this.modalElement = renderWalletModal(wallets, this.boundSelectWallet, this.boundClose);
+    this.modalElement = renderWalletModal(
+      wallets,
+      this.boundSelectWallet,
+      this.boundClose
+    );
     document.body.appendChild(this.modalElement);
   }
 
@@ -380,7 +416,7 @@ export default class WalletController extends Controller {
 
     if (!rdns) {
       this.dispatch('error', {
-        detail: { message: 'Invalid wallet selection' }
+        detail: { message: 'Invalid wallet selection' },
       });
       return;
     }
@@ -395,17 +431,14 @@ export default class WalletController extends Controller {
         setTimeout(() => reject(new Error('Connection timeout')), 30000);
       });
 
-      await Promise.race([
-        this.walletManager.connect(rdns),
-        timeoutPromise
-      ]);
+      await Promise.race([this.walletManager.connect(rdns), timeoutPromise]);
     } catch (error) {
       console.error('Wallet connection error:', error);
       this.dispatch('error', {
         detail: {
           message: error.message || 'Connection failed',
-          error
-        }
+          error,
+        },
       });
     } finally {
       this.connectingValue = false;
@@ -430,17 +463,38 @@ export default class WalletController extends Controller {
     this.boundHandleAccountChanged = this.handleAccountChanged.bind(this);
 
     this.walletManager.addEventListener('connected', this.boundHandleConnected);
-    this.walletManager.addEventListener('disconnected', this.boundHandleDisconnected);
-    this.walletManager.addEventListener('chainChanged', this.boundHandleChainChanged);
-    this.walletManager.addEventListener('accountChanged', this.boundHandleAccountChanged);
+    this.walletManager.addEventListener(
+      'disconnected',
+      this.boundHandleDisconnected
+    );
+    this.walletManager.addEventListener(
+      'chainChanged',
+      this.boundHandleChainChanged
+    );
+    this.walletManager.addEventListener(
+      'accountChanged',
+      this.boundHandleAccountChanged
+    );
   }
 
   cleanupEventListeners() {
     if (this.walletManager) {
-      this.walletManager.removeEventListener('connected', this.boundHandleConnected);
-      this.walletManager.removeEventListener('disconnected', this.boundHandleDisconnected);
-      this.walletManager.removeEventListener('chainChanged', this.boundHandleChainChanged);
-      this.walletManager.removeEventListener('accountChanged', this.boundHandleAccountChanged);
+      this.walletManager.removeEventListener(
+        'connected',
+        this.boundHandleConnected
+      );
+      this.walletManager.removeEventListener(
+        'disconnected',
+        this.boundHandleDisconnected
+      );
+      this.walletManager.removeEventListener(
+        'chainChanged',
+        this.boundHandleChainChanged
+      );
+      this.walletManager.removeEventListener(
+        'accountChanged',
+        this.boundHandleAccountChanged
+      );
     }
   }
 
@@ -470,18 +524,18 @@ export default class WalletController extends Controller {
         name: connection.name,
         rdns: connection.rdns,
         family: connection.family,
-        provider: connection.provider
-      }
+        provider: connection.provider,
+      },
     });
   }
 
   handleDisconnected() {
     // Clear Stimulus values
-    this.addressValue = "";
-    this.chainIdValue = "";
-    this.walletNameValue = "";
-    this.rdnsValue = "";
-    this.familyValue = "";
+    this.addressValue = '';
+    this.chainIdValue = '';
+    this.walletNameValue = '';
+    this.rdnsValue = '';
+    this.familyValue = '';
     this.isConnectedValue = false;
 
     // Dispatch Stimulus event
@@ -494,7 +548,7 @@ export default class WalletController extends Controller {
 
     // Dispatch Stimulus event
     this.dispatch('chainChanged', {
-      detail: { chainId: event.detail.connection.chainId }
+      detail: { chainId: event.detail.connection.chainId },
     });
   }
 
@@ -504,7 +558,7 @@ export default class WalletController extends Controller {
 
     // Dispatch Stimulus event
     this.dispatch('accountChanged', {
-      detail: { address: event.detail.connection.address }
+      detail: { address: event.detail.connection.address },
     });
   }
 
@@ -543,6 +597,7 @@ git commit -m "feat: create unified WalletController
 ## Task 3: Update Exports and Remove Old Controllers
 
 **Files:**
+
 - Modify: `src/index.js`
 - Delete: `src/controllers/connector_controller.js`
 - Delete: `src/controllers/modal_controller.js`
@@ -557,7 +612,11 @@ git commit -m "feat: create unified WalletController
 ```javascript
 // Main entry point for the wallet connector library
 import { WalletManager } from './core/wallet_manager.js';
-import { updateButtonState, resetWalletUI, updateWalletInfo } from './utils/utils.js';
+import {
+  updateButtonState,
+  resetWalletUI,
+  updateWalletInfo,
+} from './utils/utils.js';
 import { renderWallets } from './utils/wallets.js';
 import { renderWalletModal } from './utils/modal_renderer.js';
 import { WALLET_ICONS } from './utils/config.js';
@@ -574,7 +633,7 @@ export {
   renderWalletModal,
   WALLET_ICONS,
   getChainName,
-  formatChainDisplay
+  formatChainDisplay,
 };
 
 // Export wallet handlers
@@ -640,6 +699,7 @@ WalletsController removed in favor of unified WalletController
 ## Task 4: Update Example Application
 
 **Files:**
+
 - Modify: `example/index.html`
 - Modify: `example/main.js`
 - Delete: `example/controllers/demo_status_controller.js`
@@ -649,34 +709,35 @@ WalletsController removed in favor of unified WalletController
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@scionx/chain-connect Example</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <div data-controller="wallet"
-       data-action="wallet:connected->demo#handleConnected
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@scionx/chain-connect Example</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div
+      data-controller="wallet"
+      data-action="wallet:connected->demo#handleConnected
                     wallet:disconnected->demo#handleDisconnected
-                    wallet:error->demo#handleError">
+                    wallet:error->demo#handleError"
+    >
+      <div class="container">
+        <h1>@scionx/chain-connect Example</h1>
+        <p>Simple wallet connector - just one controller!</p>
 
-    <div class="container">
-      <h1>@scionx/chain-connect Example</h1>
-      <p>Simple wallet connector - just one controller!</p>
+        <button data-action="click->wallet#open">Connect Wallet</button>
+        <button data-action="click->wallet#disconnectWallet">Disconnect</button>
 
-      <button data-action="click->wallet#open">Connect Wallet</button>
-      <button data-action="click->wallet#disconnectWallet">Disconnect</button>
-
-      <div data-controller="demo" data-demo-wallet-outlet="wallet">
-        <h2>Connection Status</h2>
-        <div data-demo-target="status"></div>
+        <div data-controller="demo" data-demo-wallet-outlet="wallet">
+          <h2>Connection Status</h2>
+          <div data-demo-target="status"></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <script type="module" src="./main.js"></script>
-</body>
+    <script type="module" src="./main.js"></script>
+  </body>
 </html>
 ```
 
@@ -755,6 +816,7 @@ yarn dev
 ```
 
 Open browser, verify:
+
 - Connect button opens modal
 - Wallet selection works
 - Status updates correctly
@@ -777,6 +839,7 @@ git commit -m "docs: update example to use WalletController
 ## Task 5: Update Documentation
 
 **Files:**
+
 - Modify: `README.md`
 - Create: `docs/MIGRATION.md`
 
@@ -784,7 +847,7 @@ git commit -m "docs: update example to use WalletController
 
 Find the usage section and replace with:
 
-```markdown
+````markdown
 ## Quick Start
 
 ### Installation
@@ -794,6 +857,7 @@ npm install @scionx/chain-connect
 # or
 yarn add @scionx/chain-connect
 ```
+````
 
 ### Basic Usage
 
@@ -814,6 +878,7 @@ application.register('wallet', WalletController);
 ```
 
 That's it! The controller handles everything:
+
 - EIP-6963 wallet detection
 - Modal rendering
 - Connection management
@@ -822,9 +887,11 @@ That's it! The controller handles everything:
 ### Listening to Events
 
 ```html
-<div data-controller="wallet"
-     data-action="wallet:connected->mycontroller#handleConnected
-                  wallet:disconnected->mycontroller#handleDisconnected">
+<div
+  data-controller="wallet"
+  data-action="wallet:connected->mycontroller#handleConnected
+                  wallet:disconnected->mycontroller#handleDisconnected"
+>
   <button data-action="click->wallet#open">Connect Wallet</button>
 </div>
 ```
@@ -850,7 +917,8 @@ if (this.walletOutlet.isConnectedValue) {
 - **Ethereum**: MetaMask, Coinbase Wallet, Rainbow, any EIP-6963 wallet
 - **Solana**: Phantom, Solflare, any wallet with `window.solana`
 - **Tron**: TronLink, any wallet with `window.tronWeb`
-```
+
+````
 
 **Step 2: Create migration guide**
 
@@ -872,9 +940,10 @@ Create `docs/MIGRATION.md`:
      data-wallets-modal-outlet="modal">
   <button data-action="click->connector#open">Connect</button>
 </div>
-```
+````
 
 **v2.0:**
+
 ```html
 <div data-controller="wallet">
   <button data-action="click->wallet#open">Connect</button>
@@ -884,8 +953,13 @@ Create `docs/MIGRATION.md`:
 ### Import Changes
 
 **v1.x:**
+
 ```javascript
-import { ConnectorController, ModalController, WalletsController } from '@scionx/chain-connect';
+import {
+  ConnectorController,
+  ModalController,
+  WalletsController,
+} from '@scionx/chain-connect';
 
 application.register('connector', ConnectorController);
 application.register('modal', ModalController);
@@ -893,6 +967,7 @@ application.register('wallets', WalletsController);
 ```
 
 **v2.0:**
+
 ```javascript
 import { WalletController } from '@scionx/chain-connect';
 
@@ -901,28 +976,30 @@ application.register('wallet', WalletController);
 
 ### Event Name Changes
 
-| v1.x | v2.0 |
-|------|------|
-| `connector:connected` | `wallet:connected` |
-| `connector:disconnected` | `wallet:disconnected` |
-| `connector:chainChanged` | `wallet:chainChanged` |
+| v1.x                       | v2.0                    |
+| -------------------------- | ----------------------- |
+| `connector:connected`      | `wallet:connected`      |
+| `connector:disconnected`   | `wallet:disconnected`   |
+| `connector:chainChanged`   | `wallet:chainChanged`   |
 | `connector:accountChanged` | `wallet:accountChanged` |
-| `connector:error` | `wallet:error` |
+| `connector:error`          | `wallet:error`          |
 
 ### Stimulus Value Access
 
 **v1.x:**
+
 ```javascript
 // Had to access via connectorOutlet
-this.connectorOutlet.addressValue
-this.connectorOutlet.isConnectedValue
+this.connectorOutlet.addressValue;
+this.connectorOutlet.isConnectedValue;
 ```
 
 **v2.0:**
+
 ```javascript
 // Direct access via walletOutlet
-this.walletOutlet.addressValue
-this.walletOutlet.isConnectedValue
+this.walletOutlet.addressValue;
+this.walletOutlet.isConnectedValue;
 ```
 
 ## What Stayed the Same
@@ -964,7 +1041,8 @@ this.walletOutlet.isConnectedValue
 - **Easier to learn**: Obvious what `data-controller="wallet"` does
 - **Maintainable**: Less code, clearer responsibilities
 - **Same power**: All features preserved, just better organized
-```
+
+````
 
 **Step 3: Commit**
 
@@ -976,13 +1054,14 @@ git commit -m "docs: update documentation for v2.0
 - Add comprehensive migration guide from v1.x
 - Document breaking changes and event name updates
 - Include side-by-side comparison examples"
-```
+````
 
 ---
 
 ## Task 6: Update Package Version
 
 **Files:**
+
 - Modify: `package.json`
 
 **Step 1: Update version to 2.0.0**

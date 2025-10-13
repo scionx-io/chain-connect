@@ -5,17 +5,21 @@
 ### Single Controller
 
 **v1.x:**
+
 ```html
-<div data-controller="connector modal wallets"
-     data-connector-modal-outlet="modal"
-     data-connector-wallets-outlet="wallets"
-     data-wallets-connector-outlet="connector"
-     data-wallets-modal-outlet="modal">
+<div
+  data-controller="connector modal wallets"
+  data-connector-modal-outlet="modal"
+  data-connector-wallets-outlet="wallets"
+  data-wallets-connector-outlet="connector"
+  data-wallets-modal-outlet="modal"
+>
   <button data-action="click->connector#open">Connect</button>
 </div>
 ```
 
 **v2.0:**
+
 ```html
 <div data-controller="wallet">
   <button data-action="click->wallet#open">Connect</button>
@@ -25,8 +29,13 @@
 ### Import Changes
 
 **v1.x:**
+
 ```javascript
-import { ConnectorController, ModalController, WalletsController } from '@scionx/chain-connect';
+import {
+  ConnectorController,
+  ModalController,
+  WalletsController,
+} from '@scionx/chain-connect';
 
 application.register('connector', ConnectorController);
 application.register('modal', ModalController);
@@ -34,6 +43,7 @@ application.register('wallets', WalletsController);
 ```
 
 **v2.0:**
+
 ```javascript
 import { WalletController } from '@scionx/chain-connect';
 
@@ -42,28 +52,30 @@ application.register('wallet', WalletController);
 
 ### Event Name Changes
 
-| v1.x | v2.0 |
-|------|------|
-| `connector:connected` | `wallet:connected` |
-| `connector:disconnected` | `wallet:disconnected` |
-| `connector:chainChanged` | `wallet:chainChanged` |
+| v1.x                       | v2.0                    |
+| -------------------------- | ----------------------- |
+| `connector:connected`      | `wallet:connected`      |
+| `connector:disconnected`   | `wallet:disconnected`   |
+| `connector:chainChanged`   | `wallet:chainChanged`   |
 | `connector:accountChanged` | `wallet:accountChanged` |
-| `connector:error` | `wallet:error` |
+| `connector:error`          | `wallet:error`          |
 
 ### Stimulus Value Access
 
 **v1.x:**
+
 ```javascript
 // Had to access via connectorOutlet
-this.connectorOutlet.addressValue
-this.connectorOutlet.isConnectedValue
+this.connectorOutlet.addressValue;
+this.connectorOutlet.isConnectedValue;
 ```
 
 **v2.0:**
+
 ```javascript
 // Direct access via walletOutlet
-this.walletOutlet.addressValue
-this.walletOutlet.isConnectedValue
+this.walletOutlet.addressValue;
+this.walletOutlet.isConnectedValue;
 ```
 
 ## What Stayed the Same

@@ -1,6 +1,10 @@
 // Main entry point for the wallet connector library
 import { WalletManager } from './core/wallet_manager.js';
-import { updateButtonState, resetWalletUI, updateWalletInfo } from './utils/utils.js';
+import {
+  updateButtonState,
+  resetWalletUI,
+  updateWalletInfo,
+} from './utils/utils.js';
 import { renderWallets } from './utils/wallets.js';
 import { renderWalletModal } from './utils/modal_renderer.js';
 import { WALLET_ICONS } from './utils/config.js';
@@ -17,7 +21,7 @@ export {
   renderWalletModal,
   WALLET_ICONS,
   getChainName,
-  formatChainDisplay
+  formatChainDisplay,
 };
 
 // Export wallet handlers
@@ -29,12 +33,12 @@ export { default as TronHandler } from './core/wallets/tron_handler.js';
 export { default as WalletController } from './controllers/wallet_controller.js';
 
 // Main initialization function for the wallet connector
-export function initializeWalletConnector(mipdStore, targetElement) {
+export function initializeWalletConnector(mipdStore) {
   const walletManager = new WalletManager(mipdStore);
-  
+
   // Initialize wallet manager for auto-reconnect
   walletManager.init();
-  
+
   return walletManager;
 }
 
@@ -42,6 +46,6 @@ export function initializeWalletConnector(mipdStore, targetElement) {
 export async function createWalletConnector() {
   const { createStore } = await import('mipd');
   const mipdStore = createStore();
-  
+
   return initializeWalletConnector(mipdStore);
 }

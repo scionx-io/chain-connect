@@ -43,6 +43,7 @@ application.register('wallet', WalletController);
 ```
 
 That's it! The controller handles everything:
+
 - EIP-6963 wallet detection
 - Modal rendering
 - Connection management
@@ -51,9 +52,11 @@ That's it! The controller handles everything:
 ### Listening to Events
 
 ```html
-<div data-controller="wallet"
-     data-action="wallet:connected->mycontroller#handleConnected
-                  wallet:disconnected->mycontroller#handleDisconnected">
+<div
+  data-controller="wallet"
+  data-action="wallet:connected->mycontroller#handleConnected
+                  wallet:disconnected->mycontroller#handleDisconnected"
+>
   <button data-action="click->wallet#open">Connect Wallet</button>
 </div>
 ```
@@ -87,12 +90,14 @@ if (this.walletOutlet.isConnectedValue) {
 Main controller for wallet connection management:
 
 **Actions:**
+
 - `open()` - Open the wallet selection modal
 - `close()` - Close the wallet selection modal
 - `selectWallet(event)` - Handle wallet selection from modal
 - `disconnectWallet()` - Disconnect the currently connected wallet
 
 **Stimulus Values:**
+
 - `addressValue` - Connected wallet address
 - `chainIdValue` - Current chain ID
 - `walletNameValue` - Name of connected wallet
@@ -102,6 +107,7 @@ Main controller for wallet connection management:
 - `connectingValue` - Boolean loading state
 
 **Events Dispatched:**
+
 - `wallet:connected` - When a wallet successfully connects
 - `wallet:disconnected` - When a wallet disconnects
 - `wallet:chainChanged` - When the connected wallet's chain changes
@@ -122,6 +128,7 @@ The main class that manages wallet connections:
 - `getDetectedWallets()` - Get list of detected wallets
 
 **Events Emitted:**
+
 - `connected` - When a wallet is successfully connected
 - `disconnected` - When a wallet is disconnected
 - `chainChanged` - When the connected wallet's chain changes
@@ -138,6 +145,7 @@ The main class that manages wallet connections:
 ## Wallet Detection
 
 Automatically discovers wallets using:
+
 - **EIP-6963** (MIPD) for Ethereum wallets
 - **window.solana** for Solana wallets
 - **window.tronWeb** for Tron wallets
@@ -145,6 +153,7 @@ Automatically discovers wallets using:
 ## Swiss Design
 
 Built-in minimalist styling:
+
 - 8px grid system
 - Mobile-first responsive
 - Helvetica Neue typography

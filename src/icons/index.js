@@ -16,5 +16,5 @@ export {
   tronIcon,
   metamaskIcon,
   phantomIcon,
-  tronlinkIcon
+  tronlinkIcon,
 };

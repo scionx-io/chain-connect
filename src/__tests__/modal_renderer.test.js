@@ -7,14 +7,14 @@ describe('renderWalletModal', () => {
       rdns: 'io.metamask',
       name: 'MetaMask',
       icon: 'data:image/svg+xml;base64,PHN2Zy...',
-      chains: ['eip155']
+      chains: ['eip155'],
     },
     {
       rdns: 'app.phantom',
       name: 'Phantom',
       icon: 'data:image/svg+xml;base64,PHN2Zy...',
-      chains: ['solana']
-    }
+      chains: ['solana'],
+    },
   ];
 
   it('should return a DOM element', () => {

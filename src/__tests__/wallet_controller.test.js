@@ -23,21 +23,30 @@ describe('WalletController', () => {
   });
 
   it('should initialize with disconnected state', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     expect(controller.isConnectedValue).toBe(false);
     expect(controller.addressValue).toBe('');
   });
 
   it('should create WalletManager on connect', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     expect(controller.walletManager).toBeDefined();
     expect(controller.mipdStore).toBeDefined();
   });
 
   it('should open modal when open() is called', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     controller.open();
 
@@ -46,7 +55,10 @@ describe('WalletController', () => {
   });
 
   it('should close modal when close() is called', () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
 
     controller.open();
     controller.close();
@@ -56,7 +68,10 @@ describe('WalletController', () => {
   });
 
   it('should emit wallet:connected event when wallet connects', async () => {
-    const controller = application.getControllerForElementAndIdentifier(element, 'wallet');
+    const controller = application.getControllerForElementAndIdentifier(
+      element,
+      'wallet'
+    );
     const eventSpy = vi.fn();
     element.addEventListener('wallet:connected', eventSpy);
 
@@ -66,10 +81,12 @@ describe('WalletController', () => {
         rdns: 'io.metamask',
         name: 'MetaMask',
         icon: 'data:image/svg+xml;base64,PHN2Zy...',
-        chains: ['eip155']
-      }
+        chains: ['eip155'],
+      },
     ];
-    vi.spyOn(controller.walletManager, 'getDetectedWallets').mockReturnValue(mockWallets);
+    vi.spyOn(controller.walletManager, 'getDetectedWallets').mockReturnValue(
+      mockWallets
+    );
 
     // Mock wallet manager connect to trigger connected event
     const mockConnection = {
@@ -78,17 +95,19 @@ describe('WalletController', () => {
       name: 'MetaMask',
       rdns: 'io.metamask',
       family: 'evm',
-      provider: {}
+      provider: {},
     };
 
-    const connectSpy = vi.spyOn(controller.walletManager, 'connect').mockImplementation(async (rdns) => {
-      // Simulate the WalletManager emitting the connected event
-      const event = new CustomEvent('connected', {
-        detail: { connection: mockConnection }
+    const connectSpy = vi
+      .spyOn(controller.walletManager, 'connect')
+      .mockImplementation(async (rdns) => {
+        // Simulate the WalletManager emitting the connected event
+        const event = new CustomEvent('connected', {
+          detail: { connection: mockConnection },
+        });
+        controller.walletManager.dispatchEvent(event);
+        return mockConnection;
       });
-      controller.walletManager.dispatchEvent(event);
-      return mockConnection;
-    });
 
     controller.open();
     const button = document.querySelector('[data-wallet-rdns="io.metamask"]');

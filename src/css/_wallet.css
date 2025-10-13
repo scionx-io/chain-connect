@@ -28,8 +28,6 @@
   margin-bottom: var(--grid-3);
 }
 
-
-
 /* Wallet Grid */
 .wallets {
   display: grid;
@@ -181,5 +179,3 @@
     min-height: 120px;
   }
 }
-
-

@@ -4,13 +4,18 @@ import { getChainName } from './chain_utils.js';
 // LocalStorage
 const STORAGE_KEY = 'wallet_connection';
 
-export const saveWalletState = (walletType, address, chainId = null, rdns = null) => {
+export const saveWalletState = (
+  walletType,
+  address,
+  chainId = null,
+  rdns = null
+) => {
   const state = {
     walletType,
     address,
     chainId: chainId ? chainId.toString() : null,
     rdns,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 };
@@ -43,9 +48,15 @@ export const formatAddress = (address) => {
   return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
 };
 
-export const updateButtonState = (controller, isConnected, isLoading = false) => {
+export const updateButtonState = (
+  controller,
+  isConnected,
+  isLoading = false
+) => {
   // Find the connect wallet button relative to the controller's element
-  const btn = controller.element.querySelector('[data-action*="wallet#openModal"]');
+  const btn = controller.element.querySelector(
+    '[data-action*="wallet#openModal"]'
+  );
   if (btn) {
     if (isLoading) {
       btn.disabled = true;
@@ -61,27 +72,56 @@ export const updateButtonState = (controller, isConnected, isLoading = false) =>
 };
 
 // Wallet info template
-function walletInfoTemplate(name, address, chainId, walletType) {
+function walletInfoTemplate(name, address, chainId, walletType, rdns = null) {
   const chainName = chainId ? getChainName(chainId, walletType) : 'Unknown';
+  const walletProvider = rdns ? rdns.split('.')[1] : name; // Extract provider name from RDNS (e.g., metamask from io.metamask)
   return html`
     <div class="wallet-connector-info">
       <div class="wallet-details">
-        <div><strong>Wallet:</strong> <span class="wallet-connector-name">${name}</span></div>
-        <div><strong>Address:</strong> <span class="wallet-connector-address">${formatAddress(address)}</span></div>
-        <div><strong>Chain:</strong> <span class="wallet-connector-chain">${chainName}</span></div>
+        <div>
+          <strong>Wallet:</strong>
+          <span class="wallet-connector-name">${name}</span>
+        </div>
+        <div>
+          <strong>Provider:</strong>
+          <span class="wallet-connector-provider">${walletProvider}</span>
+        </div>
+        <div>
+          <strong>Address:</strong>
+          <span class="wallet-connector-address"
+            >${formatAddress(address)}</span
+          >
+        </div>
+        <div>
+          <strong>Chain:</strong>
+          <span class="wallet-connector-chain">${chainName}</span>
+        </div>
       </div>
       <button
         class="disconnect-button"
-        data-action="click->wallet#disconnectWallet">
+        data-action="click->wallet#disconnectWallet"
+      >
         Disconnect
       </button>
     </div>
   `;
 }
 
-export const updateWalletInfo = (controller, mipdStore, name, address, rdns = null, chainId = null, walletType = 'evm') => {
-  const connectButton = controller.element.querySelector('[data-action*="wallet#openModal"]');
-  const container = connectButton ? connectButton.parentNode : controller.element;
+export const updateWalletInfo = (
+  controller,
+  mipdStore,
+  name,
+  address,
+  rdns = null,
+  chainId = null,
+  walletType = 'evm'
+) => {
+  const connectButton = controller.element.querySelector(
+    '[data-action*="wallet#openModal"]'
+  );
+  const container = connectButton
+    ? connectButton.parentNode
+    : controller.element;
 
   // Find or create container for wallet info
   let walletInfoContainer = container.querySelector('.wallet-info-container');
@@ -90,21 +130,29 @@ export const updateWalletInfo = (controller, mipdStore, name, address, rdns = nu
     walletInfoContainer.className = 'wallet-info-container';
 
     if (connectButton) {
-      connectButton.parentNode.insertBefore(walletInfoContainer, connectButton.nextSibling);
+      connectButton.parentNode.insertBefore(
+        walletInfoContainer,
+        connectButton.nextSibling
+      );
     } else {
       container.appendChild(walletInfoContainer);
     }
   }
 
   // Render wallet info using uhtml
-  render(walletInfoContainer, walletInfoTemplate(name, address, chainId, walletType));
+  render(
+    walletInfoContainer,
+    walletInfoTemplate(name, address, chainId, walletType, rdns)
+  );
 
   updateButtonState(controller, true);
 };
 
 export const resetWalletUI = (controller) => {
   // Remove wallet info container
-  const walletInfoContainer = controller.element.querySelector('.wallet-info-container');
+  const walletInfoContainer = controller.element.querySelector(
+    '.wallet-info-container'
+  );
   if (walletInfoContainer) {
     walletInfoContainer.remove();
   }

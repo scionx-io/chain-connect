@@ -229,8 +229,7 @@ export default class WalletController extends Controller {
   // Reactive Callbacks
   // ============================================================================
 
-  isConnectedValueChanged(isConnected) {
-    // Add/remove class to controller element for CSS targeting
-    this.element.classList.toggle('wallet-connected', isConnected);
-  }
+  /*isConnectedValueChanged() {
+    this.element.classList.toggle('wallet-connected', this.isConnectedValue);
+  }*/
 }

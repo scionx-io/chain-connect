@@ -207,8 +207,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .show-more-button {
@@ -239,11 +243,11 @@
     min-width: 90vw;
     padding: 16px;
   }
-  
+
   .wallet-button {
     padding: 10px 12px;
   }
-  
+
   .wallet-button-icon {
     width: 24px;
     height: 24px;

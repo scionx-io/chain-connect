@@ -1,6 +1,10 @@
 import { WALLET_HANDLERS } from './wallets/index.js';
 import { WALLET_ICONS } from '../utils/config.js';
-import { loadWalletState, saveWalletState, clearWalletState } from '../utils/utils.js';
+import {
+  loadWalletState,
+  saveWalletState,
+  clearWalletState,
+} from '../utils/utils.js';
 
 class WalletManager extends EventTarget {
   constructor(mipdStore) {
@@ -18,145 +22,176 @@ class WalletManager extends EventTarget {
     }
   }
 
-  // Simple helper: get wallet family from chains array
-  getWalletFamily(chains) {
-    if (!chains || chains.length === 0) return null;
-    if (chains.some(chain => chain.startsWith('eip155:'))) return 'evm';
-    if (chains.some(chain => chain.startsWith('solana:'))) return 'solana';
-    if (chains.some(chain => chain.startsWith('tron:'))) return 'tron';
+  getWalletFamily(wallet) {
+    const { chains = [], rdns = '' } = wallet;
+
+    if (chains.some((c) => c.startsWith('eip155:'))) return 'evm';
+    if (chains.some((c) => c.startsWith('solana:'))) return 'solana';
+    if (chains.some((c) => c.startsWith('tron:'))) return 'tron';
+
+    // EIP-6963 doesn't require chains, fallback to rdns
+    const lower = rdns.toLowerCase();
+    if (lower.includes('metamask') || lower.includes('rabby')) return 'evm';
+    if (lower.includes('phantom') || lower.includes('magiceden'))
+      return 'solana';
+    if (lower.includes('tronlink')) return 'tron';
+
     return null;
   }
 
-  // Get all detected wallets (MIPD + global window objects)
   getDetectedWallets() {
     const wallets = [];
-
-    // Get MIPD wallets
     const mipdWallets = this.mipdStore.getProviders();
-    mipdWallets.forEach(wallet => {
-      const family = this.getWalletFamily(wallet.info.chains);
+
+    mipdWallets.forEach((wallet) => {
+      // Skip Solana-only wallets - detect via window.solana instead
+      if (
+        wallet.info.rdns === 'app.phantom' ||
+        wallet.info.rdns === 'io.magiceden.wallet'
+      )
+        return;
+
+      const family = this.getWalletFamily(wallet.info);
       if (family) {
         wallets.push({
           name: wallet.info.name,
           rdns: wallet.info.rdns,
           icon: wallet.info.icon,
           family,
-          provider: wallet.provider
+          provider: wallet.provider,
         });
       }
     });
 
-    // Check for global providers (non-MIPD wallets)
+    // Add global providers not in MIPD
     const globalProviders = [
-      { name: 'Phantom', rdns: 'phantom', window: 'solana', family: 'solana', icon: WALLET_ICONS.phantom },
-      { name: 'TronLink', rdns: 'tronlink', window: 'tronWeb', family: 'tron', icon: WALLET_ICONS.tronlink }
+      {
+        name: 'Phantom',
+        rdns: 'phantom',
+        window: 'solana',
+        family: 'solana',
+        icon: WALLET_ICONS.phantom,
+      },
+      {
+        name: 'TronLink',
+        rdns: 'tronlink',
+        window: 'tronWeb',
+        family: 'tron',
+        icon: WALLET_ICONS.tronlink,
+      },
     ];
 
-    globalProviders.forEach(({ name, rdns, window: windowProp, family, icon }) => {
-      if (typeof window !== 'undefined' && window[windowProp]) {
-        // Only add if not already in MIPD list
-        if (!wallets.some(w => w.rdns === rdns)) {
-          wallets.push({ name, rdns, icon, family, provider: window[windowProp] });
+    globalProviders.forEach(
+      ({ name, rdns, window: windowProp, family, icon }) => {
+        if (window[windowProp] && !wallets.some((w) => w.rdns === rdns)) {
+          wallets.push({
+            name,
+            rdns,
+            icon,
+            family,
+            provider: window[windowProp],
+          });
         }
       }
-    });
+    );
 
     return wallets;
   }
 
-  // Find provider by RDNS
   findProvider(rdns) {
-    // Check MIPD first
-    const mipdProvider = this.mipdStore.getProviders().find(p => p.info.rdns === rdns);
+    console.log('[findProvider] Looking for:', rdns);
+
+    const mipdProvider = this.mipdStore
+      .getProviders()
+      .find((p) => p.info.rdns === rdns);
     if (mipdProvider) {
-      this._debug('Found MIPD provider:', rdns);
-      return {
-        provider: mipdProvider.provider,
-        info: mipdProvider.info
-      };
+      console.log('[findProvider] Found in MIPD');
+      return { provider: mipdProvider.provider, info: mipdProvider.info };
     }
 
-    // Check global window objects
     const globalMap = {
-      'phantom': { provider: typeof window !== 'undefined' ? window.solana : null, chains: ['solana:101'] },
-      'tronlink': { provider: typeof window !== 'undefined' ? window.tronWeb : null, chains: ['tron:0x2b6653dc'] }
+      phantom: { provider: window.solana, chains: ['solana:101'] },
+      tronlink: { provider: window.tronWeb, chains: ['tron:0x2b6653dc'] },
     };
 
     const global = globalMap[rdns];
-    if (global && global.provider) {
-      this._debug('Found global provider:', rdns);
+    if (global?.provider) {
+      console.log('[findProvider] Found in global');
       return {
         provider: global.provider,
-        info: { rdns, chains: global.chains }
+        info: { rdns, chains: global.chains },
       };
     }
 
-    this._debug('No provider found for:', rdns);
+    console.log('[findProvider] NOT FOUND');
     return null;
   }
 
   async init() {
     const savedState = loadWalletState();
-    if (savedState && savedState.rdns) {
+    if (savedState?.rdns) {
       try {
         await this.connect(savedState.rdns, true);
       } catch (error) {
-        console.error('Automatic reconnection failed:', error);
+        console.error('Reconnection failed:', error);
         clearWalletState();
       }
     }
   }
 
   async connect(rdns, isReconnect = false) {
-    if (this.isConnecting) {
-      throw new Error('Connection already in progress');
-    }
-
+    if (this.isConnecting) throw new Error('Connection in progress');
     this.isConnecting = true;
 
     try {
-      // Disconnect current wallet if connecting to different one
-      const activeConnection = this.getActiveConnection();
-      if (activeConnection && activeConnection.rdns !== rdns && !isReconnect) {
-        await this.disconnect(activeConnection.rdns);
+      console.log('[WalletManager] Connecting to wallet:', rdns);
+      // Disconnect existing
+      const active = this.getActiveConnection();
+      if (active && active.rdns !== rdns && !isReconnect) {
+        await this.disconnect(active.rdns);
       }
-
-      // Handle reconnect to same wallet
       if (this.hasConnection(rdns)) {
-        if (!isReconnect) {
-          throw new Error(`Wallet with RDNS "${rdns}" is already connected.`);
-        }
+        if (!isReconnect) throw new Error(`Wallet "${rdns}" already connected`);
         await this.disconnect(rdns);
       }
 
+      // Get provider and handler
       const providerDetails = this.findProvider(rdns);
-      if (!providerDetails) {
-        throw new Error(`Wallet with RDNS "${rdns}" not found or not available.`);
-      }
+      if (!providerDetails) throw new Error(`Wallet "${rdns}" not found`);
 
-      const family = this.getWalletFamily(providerDetails.info.chains);
-      const HandlerClass = WALLET_HANDLERS[family];
-
-      if (!HandlerClass) {
-        throw new Error(`No handler for wallet family "${family}"`);
-      }
-
-      const handler = new HandlerClass((newState) => {
-        this.handleStateChange(rdns, newState);
+      const family = this.getWalletFamily({
+        chains: providerDetails.info.chains,
+        rdns,
       });
+      const HandlerClass = WALLET_HANDLERS[family];
+      if (!HandlerClass) throw new Error(`No handler for "${family}"`);
+
+      // Connect
+      const handler = new HandlerClass((newState) =>
+        this.handleStateChange(rdns, newState)
+      );
       this.handlers.set(rdns, handler);
 
+      console.log('[WalletManager] About to connect with handler for family:', family);
       const connection = await handler.connect(providerDetails, isReconnect);
-      if (connection) {
-        connection.rdns = rdns;
-        this.connections.set(rdns, connection);
-        this.activeConnection = connection;
-
-        saveWalletState(connection.family, connection.address, connection.chainId, rdns);
-        this.emit('connected', { connection });
-      } else {
+      console.log('[WalletManager] Handler connection result:', connection);
+      
+      if (!connection) {
         this.handlers.delete(rdns);
+        throw new Error('Connection failed');
       }
+
+      connection.rdns = rdns;
+      this.connections.set(rdns, connection);
+      this.activeConnection = connection;
+      saveWalletState(
+        connection.family,
+        connection.address,
+        connection.chainId,
+        rdns
+      );
+      console.log('[WalletManager] Emitting connected event');
+      this.emit('connected', { connection });
 
       return connection;
     } finally {
@@ -166,8 +201,7 @@ class WalletManager extends EventTarget {
 
   async disconnect(rdns) {
     if (!rdns) {
-      const activeConnection = this.getActiveConnection();
-      rdns = activeConnection?.rdns;
+      rdns = this.getActiveConnection()?.rdns;
       if (!rdns) return;
     }
 
@@ -175,9 +209,7 @@ class WalletManager extends EventTarget {
     if (!connection) return;
 
     const handler = this.handlers.get(rdns);
-    if (handler && handler.disconnect) {
-      await handler.disconnect();
-    }
+    if (handler?.disconnect) await handler.disconnect();
 
     this.connections.delete(rdns);
     this.handlers.delete(rdns);
@@ -217,6 +249,7 @@ class WalletManager extends EventTarget {
   }
 
   emit(type, detail) {
+    console.log(`[WalletManager] Emitting event: ${type}`, detail);
     this.dispatchEvent(new CustomEvent(type, { detail }));
   }
 }

@@ -2,32 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@scionx/chain-connect Example</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Multi-chain wallet connector with minimalist Swiss design">
+  <meta name="theme-color" content="#fafafa">
+  <title>Wallet Connector Demo</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div data-controller="wallet"
-       data-action="wallet:connected->demo#handleEvent
-                    wallet:disconnected->demo#handleEvent
-                    wallet:connecting->demo#handleEvent
-                    wallet:chainChanged->demo#handleEvent
-                    wallet:accountChanged->demo#handleEvent
-                    wallet:error->demo#handleEvent">
-
+  <main data-controller="demo">
     <div class="container">
-      <h1>Wallet Connector</h1>
-
-      <button data-action="click->wallet#open">Connect Wallet</button>
-      <button data-action="click->wallet#disconnectWallet">Disconnect</button>
-
-      <div data-controller="demo" data-demo-wallet-outlet="wallet">
-        <div data-demo-target="status" class="status"></div>
-        <div data-demo-target="events" class="events"></div>
+      <div class="button-group" role="group" aria-label="Wallet connection controls">
+        <button
+          type="button"
+          data-demo-target="connectButton"
+          data-action="click->demo#open"
+          aria-label="Connect to your wallet">
+          Connect Wallet
+        </button>
+        <button
+          type="button"
+          class="hidden"
+          data-demo-target="disconnectButton"
+          data-action="click->demo#disconnectWallet"
+          aria-label="Disconnect from wallet">
+          Disconnect
+        </button>
       </div>
     </div>
-  </div>
-
+  </main>
   <script type="module" src="./main.js"></script>
 </body>
 </html>

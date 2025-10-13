@@ -7,7 +7,7 @@ export const WALLET_ICONS = {
   metamask: metamaskIcon,
   phantom: phantomIcon,
   tronlink: tronlinkIcon,
-  rabby: rabbyIcon
+  rabby: rabbyIcon,
 };
 
 // Chain ID constants
@@ -25,16 +25,16 @@ export const CHAIN_IDS = {
 
 // Chain mappings for RDNS-based chain inference
 export const CHAIN_MAPPINGS = {
-  'metamask': ['eip155:1'],
-  'coinbase': ['eip155:1'],
-  'rabby': ['eip155:1'],
-  'trust': ['eip155:1'],
-  'mathwallet': ['eip155:1'],
-  'phantom': ['solana:101'],
-  'solflare': ['solana:101'],
-  'sollet': ['solana:101'],
-  'tron': ['tron:0x2b6653dc'],
-  'tokenpocket': ['tron:0x2b6653dc'],
+  metamask: ['eip155:1'],
+  coinbase: ['eip155:1'],
+  rabby: ['eip155:1'],
+  trust: ['eip155:1'],
+  mathwallet: ['eip155:1'],
+  phantom: ['solana:101'],
+  solflare: ['solana:101'],
+  sollet: ['solana:101'],
+  tron: ['tron:0x2b6653dc'],
+  tokenpocket: ['tron:0x2b6653dc'],
 };
 
 // Global provider configurations
@@ -44,27 +44,27 @@ export const GLOBAL_PROVIDERS = {
     rdns: 'io.metamask',
     chains: ['eip155:1'],
     icon: 'metamask',
-    windowProperty: 'ethereum'
+    windowProperty: 'ethereum',
   },
   'io.rabby': {
     name: 'Rabby Wallet',
     rdns: 'io.rabby',
     chains: ['eip155:1'],
     icon: 'rabby',
-    windowProperty: 'ethereum'
+    windowProperty: 'ethereum',
   },
-  'phantom': {
+  phantom: {
     name: 'Phantom',
     rdns: 'phantom',
     chains: ['solana:101'],
     icon: 'phantom',
-    windowProperty: 'solana'
+    windowProperty: 'solana',
   },
-  'tronlink': {
+  tronlink: {
     name: 'TronLink',
     rdns: 'tronlink',
     chains: ['tron:0x2b6653dc'],
     icon: 'tronlink',
-    windowProperty: 'tronWeb'
-  }
+    windowProperty: 'tronWeb',
+  },
 };

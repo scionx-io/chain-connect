@@ -20,7 +20,7 @@ class TronHandler {
 
   async connect(providerDetails, isReconnect = false) {
     this.tronWeb = window.tronWeb || window.tronLink;
-    
+
     if (!this.tronWeb) {
       throw new Error('Tron wallet not found');
     }
@@ -31,7 +31,9 @@ class TronHandler {
         return null;
       }
 
-      const accounts = await this.tronWeb.request({ method: 'tron_requestAccounts' });
+      const accounts = await this.tronWeb.request({
+        method: 'tron_requestAccounts',
+      });
       const address = accounts[0] || this.tronWeb.defaultAddress?.base58;
 
       if (!address) {
@@ -69,12 +71,12 @@ class TronHandler {
 
   async disconnect() {
     window.removeEventListener('message', this.boundMessageListener);
-    
+
     if (this.tronWeb && typeof this.tronWeb.removeListener === 'function') {
       this.tronWeb.removeListener('connect', this.boundChainChanged);
       this.tronWeb.removeListener('networkChanged', this.boundChainChanged);
     }
-    
+
     this.tronWeb = null;
     console.log('Disconnected from Tron wallet');
   }
@@ -110,7 +112,11 @@ class TronHandler {
     }
 
     try {
-      const nodeInfo = await this.tronWeb.fullNode.request('/wallet/getnodeinfo', {}, 'post');
+      const nodeInfo = await this.tronWeb.fullNode.request(
+        '/wallet/getnodeinfo',
+        {},
+        'post'
+      );
       if (nodeInfo?.config?.chainId !== undefined) {
         return String(nodeInfo.config.chainId);
       }
@@ -122,14 +128,17 @@ class TronHandler {
     const nodes = [
       this.tronWeb.fullNode,
       this.tronWeb.solidityNode,
-      this.tronWeb.eventServer
+      this.tronWeb.eventServer,
     ];
 
     for (const node of nodes) {
       if (!node?.host) continue;
-      
+
       const host = node.host.toLowerCase();
-      if (host.includes('api.trongrid.io') || host.includes('tronstackapi.com')) {
+      if (
+        host.includes('api.trongrid.io') ||
+        host.includes('tronstackapi.com')
+      ) {
         return '728126428'; // Mainnet
       }
       if (host.includes('api.shasta.trongrid.io')) {

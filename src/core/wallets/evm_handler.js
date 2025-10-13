@@ -22,27 +22,32 @@ class EvmHandler {
 
   async connect(providerDetails, isReconnect = false) {
     try {
+      console.log('[EvmHandler] Connecting with provider details:', providerDetails);
       this.originalProvider = providerDetails.provider;
       this.provider = new ethers.BrowserProvider(this.originalProvider);
-      
+
       const method = isReconnect ? 'eth_accounts' : 'eth_requestAccounts';
+      console.log(`[EvmHandler] Sending ${method} request`);
       const accounts = await this.provider.send(method, []);
+      console.log('[EvmHandler] Accounts received:', accounts);
 
       if (accounts.length === 0) {
         if (isReconnect) {
-          console.log('No accounts found during reconnect');
+          console.warn('[EvmHandler] No accounts found during reconnect.');
           return null;
         }
-        throw new Error('No accounts found.');
+        throw new Error('No accounts found. User may have rejected.');
       }
 
-      const address = ethers.getAddress(accounts[0]); // Checksummed
+      const address = ethers.getAddress(accounts[0]);
       const chainId = await this.getChainId();
+      console.log(`[EvmHandler] Address: ${address}, ChainID: ${chainId}`);
 
       this.originalProvider.on('accountsChanged', this.boundAccountsChanged);
       this.originalProvider.on('chainChanged', this.boundChainChanged);
+      console.log('[EvmHandler] Event listeners attached.');
 
-      return {
+      const connection = {
         provider: this.provider,
         address,
         chainId,
@@ -51,11 +56,14 @@ class EvmHandler {
         family: 'evm',
         chains: [`eip155:${chainId}`],
       };
+      console.log('[EvmHandler] Connection object created:', connection);
+      return connection;
     } catch (error) {
       if (error.code === 4001) {
+        console.error('[EvmHandler] User rejected connection request.');
         throw new Error('User rejected connection request');
       }
-      console.error('EVM connection error:', error);
+      console.error('[EvmHandler] Connection error:', error);
       throw error;
     }
   }
@@ -67,16 +75,22 @@ class EvmHandler {
     try {
       await this.originalProvider.request({
         method: 'wallet_revokePermissions',
-        params: [{ eth_accounts: {} }]
+        params: [{ eth_accounts: {} }],
       });
     } catch (error) {
       console.debug('wallet_revokePermissions not supported:', error.message);
     }
 
     // Remove listeners
-    this.originalProvider.removeListener('accountsChanged', this.boundAccountsChanged);
-    this.originalProvider.removeListener('chainChanged', this.boundChainChanged);
-    
+    this.originalProvider.removeListener(
+      'accountsChanged',
+      this.boundAccountsChanged
+    );
+    this.originalProvider.removeListener(
+      'chainChanged',
+      this.boundChainChanged
+    );
+
     this.provider = null;
     this.originalProvider = null;
     console.log('Disconnected from EVM wallet');

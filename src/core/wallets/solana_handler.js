@@ -20,7 +20,7 @@ class SolanaHandler {
 
   setupEventListeners() {
     if (typeof this.provider.on !== 'function') return;
-    
+
     this.provider.on('accountChanged', this.boundAccountChanged);
     this.provider.on('connect', this.boundChainChanged);
     this.provider.on('disconnect', this.boundDisconnect);
@@ -29,7 +29,7 @@ class SolanaHandler {
 
   async connect(providerDetails, isReconnect = false) {
     this.provider = providerDetails.provider;
-    
+
     try {
       const options = isReconnect ? { onlyIfTrusted: true } : {};
       const resp = await this.provider.connect(options);
@@ -59,14 +59,14 @@ class SolanaHandler {
 
   disconnect() {
     if (!this.provider) return;
-    
+
     if (typeof this.provider.removeListener === 'function') {
       this.provider.removeListener('accountChanged', this.boundAccountChanged);
       this.provider.removeListener('connect', this.boundChainChanged);
       this.provider.removeListener('disconnect', this.boundDisconnect);
       this.provider.removeListener('networkChanged', this.boundChainChanged);
     }
-    
+
     this.provider = null;
     console.log('Disconnected from Solana wallet');
   }
@@ -93,10 +93,11 @@ class SolanaHandler {
       throw new Error('Provider not initialized');
     }
 
-    const endpoint = this.provider._rpcEndpoint || 
-                     this.provider._apiEndpoint || 
-                     this.provider.connection?.rpcEndpoint;
-    
+    const endpoint =
+      this.provider._rpcEndpoint ||
+      this.provider._apiEndpoint ||
+      this.provider.connection?.rpcEndpoint;
+
     if (endpoint) {
       const lower = endpoint.toLowerCase();
       if (lower.includes('mainnet')) return '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp';

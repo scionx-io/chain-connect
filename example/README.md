@@ -48,6 +48,7 @@ The example contains:
 ## Usage
 
 The example shows:
+
 1. How to set up the HTML structure required by the wallet connector
 2. How to import and register the Stimulus controller via package management
 3. How to connect to different wallets (Ethereum/EVM, Solana, Tron)
