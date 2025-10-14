@@ -23,6 +23,8 @@
     "dev": "vite",
     "build": "vite build",
     "build:clean": "rm -rf dist && vite build",
+    "build:watch": "vite build --watch",
+    "watch:copy": "nodemon --watch dist --exec 'cp -r dist/* ../../ScionX/app.scionx.io/local_packages/chain-connect/dist/ && cp package.json ../../ScionX/app.scionx.io/local_packages/chain-connect/' --ext js,css",
     "preview": "vite preview",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -49,6 +51,7 @@
     "eslint": "^9.37.0",
     "globals": "^16.4.0",
     "jsdom": "^27.0.0",
+    "nodemon": "^3.1.10",
     "prettier": "^3.6.2",
     "vite": "^7.1.9",
     "vitest": "^3.2.4"

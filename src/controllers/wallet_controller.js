@@ -1,7 +1,8 @@
 import { Controller } from '@hotwired/stimulus';
 import { createStore } from 'mipd';
 import { WalletManager } from '../core/wallet_manager.js';
-import { renderWalletModal } from '../utils/modal_renderer.js';
+import ModalManager from '../utils/modal_manager.js';
+import { loadWalletState } from '../utils/utils.js';
 
 /**
  * Main wallet controller - handles wallet connection, modal display, and state management
@@ -16,6 +17,7 @@ export default class WalletController extends Controller {
     family: String,
     isConnected: { type: Boolean, default: false },
     connecting: { type: Boolean, default: false },
+    status: { type: String, default: 'idle' },
   };
 
   // ============================================================================
@@ -24,24 +26,46 @@ export default class WalletController extends Controller {
 
   connect() {
     // Initialize services
-    this.mipdStore = createStore();
-    this.walletManager = new WalletManager(this.mipdStore);
-    this.modalElement = null;
-    this.lastSelectedRdns = null;
+    this.initializeServices();
 
     // Set up event listeners for WalletManager events
     this.setupEventListeners();
 
+    // Set the retry handler for the modal manager
+    this.modalManager.setRetryHandler(this.retryConnection.bind(this));
+
+    // Set initial status based on saved state
+    this.setInitialStatus();
+
     // Initialize wallet manager for auto-reconnect
     this.walletManager.init();
+  }
+
+  initializeServices() {
+    this.mipdStore = createStore();
+    this.walletManager = new WalletManager(this.mipdStore);
+    this.modalManager = new ModalManager(this.walletManager);
+    this.lastSelectedRdns = null;
+  }
+
+  setInitialStatus() {
+    const savedState = loadWalletState();
+    if (savedState?.rdns) {
+      this.statusValue = 'connecting';
+    } else {
+      this.statusValue = 'idle';
+    }
   }
 
   disconnect() {
     this.cleanupEventListeners();
     this.close(); // Remove modal if open
 
+    // Only disconnect the wallet connection but don't clear storage,
+    // to preserve the session across Turbo page updates
     if (this.walletManager.getActiveConnection()) {
-      this.walletManager.disconnect();
+      const rdns = this.walletManager.getActiveConnection().rdns;
+      this.walletManager.disconnect(rdns, false); // Don't clear storage
     }
   }
 
@@ -58,6 +82,10 @@ export default class WalletController extends Controller {
   }
 
   get provider() {
+    return this.getActiveProvider();
+  }
+
+  getActiveProvider() {
     return this.walletManager.getActiveConnection()?.provider;
   }
 
@@ -70,70 +98,15 @@ export default class WalletController extends Controller {
   // ============================================================================
 
   open() {
-    if (this.modalElement) {
-      return; // Already open
-    }
-
-    const wallets = this.walletManager.getDetectedWallets();
-
     // Bind callbacks
     this.boundSelectWallet = this.selectWallet.bind(this);
     this.boundClose = this.close.bind(this);
 
-    // Render modal
-    this.modalElement = renderWalletModal(
-      wallets,
-      this.boundSelectWallet,
-      this.boundClose
-    );
-    document.body.appendChild(this.modalElement);
-
-    // Store references for loading state (can't use Stimulus targets since modal is outside controller element)
-    this.loadingOverlay = this.modalElement.querySelector(
-      '.wallet-loading-overlay'
-    );
-    this.buttonsContainer = this.modalElement.querySelector(
-      '.wallet-buttons-container'
-    );
-    this.walletButtons = this.modalElement.querySelectorAll('.wallet-button');
-
-    // Store references for error state
-    this.errorOverlay = this.modalElement.querySelector(
-      '.wallet-error-overlay'
-    );
-    this.errorMessage = this.modalElement.querySelector(
-      '.wallet-error-message'
-    );
-    this.errorBackButton =
-      this.modalElement.querySelector('.wallet-error-back');
-    this.errorRetryButton = this.modalElement.querySelector(
-      '.wallet-error-retry'
-    );
-
-    // Bind error button handlers
-    if (this.errorBackButton) {
-      this.errorBackButton.addEventListener('click', () => this.hideError());
-    }
-    if (this.errorRetryButton) {
-      this.errorRetryButton.addEventListener('click', () =>
-        this.retryConnection()
-      );
-    }
+    this.modalManager.open(this.boundSelectWallet, this.boundClose);
   }
 
   close() {
-    if (this.modalElement) {
-      this.modalElement.remove();
-      this.modalElement = null;
-      // Clean up references
-      this.loadingOverlay = null;
-      this.buttonsContainer = null;
-      this.walletButtons = null;
-      this.errorOverlay = null;
-      this.errorMessage = null;
-      this.errorBackButton = null;
-      this.errorRetryButton = null;
-    }
+    this.modalManager.close();
   }
 
   async selectWallet(event) {
@@ -141,9 +114,7 @@ export default class WalletController extends Controller {
     const rdns = button.dataset.walletRdns;
 
     if (!rdns) {
-      this.dispatch('error', {
-        detail: { message: 'Invalid wallet selection' },
-      });
+      this.handleWalletError('Invalid wallet selection');
       return;
     }
 
@@ -157,6 +128,7 @@ export default class WalletController extends Controller {
   async connectToWallet(rdns) {
     // Set connecting state
     this.connectingValue = true;
+    this.statusValue = 'connecting';
 
     this.dispatch('connecting', { detail: { rdns } });
 
@@ -172,53 +144,33 @@ export default class WalletController extends Controller {
       // Show error overlay
       this.showError(error);
 
-      this.dispatch('error', {
-        detail: {
-          message: error.message || 'Connection failed',
-          error,
-        },
-      });
+      this.handleWalletError(error.message || 'Connection failed', error);
+      // Only change status to 'disconnected' on failure
+      this.statusValue = 'disconnected';
     } finally {
       this.connectingValue = false;
     }
   }
 
+  handleWalletError(message, error = null) {
+    this.dispatch('error', {
+      detail: { message, error },
+    });
+  }
+
   showError(error) {
-    if (!this.modalElement || !this.errorOverlay) return;
+    if (!this.modalManager.isModalOpen()) return;
 
-    // Determine error message based on error type
-    let message = 'Please try again or choose a different wallet.';
+    // Show error using the modal manager
+    this.modalManager.showError(this.formatErrorMessage(error));
+  }
 
-    if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
-      message = 'You cancelled the connection request.';
-    } else if (error.message) {
-      const msg = error.message.toLowerCase();
-      if (
-        msg.includes('reject') ||
-        msg.includes('cancel') ||
-        msg.includes('denied')
-      ) {
-        message = 'You cancelled the connection request.';
-      } else if (msg.includes('timeout')) {
-        message = 'Connection request timed out.';
-      } else {
-        message = error.message;
-      }
-    }
-
-    // Update error message text
-    if (this.errorMessage) {
-      this.errorMessage.textContent = message;
-    }
-
-    // Show error overlay
-    this.errorOverlay.classList.remove('hidden');
+  formatErrorMessage(error) {
+    return this.modalManager.formatErrorMessage(error);
   }
 
   hideError() {
-    if (this.errorOverlay) {
-      this.errorOverlay.classList.add('hidden');
-    }
+    this.modalManager.hideError();
   }
 
   async retryConnection() {
@@ -232,9 +184,10 @@ export default class WalletController extends Controller {
   }
 
   async disconnectWallet() {
-    if (this.walletManager.getActiveConnection()) {
-      const rdns = this.walletManager.getActiveConnection().rdns;
-      await this.walletManager.disconnect(rdns);
+    const connection = this.walletManager.getActiveConnection();
+    if (connection) {
+      // Clear storage when user explicitly disconnects
+      await this.walletManager.disconnect(connection.rdns, true);
     }
   }
 
@@ -243,11 +196,18 @@ export default class WalletController extends Controller {
   // ============================================================================
 
   setupEventListeners() {
+    this.setupWalletManagerEventBindings();
+    this.subscribeToWalletManagerEvents();
+  }
+
+  setupWalletManagerEventBindings() {
     this.boundHandleConnected = this.handleConnected.bind(this);
     this.boundHandleDisconnected = this.handleDisconnected.bind(this);
     this.boundHandleChainChanged = this.handleChainChanged.bind(this);
     this.boundHandleAccountChanged = this.handleAccountChanged.bind(this);
+  }
 
+  subscribeToWalletManagerEvents() {
     this.walletManager.addEventListener('connected', this.boundHandleConnected);
     this.walletManager.addEventListener(
       'disconnected',
@@ -264,6 +224,10 @@ export default class WalletController extends Controller {
   }
 
   cleanupEventListeners() {
+    this.unsubscribeFromWalletManagerEvents();
+  }
+
+  unsubscribeFromWalletManagerEvents() {
     if (this.walletManager) {
       this.walletManager.removeEventListener(
         'connected',
@@ -292,12 +256,8 @@ export default class WalletController extends Controller {
     const { connection } = event.detail;
 
     // Update Stimulus values (triggers reactive callbacks)
-    this.addressValue = connection.address;
-    this.chainIdValue = connection.chainId;
-    this.walletNameValue = connection.name;
-    this.rdnsValue = connection.rdns;
-    this.familyValue = connection.family;
-    this.isConnectedValue = true;
+    this.updateConnectionValues(connection);
+    this.statusValue = 'connected';
 
     // Close modal
     this.close();
@@ -317,12 +277,8 @@ export default class WalletController extends Controller {
 
   handleDisconnected() {
     // Clear Stimulus values
-    this.addressValue = '';
-    this.chainIdValue = '';
-    this.walletNameValue = '';
-    this.rdnsValue = '';
-    this.familyValue = '';
-    this.isConnectedValue = false;
+    this.clearConnectionValues();
+    this.statusValue = 'disconnected';
 
     // Dispatch Stimulus event
     this.dispatch('disconnected');
@@ -348,33 +304,40 @@ export default class WalletController extends Controller {
     });
   }
 
+  updateConnectionValues(connection) {
+    this.addressValue = connection.address;
+    this.chainIdValue = connection.chainId;
+    this.walletNameValue = connection.name;
+    this.rdnsValue = connection.rdns;
+    this.familyValue = connection.family;
+    this.isConnectedValue = true;
+  }
+
+  clearConnectionValues() {
+    this.addressValue = '';
+    this.chainIdValue = '';
+    this.walletNameValue = '';
+    this.rdnsValue = '';
+    this.familyValue = '';
+    this.isConnectedValue = false;
+  }
+
   // ============================================================================
   // Reactive Callbacks (Stimulus pattern for state changes)
   // ============================================================================
 
   connectingValueChanged() {
-    if (!this.modalElement) return;
+    if (!this.modalManager || !this.modalManager.isModalOpen()) return;
 
     if (this.connectingValue) {
-      // Show loading state - disable all buttons and show overlay
-      if (this.loadingOverlay) this.loadingOverlay.classList.remove('hidden');
-      if (this.buttonsContainer) {
-        this.buttonsContainer.style.pointerEvents = 'none';
-        this.buttonsContainer.style.opacity = '0.5';
-      }
-      if (this.walletButtons) {
-        this.walletButtons.forEach((btn) => (btn.disabled = true));
-      }
+      this.modalManager.showLoading();
     } else {
-      // Hide loading state - re-enable buttons
-      if (this.loadingOverlay) this.loadingOverlay.classList.add('hidden');
-      if (this.buttonsContainer) {
-        this.buttonsContainer.style.pointerEvents = '';
-        this.buttonsContainer.style.opacity = '';
-      }
-      if (this.walletButtons) {
-        this.walletButtons.forEach((btn) => (btn.disabled = false));
-      }
+      this.modalManager.hideLoading();
     }
+  }
+
+  statusValueChanged() {
+    // Dispatch a status change event that other controllers can listen to
+    this.dispatch('status-changed', { detail: { status: this.statusValue } });
   }
 }

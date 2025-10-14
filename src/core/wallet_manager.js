@@ -135,6 +135,8 @@ class WalletManager extends EventTarget {
       } catch (error) {
         console.error('Reconnection failed:', error);
         clearWalletState();
+        // Emit a disconnected event to notify controllers that reconnection failed
+        this.emit('disconnected', { rdns: savedState.rdns });
       }
     }
   }
@@ -202,7 +204,7 @@ class WalletManager extends EventTarget {
     }
   }
 
-  async disconnect(rdns) {
+  async disconnect(rdns, shouldClearStorage = false) {
     if (!rdns) {
       rdns = this.getActiveConnection()?.rdns;
       if (!rdns) return;
@@ -221,7 +223,9 @@ class WalletManager extends EventTarget {
       this.activeConnection = null;
     }
 
-    clearWalletState();
+    if (shouldClearStorage) {
+      clearWalletState();
+    }
     this.emit('disconnected', { rdns });
   }
 

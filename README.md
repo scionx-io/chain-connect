@@ -53,10 +53,57 @@ application.register('wallet', WalletController);
 walletController.addressValue      // Wallet address
 walletController.chainIdValue      // Chain ID
 walletController.isConnectedValue  // Connection status
+walletController.statusValue       // Wallet lifecycle status ('idle', 'connecting', 'connected', 'disconnected')
 
 // Via outlets
 static outlets = ['wallet'];
 this.walletOutlet.addressValue
+this.walletOutlet.statusValue
+```
+
+## Status Value
+
+The WalletController now provides a `status` value that represents the wallet connection lifecycle:
+
+- `'idle'` - Initial state when no saved wallet state exists
+- `'connecting'` - When a connection attempt is in progress (both manual and auto-reconnect)
+- `'connected'` - When a wallet is successfully connected
+- `'disconnected'` - When disconnected, connection attempt fails, or auto-reconnect fails
+
+### Status Change Events
+
+The controller dispatches a `status-changed` event when the status changes:
+
+```javascript
+// Listen to status changes
+document.addEventListener('wallet:status-changed', (event) => {
+  console.log('New status:', event.detail.status);
+});
+```
+
+### Outlet Integration
+
+You can use the outlet system to react to status changes in other controllers:
+
+```javascript
+// In your controller that uses the wallet outlet
+static outlets = ['wallet'];
+
+// This method is automatically called when the wallet outlet's status changes
+walletOutletStatusValueChanged(status) {
+  switch (status) {
+    case 'connected':
+      this.showPay();
+      break;
+    case 'connecting':
+      this.showLoader();
+      break;
+    case 'idle':
+    case 'disconnected':
+      this.showConnect();
+      break;
+  }
+}
 ```
 
 ## Supported Wallets
@@ -74,3 +121,7 @@ yarn dev
 ## License
 
 ISC
+
+## Hotwire/Turbo Compatibility
+
+The wallet connection state is now preserved across Turbo Stream updates. When a Turbo update replaces the DOM element containing the WalletController, the connection session is maintained in localStorage, allowing for seamless auto-reconnection. The session is only cleared when the user explicitly disconnects from the wallet.
