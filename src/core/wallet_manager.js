@@ -233,6 +233,13 @@ class WalletManager extends EventTarget {
     const connection = this.connections.get(rdns);
     if (!connection) return;
 
+    // BUGFIX: If address becomes null, it's a disconnection.
+    if (newState.address === null) {
+      this.disconnect(rdns); // Trigger the full disconnect logic
+      return;
+    }
+
+    // Original logic for normal state updates
     Object.assign(connection, newState);
 
     if (newState.chainId !== undefined) {
