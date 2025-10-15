@@ -12,6 +12,7 @@ export default class DemoController extends WalletController {
     'walletNameDisplay',
     'rdnsDisplay',
     'familyDisplay',
+    'statusDisplay',
   ];
   static classes = ['connected', 'disconnected'];
 
@@ -49,6 +50,10 @@ export default class DemoController extends WalletController {
 
   familyValueChanged() {
     this.familyDisplayTarget.textContent = this.familyValue;
+  }
+
+  statusValueChanged() {
+    this.statusDisplayTarget.textContent = this.statusValue;
   }
 
   clearStatusDisplay() {
