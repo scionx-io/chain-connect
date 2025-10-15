@@ -169,9 +169,9 @@ class WalletManager extends EventTarget {
       if (!HandlerClass) throw new Error(`No handler for "${family}"`);
 
       // Connect
-      const handler = new HandlerClass((newState) =>
-        this.handleStateChange(rdns, newState)
-      );
+      const handler = new HandlerClass(async (newState) => {
+        await this.handleStateChange(rdns, newState);
+      });
       this.handlers.set(rdns, handler);
 
       console.log(
@@ -229,13 +229,13 @@ class WalletManager extends EventTarget {
     this.emit('disconnected', { rdns });
   }
 
-  handleStateChange(rdns, newState) {
+  async handleStateChange(rdns, newState) {
     const connection = this.connections.get(rdns);
     if (!connection) return;
 
     // BUGFIX: If address becomes null, it's a disconnection.
     if (newState.address === null) {
-      this.disconnect(rdns); // Trigger the full disconnect logic
+      await this.disconnect(rdns); // Trigger the full disconnect logic
       return;
     }
 
