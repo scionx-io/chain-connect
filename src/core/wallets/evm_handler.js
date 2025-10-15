@@ -84,15 +84,21 @@ class EvmHandler {
       console.debug('wallet_revokePermissions not supported:', error.message);
     }
 
-    // Remove listeners
-    this.originalProvider.removeListener(
-      'accountsChanged',
-      this.boundAccountsChanged
-    );
-    this.originalProvider.removeListener(
-      'chainChanged',
-      this.boundChainChanged
-    );
+    // Remove listeners with null checks
+    if (this.originalProvider) {
+      try {
+        this.originalProvider.removeListener(
+          'accountsChanged',
+          this.boundAccountsChanged
+        );
+        this.originalProvider.removeListener(
+          'chainChanged',
+          this.boundChainChanged
+        );
+      } catch (error) {
+        console.debug('Error removing listeners:', error.message);
+      }
+    }
 
     this.provider = null;
     this.originalProvider = null;
