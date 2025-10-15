@@ -2,9 +2,41 @@ node_modules/
 .DS_Store
 dist/
 .env
+.env.local
+.env.development
+.env.production
 *.log
 coverage/
 GEMINI.md
 CLAUDE.md
 QWEN.md
 *.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+config/
+ secrets/
+ .vscode/settings.json
+ .idea/
+ .history/
+ *.key
+ *.pem
+ *.p12
+ *.jks
+ keystores/
+ .secret
+ .credentials
+ credentials.json
+ *.wallet
+ *.keystore
+ .wallet
+ .env.test
+ .env.testing
+ .env.local
+ .env.*.local
+ .cache/
+ .tmp/
+ tmp/
+ .nyc_output/
+ .eslintcache
+ .prettierignore

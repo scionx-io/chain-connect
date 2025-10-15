@@ -100,7 +100,7 @@ describe('WalletController', () => {
 
     const connectSpy = vi
       .spyOn(controller.walletManager, 'connect')
-      .mockImplementation(async (rdns) => {
+      .mockImplementation(async (_rdns) => {
         // Simulate the WalletManager emitting the connected event
         const event = new CustomEvent('connected', {
           detail: { connection: mockConnection },
