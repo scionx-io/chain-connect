@@ -235,7 +235,7 @@ class WalletManager extends EventTarget {
 
     // BUGFIX: If address becomes null, it's a disconnection.
     if (newState.address === null) {
-      await this.disconnect(rdns); // Trigger the full disconnect logic
+      await this.disconnect(rdns, true); // Clear storage to prevent auto-reconnect on reload
       return;
     }
 
