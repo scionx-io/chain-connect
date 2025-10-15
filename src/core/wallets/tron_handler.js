@@ -19,23 +19,44 @@ class TronHandler {
   }
 
   async connect(providerDetails, isReconnect = false) {
-    this.tronWeb = window.tronWeb || window.tronLink;
+    // TronLink has two objects: window.tronLink (wallet) and window.tronWeb (provider)
+    const tronLink = window.tronLink;
+    this.tronWeb = tronLink?.tronWeb || window.tronWeb;
 
-    if (!this.tronWeb) {
+    if (!this.tronWeb && !tronLink) {
       throw new Error('Tron wallet not found');
     }
 
     try {
-      if (isReconnect && !this.tronWeb.ready) {
-        console.log('TronWeb not ready, skipping reconnect');
-        return null;
+      // During reconnect, check if wallet has an address already
+      if (isReconnect) {
+        const address = this.tronWeb?.defaultAddress?.base58;
+        if (!address) {
+          return null;
+        }
+        this.setupListeners();
+        const chainId = await this.getChainId();
+        return {
+          provider: this.tronWeb,
+          address,
+          chainId,
+          name: providerDetails.info.name,
+          rdns: providerDetails.info.rdns,
+          family: 'tron',
+          chains: [`tron:${chainId}`],
+        };
       }
 
-      const accounts = await this.tronWeb.request({
-        method: 'tron_requestAccounts',
-      });
-      const address = accounts[0] || this.tronWeb.defaultAddress?.base58;
+      // Manual connection: request account access
+      if (tronLink && typeof tronLink.request === 'function') {
+        const res = await tronLink.request({ method: 'tron_requestAccounts' });
+        if (!res || res.code === 4001) {
+          throw new Error('User rejected connection');
+        }
+      }
 
+      // Get address from tronWeb after request
+      const address = this.tronWeb?.defaultAddress?.base58;
       if (!address) {
         throw new Error('No Tron address found');
       }
@@ -53,7 +74,7 @@ class TronHandler {
         chains: [`tron:${chainId}`],
       };
     } catch (error) {
-      console.error('Tron connection error:', error);
+      console.error('[TronHandler] Connection error:', error);
       throw error;
     }
   }
