@@ -33,12 +33,11 @@
     "lint": "eslint src/ --ext .js",
     "lint:fix": "eslint . --fix",
     "prettier": "prettier --check .",
-    "prettier:format": "prettier --write .",
     "format": "prettier --write .",
     "clean": "rm -rf node_modules dist coverage",
     "prepublishOnly": "yarn test && yarn build",
-    "package": "vite build && npm pack",
-    "example": "vite build && npm pack && cd example && npm install"
+    "package": "vite build && yarn pack",
+    "example": "vite build && yarn pack && cd example && yarn install"
   },
   "dependencies": {
     "@hotwired/stimulus": "^3.2.2",
