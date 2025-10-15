@@ -131,13 +131,10 @@ class WalletManager extends EventTarget {
   async init() {
     const savedState = loadWalletState();
     if (savedState?.rdns) {
-      try {
-        await this.connect(savedState.rdns, true);
-      } catch (error) {
-        console.error('Reconnection failed:', error);
+      const connection = await this.connect(savedState.rdns, true);
+      // If reconnect returns null, clear stale state silently
+      if (!connection) {
         clearWalletState();
-        // Emit a disconnected event to notify controllers that reconnection failed
-        this.emit('disconnected', { rdns: savedState.rdns });
       }
     }
   }
@@ -184,6 +181,10 @@ class WalletManager extends EventTarget {
 
       if (!connection) {
         this.handlers.delete(rdns);
+        // During reconnect, null means wallet not authorized - return null silently
+        if (isReconnect) {
+          return null;
+        }
         throw new Error('Connection failed');
       }
 

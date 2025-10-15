@@ -36,7 +36,7 @@ class EvmHandler {
 
       if (accounts.length === 0) {
         if (isReconnect) {
-          console.warn('[EvmHandler] No accounts found during reconnect.');
+          // Wallet not authorized, return null to clear stale state
           return null;
         }
         throw new Error('No accounts found. User may have rejected.');
