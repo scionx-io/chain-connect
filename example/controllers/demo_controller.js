@@ -62,5 +62,6 @@ export default class DemoController extends WalletController {
     this.walletNameDisplayTarget.textContent = '';
     this.rdnsDisplayTarget.textContent = '';
     this.familyDisplayTarget.textContent = '';
+    this.statusDisplayTarget.textContent = '';
   }
 }
