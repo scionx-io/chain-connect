@@ -14,6 +14,7 @@ class WalletManager extends EventTarget {
     this.activeConnection = null;
     this.handlers = new Map();
     this.isConnecting = false;
+    this.isDisconnecting = false;
   }
 
   _debug(...args) {
@@ -130,13 +131,10 @@ class WalletManager extends EventTarget {
   async init() {
     const savedState = loadWalletState();
     if (savedState?.rdns) {
-      try {
-        await this.connect(savedState.rdns, true);
-      } catch (error) {
-        console.error('Reconnection failed:', error);
+      const connection = await this.connect(savedState.rdns, true);
+      // If reconnect returns null, clear stale state silently
+      if (!connection) {
         clearWalletState();
-        // Emit a disconnected event to notify controllers that reconnection failed
-        this.emit('disconnected', { rdns: savedState.rdns });
       }
     }
   }
@@ -183,18 +181,34 @@ class WalletManager extends EventTarget {
 
       if (!connection) {
         this.handlers.delete(rdns);
+        // During reconnect, null means wallet not authorized - return null silently
+        if (isReconnect) {
+          return null;
+        }
         throw new Error('Connection failed');
       }
 
       connection.rdns = rdns;
       this.connections.set(rdns, connection);
       this.activeConnection = connection;
-      saveWalletState(
+
+      // Save wallet state and handle storage errors
+      const saveResult = saveWalletState(
         connection.family,
         connection.address,
         connection.chainId,
         rdns
       );
+
+      if (!saveResult.success) {
+        console.warn('[WalletManager] Storage error:', saveResult.message);
+        // Emit storage error event for UI notification
+        this.emit('storage-error', {
+          error: saveResult.error,
+          message: saveResult.message,
+        });
+      }
+
       console.log('[WalletManager] Emitting connected event');
       this.emit('connected', { connection });
 
@@ -205,6 +219,11 @@ class WalletManager extends EventTarget {
   }
 
   async disconnect(rdns, shouldClearStorage = false) {
+    if (this.isDisconnecting) {
+      console.warn('[WalletManager] Disconnect already in progress');
+      return;
+    }
+
     if (!rdns) {
       rdns = this.getActiveConnection()?.rdns;
       if (!rdns) return;
@@ -213,20 +232,28 @@ class WalletManager extends EventTarget {
     const connection = this.connections.get(rdns);
     if (!connection) return;
 
-    const handler = this.handlers.get(rdns);
-    if (handler?.disconnect) await handler.disconnect();
+    this.isDisconnecting = true;
 
-    this.connections.delete(rdns);
-    this.handlers.delete(rdns);
+    try {
+      const handler = this.handlers.get(rdns);
+      if (handler?.disconnect) {
+        await handler.disconnect();
+      }
 
-    if (this.activeConnection?.rdns === rdns) {
-      this.activeConnection = null;
+      this.connections.delete(rdns);
+      this.handlers.delete(rdns);
+
+      if (this.activeConnection?.rdns === rdns) {
+        this.activeConnection = null;
+      }
+
+      if (shouldClearStorage) {
+        clearWalletState();
+      }
+      this.emit('disconnected', { rdns });
+    } finally {
+      this.isDisconnecting = false;
     }
-
-    if (shouldClearStorage) {
-      clearWalletState();
-    }
-    this.emit('disconnected', { rdns });
   }
 
   async handleStateChange(rdns, newState) {

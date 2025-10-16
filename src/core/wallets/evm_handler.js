@@ -36,7 +36,7 @@ class EvmHandler {
 
       if (accounts.length === 0) {
         if (isReconnect) {
-          console.warn('[EvmHandler] No accounts found during reconnect.');
+          // Wallet not authorized, return null to clear stale state
           return null;
         }
         throw new Error('No accounts found. User may have rejected.');
@@ -84,15 +84,21 @@ class EvmHandler {
       console.debug('wallet_revokePermissions not supported:', error.message);
     }
 
-    // Remove listeners
-    this.originalProvider.removeListener(
-      'accountsChanged',
-      this.boundAccountsChanged
-    );
-    this.originalProvider.removeListener(
-      'chainChanged',
-      this.boundChainChanged
-    );
+    // Remove listeners with null checks
+    if (this.originalProvider) {
+      try {
+        this.originalProvider.removeListener(
+          'accountsChanged',
+          this.boundAccountsChanged
+        );
+        this.originalProvider.removeListener(
+          'chainChanged',
+          this.boundChainChanged
+        );
+      } catch (error) {
+        console.debug('Error removing listeners:', error.message);
+      }
+    }
 
     this.provider = null;
     this.originalProvider = null;

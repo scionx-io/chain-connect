@@ -17,7 +17,31 @@ export const saveWalletState = (
     rdns,
     timestamp: Date.now(),
   };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to save wallet state to localStorage:', error);
+
+    // Determine the error type
+    let errorType = 'unknown';
+    let errorMessage = 'Failed to save connection state';
+
+    if (error.name === 'QuotaExceededError') {
+      errorType = 'quota_exceeded';
+      errorMessage = 'Storage quota exceeded. Auto-reconnect disabled.';
+    } else if (error.name === 'SecurityError') {
+      errorType = 'security_error';
+      errorMessage = 'Storage access blocked. Auto-reconnect disabled.';
+    }
+
+    return {
+      success: false,
+      error: errorType,
+      message: errorMessage,
+    };
+  }
 };
 
 export const loadWalletState = () => {

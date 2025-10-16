@@ -19,29 +19,75 @@ class TronHandler {
   }
 
   async connect(providerDetails, isReconnect = false) {
-    this.tronWeb = window.tronWeb || window.tronLink;
+    // TronLink has two objects: window.tronLink (wallet) and window.tronWeb (provider)
+    const tronLink = window.tronLink;
+    this.tronWeb = tronLink?.tronWeb || window.tronWeb;
 
-    if (!this.tronWeb) {
+    if (!this.tronWeb && !tronLink) {
       throw new Error('Tron wallet not found');
     }
 
     try {
-      if (isReconnect && !this.tronWeb.ready) {
-        console.log('TronWeb not ready, skipping reconnect');
-        return null;
+      // During reconnect, check if wallet has an address already
+      if (isReconnect) {
+        const address = this.tronWeb?.defaultAddress?.base58;
+        if (!address) {
+          return null;
+        }
+        const chainId = await this.getChainId();
+        this.setupListeners();
+        return {
+          provider: this.tronWeb,
+          address,
+          chainId,
+          name: providerDetails.info.name,
+          rdns: providerDetails.info.rdns,
+          family: 'tron',
+          chains: [`tron:${chainId}`],
+        };
       }
 
-      const accounts = await this.tronWeb.request({
-        method: 'tron_requestAccounts',
-      });
-      const address = accounts[0] || this.tronWeb.defaultAddress?.base58;
+      // Check if wallet is already connected (has address)
+      let address = this.tronWeb?.defaultAddress?.base58;
 
       if (!address) {
-        throw new Error('No Tron address found');
+        // Manual connection: request account access
+        if (tronLink && typeof tronLink.request === 'function') {
+          console.log('[TronHandler] Requesting accounts...');
+          const res = await tronLink.request({
+            method: 'tron_requestAccounts',
+          });
+          console.log('[TronHandler] Request result:', res);
+
+          // Empty response means wallet is locked or no account
+          if (!res) {
+            throw new Error(
+              'TronLink wallet is locked or no account available. Please unlock your wallet and try again.'
+            );
+          }
+
+          if (res.code === 4001) {
+            throw new Error('User rejected connection');
+          }
+          if (res.code === 4000) {
+            throw new Error(
+              'Connection request already pending. Please check TronLink popup.'
+            );
+          }
+
+          // After successful request, get the address
+          address = this.tronWeb?.defaultAddress?.base58;
+        }
       }
 
-      this.setupListeners();
+      if (!address) {
+        throw new Error(
+          'No Tron address found. Please unlock TronLink wallet.'
+        );
+      }
+
       const chainId = await this.getChainId();
+      this.setupListeners();
 
       return {
         provider: this.tronWeb,
@@ -53,7 +99,7 @@ class TronHandler {
         chains: [`tron:${chainId}`],
       };
     } catch (error) {
-      console.error('Tron connection error:', error);
+      console.error('[TronHandler] Connection error:', error);
       throw error;
     }
   }
