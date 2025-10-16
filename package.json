@@ -1,5 +1,5 @@
 {
-  "name": "@scionx/chain-connect",
+  "name": "@scionx-io/chain-connect",
   "version": "2.0.1",
   "description": "Multi-chain wallet connector supporting Ethereum, Solana, and Tron with minimalist Swiss design",
   "type": "module",
@@ -74,10 +74,10 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/scionx/chain-connect.git"
+    "url": "https://github.com/scionx-io/chain-connect.git"
   },
   "bugs": {
-    "url": "https://github.com/scionx/chain-connect/issues"
+    "url": "https://github.com/scionx-io/chain-connect/issues"
   },
-  "homepage": "https://github.com/scionx/chain-connect#readme"
+  "homepage": "https://github.com/scionx-io/chain-connect#readme"
 }
