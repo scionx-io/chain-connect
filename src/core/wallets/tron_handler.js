@@ -47,18 +47,43 @@ class TronHandler {
         };
       }
 
-      // Manual connection: request account access
-      if (tronLink && typeof tronLink.request === 'function') {
-        const res = await tronLink.request({ method: 'tron_requestAccounts' });
-        if (!res || res.code === 4001) {
-          throw new Error('User rejected connection');
+      // Check if wallet is already connected (has address)
+      let address = this.tronWeb?.defaultAddress?.base58;
+
+      if (!address) {
+        // Manual connection: request account access
+        if (tronLink && typeof tronLink.request === 'function') {
+          console.log('[TronHandler] Requesting accounts...');
+          const res = await tronLink.request({
+            method: 'tron_requestAccounts',
+          });
+          console.log('[TronHandler] Request result:', res);
+
+          // Empty response means wallet is locked or no account
+          if (!res) {
+            throw new Error(
+              'TronLink wallet is locked or no account available. Please unlock your wallet and try again.'
+            );
+          }
+
+          if (res.code === 4001) {
+            throw new Error('User rejected connection');
+          }
+          if (res.code === 4000) {
+            throw new Error(
+              'Connection request already pending. Please check TronLink popup.'
+            );
+          }
+
+          // After successful request, get the address
+          address = this.tronWeb?.defaultAddress?.base58;
         }
       }
 
-      // Get address from tronWeb after request
-      const address = this.tronWeb?.defaultAddress?.base58;
       if (!address) {
-        throw new Error('No Tron address found');
+        throw new Error(
+          'No Tron address found. Please unlock TronLink wallet.'
+        );
       }
 
       this.setupListeners();
