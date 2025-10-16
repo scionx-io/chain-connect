@@ -34,8 +34,8 @@ class TronHandler {
         if (!address) {
           return null;
         }
-        this.setupListeners();
         const chainId = await this.getChainId();
+        this.setupListeners();
         return {
           provider: this.tronWeb,
           address,
@@ -86,8 +86,8 @@ class TronHandler {
         );
       }
 
-      this.setupListeners();
       const chainId = await this.getChainId();
+      this.setupListeners();
 
       return {
         provider: this.tronWeb,
