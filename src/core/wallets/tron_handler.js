@@ -105,13 +105,13 @@ class TronHandler {
   }
 
   setupListeners() {
-    // TronLink uses window messages for account changes
+    // TronLink uses window messages for account and network changes
     window.addEventListener('message', this.boundMessageListener);
 
-    // Network change events (if supported)
+    // New TIP-1193 protocol events (if supported by window.tron)
     if (typeof this.tronWeb.on === 'function') {
-      this.tronWeb.on('connect', this.boundChainChanged);
-      this.tronWeb.on('networkChanged', this.boundChainChanged);
+      this.tronWeb.on('chainChanged', this.boundChainChanged);
+      this.tronWeb.on('accountsChanged', this.boundAccountChanged);
     }
   }
 
@@ -119,8 +119,8 @@ class TronHandler {
     window.removeEventListener('message', this.boundMessageListener);
 
     if (this.tronWeb && typeof this.tronWeb.removeListener === 'function') {
-      this.tronWeb.removeListener('connect', this.boundChainChanged);
-      this.tronWeb.removeListener('networkChanged', this.boundChainChanged);
+      this.tronWeb.removeListener('chainChanged', this.boundChainChanged);
+      this.tronWeb.removeListener('accountsChanged', this.boundAccountChanged);
     }
 
     this.tronWeb = null;
@@ -134,11 +134,18 @@ class TronHandler {
     const message = event.data.message;
     if (!message || typeof message !== 'object') return;
 
-    // Validate this is a TronLink message
+    // Handle account changes
     if (message.action === 'setAccount') {
       const address = message.data?.address;
       if (address && typeof address === 'string') {
         this.onStateChanged({ address });
+      }
+    }
+    // Handle network changes (mainnet ↔ nile, etc.)
+    else if (message.action === 'setNode') {
+      const chainId = message.data?.node?.chainId;
+      if (chainId) {
+        this.onStateChanged({ chainId: String(chainId) });
       }
     }
   }
