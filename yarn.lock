@@ -1323,6 +1323,14 @@
   dependencies:
     tslib "^2.8.0"
 
+"@tronweb3/tronwallet-abstract-adapter@^1.1.10":
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/@tronweb3/tronwallet-abstract-adapter/-/tronwallet-abstract-adapter-1.1.10.tgz#056f8b440f48a082bcb2790d8c5555a3569661f6"
+  integrity sha512-gZExaEZwPfI9oI7qSi56p/5Zl/DEzo1JlcD3lQzz1cuz0rZmEFpIqDS2mhY4r/IwEPwilIU7lg7T8/RQDVk9gA==
+  dependencies:
+    eventemitter3 "^4.0.0"
+    tronweb "6"
+
 "@tronweb3/tronwallet-abstract-adapter@^1.1.9":
   version "1.1.9"
   resolved "https://registry.yarnpkg.com/@tronweb3/tronwallet-abstract-adapter/-/tronwallet-abstract-adapter-1.1.9.tgz#cb58253bb3b340d24e5d32bc51be100eecb80ca1"
@@ -1409,13 +1417,13 @@
     "@tronweb3/tronwallet-abstract-adapter" "^1.1.9"
     "@tronweb3/tronwallet-adapter-tronlink" "^1.1.12"
 
-"@tronweb3/tronwallet-adapter-tokenpocket@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@tronweb3/tronwallet-adapter-tokenpocket/-/tronwallet-adapter-tokenpocket-1.0.7.tgz#8cd39299974f29c4068ea2be400e9a469eaae507"
-  integrity sha512-AJc1pM8wNmYDD7LASQAlR5PIREvcYXb/vY5kYcmOX8EpondFZsaMuCILWw4Ms+LyYrJ2xUSWeQubpwakv+LSxA==
+"@tronweb3/tronwallet-adapter-tokenpocket@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@tronweb3/tronwallet-adapter-tokenpocket/-/tronwallet-adapter-tokenpocket-1.0.8.tgz#bc39acf2f4111b9c85803036478251579895d25a"
+  integrity sha512-TmkbAyB79MnZ/raivEtPH33gy2xXSbNxUJGUKDebBZ/TXQamesjS2NNfNqNmYsm66wvHSe3ITlvMhRuyAoNL+g==
   dependencies:
-    "@tronweb3/tronwallet-abstract-adapter" "^1.1.9"
-    "@tronweb3/tronwallet-adapter-tronlink" "^1.1.12"
+    "@tronweb3/tronwallet-abstract-adapter" "^1.1.10"
+    "@tronweb3/tronwallet-adapter-tronlink" "^1.1.13"
 
 "@tronweb3/tronwallet-adapter-tomowallet@^1.0.1":
   version "1.0.1"
@@ -1453,9 +1461,9 @@
     viem "^0.3.50"
 
 "@tronweb3/tronwallet-adapters@^1.2.14":
-  version "1.2.14"
-  resolved "https://registry.yarnpkg.com/@tronweb3/tronwallet-adapters/-/tronwallet-adapters-1.2.14.tgz#0e82108c883762a621fe921dfe84d6aa8c70758e"
-  integrity sha512-Q2XchKisQjluF1IoOtjdkRZ8g/I03zE1Y56iWuNqAK3OixWWN7npGfh9rNr54O4wIWLjP3D0ElAAL90l3+Tmxg==
+  version "1.2.15"
+  resolved "https://registry.yarnpkg.com/@tronweb3/tronwallet-adapters/-/tronwallet-adapters-1.2.15.tgz#bfeafbf4967934864ddc02adef3b35965ef5f22e"
+  integrity sha512-vZkNxm8JcLuyAKnr6U0grc00OUC+oDG54bQapxgC//5D7NDjqxsxp0eHNCyO6cLzrKjeXS919vtNIB9OvYoD4w==
   dependencies:
     "@tronweb3/tronwallet-adapter-binance" "^1.0.2"
     "@tronweb3/tronwallet-adapter-bitkeep" "^1.1.7"
@@ -1466,7 +1474,7 @@
     "@tronweb3/tronwallet-adapter-imtoken" "^1.0.3"
     "@tronweb3/tronwallet-adapter-ledger" "^1.1.11"
     "@tronweb3/tronwallet-adapter-okxwallet" "^1.0.7"
-    "@tronweb3/tronwallet-adapter-tokenpocket" "^1.0.7"
+    "@tronweb3/tronwallet-adapter-tokenpocket" "^1.0.8"
     "@tronweb3/tronwallet-adapter-tomowallet" "^1.0.1"
     "@tronweb3/tronwallet-adapter-tronlink" "^1.1.13"
     "@tronweb3/tronwallet-adapter-trust" "^1.0.2"
